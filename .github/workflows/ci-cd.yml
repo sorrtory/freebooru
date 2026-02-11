@@ -25,10 +25,18 @@ jobs:
           cache: "pnpm"
           cache-dependency-path: freebooru/pnpm-lock.yaml
 
+      # ставим pnpm
       - uses: pnpm/action-setup@v4
         with:
           version: "latest"
           run_install: false
+
+      # ВАЖНО: гарантируем наличие pnpm в PATH
+      - name: Enable corepack + pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@latest --activate
+          pnpm -v
 
       - name: Install JS deps
         run: pnpm install --frozen-lockfile
