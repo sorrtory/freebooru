@@ -1,32 +1,20 @@
-FROM ubuntu:24.04
+FROM node:20-alpine AS build
+WORKDIR /app/freebooru
 
-ENV DEBIAN_FRONTEND=noninteractive
-WORKDIR /workspace
+RUN corepack enable && corepack prepare pnpm@latest --activate
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    ca-certificates \
-    curl \
-    wget \
-    file \
-    git \
-    pkg-config \
-    build-essential \
-    libssl-dev \
-    libwebkit2gtk-4.1-dev \
-    libayatana-appindicator3-dev \
-    librsvg2-dev \
-    libxdo-dev \
-    && rm -rf /var/lib/apt/lists/*
+COPY freebooru/package.json freebooru/pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
 
-RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - \
-    && apt-get update && apt-get install -y --no-install-recommends nodejs \
-    && corepack enable \
-    && corepack prepare pnpm@latest --activate \
-    && rm -rf /var/lib/apt/lists/*
+COPY freebooru/ ./
+RUN pnpm build
 
-RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
-ENV PATH="/root/.cargo/bin:${PATH}"
+FROM nginx:1.27-alpine
 
-WORKDIR /workspace/freebooru
 
-EXPOSE 1420
+COPY deploy/nginx.conf /etc/nginx/conf.d/default.conf
+
+COPY --from=build /app/freebooru/dist /usr/share/nginx/html
+
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
