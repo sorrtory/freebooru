@@ -1,0 +1,23 @@
+services:
+  tauri-dev:
+    build: .
+    working_dir: /workspace/freebooru
+    volumes:
+      - ./:/workspace
+      - pnpm-store:/pnpm-store
+      - cargo-registry:/root/.cargo/registry
+      - cargo-git:/root/.cargo/git
+      - rust-target:/workspace/freebooru/src-tauri/target
+    environment:
+      - PNPM_HOME=/pnpm
+      - PNPM_STORE_PATH=/pnpm-store
+    command: >
+      bash -lc "
+        pnpm install &&
+        pnpm tauri dev --no-run
+      "
+volumes:
+  pnpm-store:
+  cargo-registry:
+  cargo-git:
+  rust-target:
