@@ -2,7 +2,7 @@ services:
   freebooru-web:
     build:
       context: ..
-      dockerfile: Dockerfile.web
+      dockerfile: Dockerfile
     container_name: freebooru-web
     restart: unless-stopped
     ports:
