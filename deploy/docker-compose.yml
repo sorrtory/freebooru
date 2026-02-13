@@ -6,4 +6,4 @@ services:
     container_name: freebooru-web
     restart: unless-stopped
     ports:
-      - "1420:80"
+      - "80:80"
