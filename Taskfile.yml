@@ -1,0 +1,43 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+
+version: '3'
+
+tasks:
+  default:
+    desc: Print a greeting message
+    cmds:
+      - task: check
+  
+  lint:
+    desc: Run golangci-lint on the project
+    cmds:
+      - golangci-lint run
+
+  format:
+    desc: Format the code using golangci-lint
+    cmds:
+      - golangci-lint fmt
+
+  fix:
+    desc: Run golangci-lint with auto-fix enabled
+    cmds:
+      - golangci-lint run --fix
+      - golangci-lint fmt
+  
+  test:
+    desc: Run tests
+    cmds:
+      - go test ./...
+
+  check:
+    desc: Run code quality checks
+    cmds:
+      - task: format
+      - task: lint
+      - task: test
+
+  cli:
+    desc: Run the CLI application
+    cmds:
+      - go run ./cmd/freebooru-cli/
+

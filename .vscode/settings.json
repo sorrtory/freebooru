@@ -1,0 +1,14 @@
+{
+  "[go]": {
+    "editor.defaultFormatter": "golang.go",
+    "editor.formatOnSave": true
+  },
+
+  "gopls": {
+    "formatting.gofumpt": true,
+    "formatting.local": "github.com/sorrtory/freebooru"
+  },
+
+  "go.lintTool": "golangci-lint-v2",
+  "go.lintOnSave": "package"
+}
