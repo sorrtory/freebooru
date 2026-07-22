@@ -101,6 +101,10 @@ freebooru/
 │   │   ├── state_test.go              State validation and active-source tests
 │   │   └── values_test.go             Candidate-value evaluation tests
 │   │
+│   ├── search/
+│   │   ├── query.go                    Strict frontend-independent AND query parser
+│   │   └── query_test.go               Supported and rejected query syntax tests
+│   │
 │   ├── storage/
 │   │   ├── local.go                    Local content paths and streamed inspection
 │   │   ├── local_write.go              Atomic local content storage and deletion
