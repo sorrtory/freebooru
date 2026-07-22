@@ -299,6 +299,21 @@ The MVP does not include:
 These features must not weaken the explicit collection, storage, and tag
 contracts defined for the MVP.
 
+## Platform limitations
+
+- MVP storage is local. Atomic no-clobber publication requires a filesystem
+  that supports hard links within one storage root. If publication is not
+  supported, import fails before a database row is committed or the source is
+  removed; the finalized content path has one link after staging cleanup.
+- Concurrent GUI and CLI access relies on SQLite locking. Local filesystems are
+  supported; FreeBooru does not claim correct locking on network filesystems
+  whose SQLite lock semantics are incomplete.
+- Collection databases are plaintext. The connector preserves the future
+  Adiantum VFS seam, but MVP encryption and key management are not implemented.
+- Automatic cleanup of safe staged or finalized orphan content is outside the
+  MVP. Normal operations ignore staged files and may adopt a valid finalized
+  copy when its bytes are imported later.
+
 ## Completion criteria
 
 The MVP is complete when:

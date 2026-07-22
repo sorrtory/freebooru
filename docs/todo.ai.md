@@ -668,16 +668,16 @@ Acceptance:
 
 ## Phase 23: MVP documentation and release gate
 
-- [ ] Update `docs/cli.md` with all commands and examples.
-- [ ] Update `docs/config-spec.md`, including `remove_on_upload` status.
-- [ ] Update `docs/navigation.md` for all new files.
-- [ ] Document the dependency flow from config through Core to frontends.
-- [ ] Verify clean-home init, check, import, tag, search, storage removal, and
+- [x] Update `docs/cli.md` with all commands and examples.
+- [x] Update `docs/config-spec.md`, including `remove_on_upload` status.
+- [x] Update `docs/navigation.md` for all new files.
+- [x] Document the dependency flow from config through Core to frontends.
+- [x] Verify clean-home init, check, import, tag, search, storage removal, and
   reopen.
-- [ ] Verify all eleven `mvp.ai.md` completion criteria explicitly.
-- [ ] Run `go tool task check`.
-- [ ] Run relevant race and integration suites.
-- [ ] Record platform limitations without weakening data safety.
+- [x] Verify all eleven `mvp.ai.md` completion criteria explicitly.
+- [x] Run `go tool task check`.
+- [x] Run relevant race and integration suites.
+- [x] Record platform limitations without weakening data safety.
 
 Acceptance:
 

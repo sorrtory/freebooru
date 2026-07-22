@@ -13,9 +13,12 @@ func newCollectionCommand(options *rootOptions) *cobra.Command {
 	return &cobra.Command{
 		Use:                "collection <name> <command>",
 		Short:              "Run a command for an explicit collection",
-		Args:               cobra.MinimumNArgs(2),
+		Args:               dynamicCommandArgs(2),
 		DisableFlagParsing: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if isHelpArgument(args[0]) {
+				return cmd.Help()
+			}
 			name := args[0]
 			if name == "" {
 				return fmt.Errorf("collection name is required")
@@ -24,6 +27,19 @@ func newCollectionCommand(options *rootOptions) *cobra.Command {
 			return executeNestedCommand(cmd, scope, args[1:])
 		},
 	}
+}
+
+func dynamicCommandArgs(minimum int) cobra.PositionalArgs {
+	return func(cmd *cobra.Command, args []string) error {
+		if len(args) == 1 && isHelpArgument(args[0]) {
+			return nil
+		}
+		return cobra.MinimumNArgs(minimum)(cmd, args)
+	}
+}
+
+func isHelpArgument(value string) bool {
+	return value == "--help" || value == "-h"
 }
 
 func newCollectionScopeCommand(options *rootOptions, name string) *cobra.Command {

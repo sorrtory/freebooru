@@ -16,9 +16,12 @@ func newTagCommand(options *rootOptions, collectionName string) *cobra.Command {
 	return &cobra.Command{
 		Use:                "tag <sha256> <operation>",
 		Short:              "Read or mutate file tags",
-		Args:               cobra.MinimumNArgs(2),
+		Args:               dynamicCommandArgs(2),
 		DisableFlagParsing: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if isHelpArgument(args[0]) {
+				return cmd.Help()
+			}
 			sha256, err := canonicalSHA256(args[0])
 			if err != nil {
 				return err

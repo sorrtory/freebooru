@@ -21,6 +21,13 @@ cmd/freebooru-server┘                         │
 - `core` contains workflows shared by all frontends.
 - `config` owns YAML configuration and validation.
 - `collection` owns SQLite connections and migrations.
+- `storage` owns content hashing, atomic publication, verification, and deletion.
+
+At runtime, an executable asks `bootstrap` for a Core. Core loads
+`freebooru.yaml`, builds the validated config catalog and relationship graph,
+then opens a collection session that binds its config subset, evaluator,
+SQLite repository, and storage backends. CLI, GUI, and server code call Core
+workflows only; they do not read YAML, issue SQL, or coordinate file copies.
 
 ## Project tree
 
@@ -28,7 +35,7 @@ cmd/freebooru-server┘                         │
 freebooru/
 ├── AGENTS.md                         Repository rules for contributors and agents
 ├── README.md                         Project introduction
-├── Taskfile.yml                      Format, lint, test, fix, and CLI tasks
+├── Taskfile.yml                      Format, lint, test, release, fix, and CLI tasks
 ├── go.mod                            Go version and dependencies
 ├── go.sum                            Dependency checksums
 ├── .golangci.yml                     Linter and formatter configuration
@@ -40,6 +47,7 @@ freebooru/
 │   ├── freebooru-cli/
 │   │   ├── main.go                   CLI process entry point and exit handling
 │   │   ├── root.go                   Cobra root, --verbose, logger, command registration
+│   │   ├── root_test.go              Root and dynamic command help tests
 │   │   ├── app.go                    Shared checked Core construction for data commands
 │   │   ├── completion.go             Core-backed tag and value completion
 │   │   ├── completion_test.go        Config and persisted-state completion tests
@@ -50,6 +58,7 @@ freebooru/
 │   │   ├── tag_test.go               Tag routing, persistence, output, and validation tests
 │   │   ├── search.go                 Typed search and pagination commands
 │   │   ├── search_test.go            Default/explicit search and pagination tests
+│   │   ├── mvp_test.go               Clean-home persisted CLI release workflow
 │   │   ├── init.go                   `freebooru-cli init`
 │   │   ├── init_test.go              Initialization command tests
 │   │   ├── config.go                 `config check` and diagnostic rendering
@@ -123,6 +132,7 @@ freebooru/
 │   │
 │   ├── evaluator/
 │   │   ├── evaluator.go               Relationship evaluation and result API
+│   │   ├── evaluator_test.go          Demand, conflict, suggestion, and helper tests
 │   │   ├── predicate.go               Compiled predicate matching
 │   │   ├── state.go                   Immutable validated file tag state
 │   │   ├── values.go                  Allowed-value hints and blocking reasons
@@ -147,6 +157,7 @@ freebooru/
 │       ├── collections.go            Collection config and tag references
 │       ├── tags.go                   Tag, predefined-value, and relationship models
 │       ├── tag_validate.go           Tag-local schema validation
+│       ├── tag_validate_test.go      Tag schema and relationship YAML tests
 │       ├── tag_value.go              Typed tag-value validation
 │       ├── tag_value_test.go         Tag type and boundary tests
 │       ├── graph.go                  Directed relationship graph types
@@ -156,7 +167,11 @@ freebooru/
 │       ├── graph_contradiction.go    Demand/conflict semantic comparison
 │       ├── graph_query.go            Relationship and backlink queries
 │       ├── graph_validate.go         Complete graph validation pipeline
+│       ├── graph_test.go             Graph indexing and defensive-copy tests
+│       ├── graph_check_test.go       Collection-aware graph rule tests
+│       ├── graph_validate_test.go    End-to-end graph validation tests
 │       ├── predicate_compile.go      Predicate shape and combination dispatcher
+│       ├── predicate_compile_test.go Typed predicate acceptance and rejection tests
 │       ├── predicate_is.go           Typed scalar equality compilation
 │       ├── predicate_set.go          Predefined-value membership compilation
 │       ├── predicate_bounds.go       Numeric, temporal, and regex compilation
@@ -192,6 +207,7 @@ freebooru/
     ├── dependencies.md               Selected libraries and tools
     ├── config.ai.md                  Implementation-facing config contract
     ├── mvp.ai.md                     MVP goal and completion criteria
+    ├── release.ai.md                 MVP criteria, evidence, and release command
     ├── todo.ai.md                    Ordered implementation checklist
     └── user-story.excalidraw         Editable user-flow diagram
 ```

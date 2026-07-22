@@ -36,8 +36,15 @@ tasks:
       - task: lint
       - task: test
 
+  release:
+    desc: Run the complete MVP release gate
+    cmds:
+      - task: check
+      - go test -race ./...
+      - go test ./cmd/freebooru-cli -run '^TestMVPCleanHomeWorkflow$' -count=1
+      - go mod verify
+
   cli:
     desc: Run the CLI application
     cmds:
       - go run ./cmd/freebooru-cli/
-

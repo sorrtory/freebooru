@@ -43,6 +43,40 @@ configuration, evaluator failures, cancellation, and persistence failures
 return a nonzero status without printing Cobra usage. `--help` is the only
 normal path that prints usage.
 
+## Examples
+
+Initialize and validate a clean installation:
+
+```bash
+freebooru-cli init
+freebooru-cli config check
+```
+
+Import into the configured default collection and inspect the result:
+
+```bash
+sha=$(freebooru-cli import ./image.png --tag reviewed --tag rating:safe)
+freebooru-cli tag "$sha" get
+freebooru-cli search reviewed rating:safe
+```
+
+Run the same workflows against an explicit collection without changing
+`default_collection`:
+
+```bash
+sha=$(freebooru-cli collection archive import ./image.png --interactive)
+freebooru-cli collection archive tag "$sha" set rating:questionable
+freebooru-cli collection archive search rating:questionable --limit 25
+```
+
+Storage uses the tag command surface. Adding a value copies content; removing
+one deletes that copy. Removing the last value also deletes the indexed file:
+
+```bash
+freebooru-cli tag "$sha" add storage:archive
+freebooru-cli tag "$sha" remove storage:default
+```
+
 There is no `config init`: initialization is an application workflow, not a
 configuration-only operation. Successful initialization prints
 `FreeBooru initialized`. A failure returns a nonzero status and does not print

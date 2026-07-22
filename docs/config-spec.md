@@ -15,10 +15,14 @@ missing or invalid.
 | `default_storage_name` | string |       no | `default`                                      | Valid storage name                      | Storage used by default                          | Implemented     |
 | `default_storage_path` | path   |       no | `$HOME/.local/share/freebooru/storage/default` | Absolute after expanding `$HOME` or `~` | Path created for the default storage             | Implemented     |
 | `http_port`            | int    |       no | `52800`                                        | `1`–`65535`                             | HTTP server port                                 | Implemented     |
-| `remove_on_upload`     | bool   |       no | `false`                                        | —                                       | Remove the source after a successful upload      | Parsed; upload pending |
+| `remove_on_upload`     | bool   |       no | `false`                                        | —                                       | Remove the source after copies and SQL commit     | Implemented     |
 
 `default_collection` is a fallback, not global current state. An explicitly
 selected collection always wins.
+
+When `remove_on_upload` is true, FreeBooru re-hashes the source after every
+copy and the database transaction succeed. It removes the source only when its
+identity is unchanged; otherwise the committed copy and modified source remain.
 
 ## `storage.yaml`
 
