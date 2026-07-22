@@ -10,12 +10,12 @@ missing or invalid.
 
 | Field                  | Type   | Required | Default                                        | Rules                                   | Description                                      | Status          |
 | ---------------------- | ------ | -------: | ---------------------------------------------- | --------------------------------------- | ------------------------------------------------ | --------------- |
-| `lang`                 | enum   |       no | `en`                                           | `en`, `ru`                              | Application language                             | Not implemented |
-| `default_collection`   | string |       no | `main`                                         | Existing collection name                | Collection used when none is selected explicitly | Not implemented |
-| `default_storage_name` | string |       no | `default`                                      | Valid storage name                      | Storage used by default                          | Not implemented |
-| `default_storage_path` | path   |       no | `$HOME/.local/share/freebooru/storage/default` | Absolute after expanding `$HOME` or `~` | Path created for the default storage             | Not implemented |
-| `http_port`            | int    |       no | `52800`                                        | `1`–`65535`                             | HTTP server port                                 | Not implemented |
-| `remove_on_upload`     | bool   |       no | `false`                                        | —                                       | Remove the source after a successful upload      | Not implemented |
+| `lang`                 | enum   |       no | `en`                                           | `en`, `ru`                              | Application language                             | Implemented     |
+| `default_collection`   | string |       no | `main`                                         | Existing collection name                | Collection used when none is selected explicitly | Implemented     |
+| `default_storage_name` | string |       no | `default`                                      | Valid storage name                      | Storage used by default                          | Implemented     |
+| `default_storage_path` | path   |       no | `$HOME/.local/share/freebooru/storage/default` | Absolute after expanding `$HOME` or `~` | Path created for the default storage             | Implemented     |
+| `http_port`            | int    |       no | `52800`                                        | `1`–`65535`                             | HTTP server port                                 | Implemented     |
+| `remove_on_upload`     | bool   |       no | `false`                                        | —                                       | Remove the source after a successful upload      | Parsed; upload pending |
 
 `default_collection` is a fallback, not global current state. An explicitly
 selected collection always wins.
@@ -27,9 +27,9 @@ This defines storage backends. Storage is also the built-in multivalue tag
 
 | Field  | Type   | Required | Default | Rules                                   | Description             | Status          |
 | ------ | ------ | -------: | ------- | --------------------------------------- | ----------------------- | --------------- |
-| `name` | string |      yes | —       | Non-empty and globally unique           | Storage tag value       | Not implemented |
-| `type` | enum   |      yes | —       | `local` for MVP                         | Storage implementation  | Not implemented |
-| `path` | path   |      yes | —       | Absolute after expanding `$HOME` or `~` | Local storage directory | Not implemented |
+| `name` | string |      yes | —       | Non-empty and globally unique           | Storage tag value       | Implemented     |
+| `type` | enum   |      yes | —       | `local` for MVP                         | Storage implementation  | Implemented     |
+| `path` | path   |      yes | —       | Absolute after expanding `$HOME` or `~` | Local storage directory | Implemented     |
 
 Assigning a storage value copies a file there. Removing it deletes that copy.
 Removing the last storage value deletes the indexed file. Multi-storage uploads
@@ -44,16 +44,16 @@ one collection and each collection has one SQLite database.
 
 | Field      | Type   | Required | Default                                                  | Rules                                                                   | Description                      | Status          |
 | ---------- | ------ | -------: | -------------------------------------------------------- | ----------------------------------------------------------------------- | -------------------------------- | --------------- |
-| `name`     | string |      yes | —                                                        | Non-empty and globally unique                                           | Collection name                  | Not implemented |
-| `location` | path   |       no | `$HOME/.local/share/freebooru/collections/<name>.sqlite` | Absolute after expansion                                                | SQLite database path             | Not implemented |
-| `tags`     | object |      yes | —                                                        | Contains `require` and/or `import`; must reference at least one storage | Tags available in the collection | Not implemented |
+| `name`     | string |      yes | —                                                        | Non-empty and globally unique                                           | Collection name                  | Implemented     |
+| `location` | path   |       no | `$HOME/.local/share/freebooru/collections/<name>.sqlite` | Absolute after expansion                                                | SQLite database path             | Implemented     |
+| `tags`     | object |      yes | —                                                        | Contains `require` and/or `import`; must reference at least one storage | Tags available in the collection | Implemented     |
 
 ### Collection tags
 
 | Field     | Type | Required | Default | Rules                 | Description                 | Status          |
 | --------- | ---- | -------: | ------- | --------------------- | --------------------------- | --------------- |
-| `require` | list |       no | empty   | References must exist | Tags required on every file | Not implemented |
-| `import`  | list |       no | empty   | References must exist | Tags available to users     | Not implemented |
+| `require` | list |       no | empty   | References must exist | Tags required on every file | Implemented     |
+| `import`  | list |       no | empty   | References must exist | Tags available to users     | Implemented     |
 
 Every entry references exactly one `tag`, `group`, or `storage`. `require`
 automatically imports the reference and has priority over `import`. Overrides
@@ -70,9 +70,9 @@ YAML documents separated by `---`.
 | `type`     | enum   |                       yes | —       | See tag types below                                | Tag value type                               | Implemented     |
 | `groups`   | list   |                        no | empty   | No duplicates inside one tag                       | Implicit groups containing this tag          | Implemented     |
 | `values`   | list   | for `value`, `multivalue` | —       | Entries contain unique `val` fields                | Allowed predefined values                    | Implemented     |
-| `suggest`  | list   |                        no | empty   | See tag relationships                              | Tags recommended with this tag                | Parsed; graph pending |
-| `demand`   | list   |                        no | empty   | See tag relationships                              | Tags required with this tag                   | Parsed; graph pending |
-| `conflict` | list   |                        no | empty   | See tag relationships                              | Tags forbidden together with this tag         | Parsed; graph pending |
+| `suggest`  | list   |                        no | empty   | See tag relationships                              | Tags recommended with this tag                | Implemented     |
+| `demand`   | list   |                        no | empty   | See tag relationships                              | Tags required with this tag                   | Implemented     |
+| `conflict` | list   |                        no | empty   | See tag relationships                              | Tags forbidden together with this tag         | Implemented     |
 
 Groups are created implicitly. A tag may belong to several groups. Tag and
 group names may be equal because references identify their category.
@@ -102,16 +102,16 @@ the reverse relationship.
 
 | Field    | Type   | Required | Default | Rules                                  | Description                                      | Status          |
 | -------- | ------ | -------: | ------- | -------------------------------------- | ------------------------------------------------ | --------------- |
-| `tag`    | string |      yes | —       | Existing tag name                      | Relationship target                              | Not implemented |
-| `has`    | list   |       no | —       | Target type is `multivalue`            | Target contains at least one listed value        | Not implemented |
-| `is`     | scalar |       no | —       | Value matches target type              | Target equals this value                         | Not implemented |
-| `not`    | list   |       no | —       | Target type is `value` or `multivalue` | Target contains none of the listed values        | Not implemented |
-| `min`    | int    |       no | —       | Target type is `int`                    | Target is greater than or equal to this value     | Not implemented |
-| `max`    | int    |       no | —       | Target type is `int`                    | Target is less than or equal to this value        | Not implemented |
-| `before` | string |       no | —       | Target type is `date` or `datetime`     | Target is earlier than this date or timestamp     | Not implemented |
-| `after`  | string |       no | —       | Target type is `date` or `datetime`     | Target is later than this date or timestamp       | Not implemented |
-| `regex`  | string |       no | —       | Target type is `text`; valid Go regexp  | Target text matches the regular expression        | Not implemented |
-| `reason` | string |       no | —       | Non-empty when present                 | Human explanation for the relationship           | Not implemented |
+| `tag`    | string |      yes | —       | Existing tag name                      | Relationship target                              | Implemented     |
+| `has`    | list   |       no | —       | Target type is `multivalue`            | Target contains at least one listed value        | Implemented     |
+| `is`     | scalar |       no | —       | Value matches target type              | Target equals this value                         | Implemented     |
+| `not`    | list   |       no | —       | Target type is `value` or `multivalue` | Target contains none of the listed values        | Implemented     |
+| `min`    | int    |       no | —       | Target type is `int`                    | Target is greater than or equal to this value     | Implemented     |
+| `max`    | int    |       no | —       | Target type is `int`                    | Target is less than or equal to this value        | Implemented     |
+| `before` | string |       no | —       | Target type is `date` or `datetime`     | Target is earlier than this date or timestamp     | Implemented     |
+| `after`  | string |       no | —       | Target type is `date` or `datetime`     | Target is later than this date or timestamp       | Implemented     |
+| `regex`  | string |       no | —       | Target type is `text`; valid Go regexp  | Target text matches the regular expression        | Implemented     |
+| `reason` | string |       no | —       | Non-empty when present                 | Human explanation for the relationship           | Implemented     |
 
 With no predicate, the relationship matches when the target tag exists. For a
 boolean target, `is: true` means present and `is: false` means absent.

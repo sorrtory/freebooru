@@ -16,19 +16,21 @@ type CollectionDatabase interface {
 	Close() error
 }
 
-// OpenCollection opens one collection database.
-type OpenCollection func(context.Context, string) (CollectionDatabase, error)
+// CollectionOpener opens one collection database.
+type CollectionOpener func(context.Context, string) (CollectionDatabase, error)
 
 // Core exposes application workflows to frontends.
 type Core struct {
-	log    *slog.Logger
-	config config.AppConfig
-	paths  config.Paths
-	open   OpenCollection
+	log     *slog.Logger
+	config  config.AppConfig
+	paths   config.Paths
+	open    CollectionOpener
+	catalog *config.Catalog
+	graph   *config.Graph
 }
 
 // New creates a Core with explicit dependencies.
-func New(logger *slog.Logger, paths config.Paths, open OpenCollection) (*Core, error) {
+func New(logger *slog.Logger, paths config.Paths, open CollectionOpener) (*Core, error) {
 	if logger == nil {
 		return nil, fmt.Errorf("logger is required")
 	}
@@ -48,9 +50,49 @@ func (c *Core) LoadConfig(context.Context) error {
 	return nil
 }
 
-// CheckConfig returns all discoverable domain configuration diagnostics.
+// CheckConfig rebuilds the immutable domain and relationship snapshots and
+// returns all discoverable diagnostics.
 func (c *Core) CheckConfig(context.Context) config.Diagnostics {
-	return config.CheckDomain(c.paths, c.config)
+	catalog, diagnostics := config.LoadCatalog(c.paths, c.config)
+	graph, graphDiagnostics := config.BuildValidatedGraph(catalog)
+	c.catalog = catalog
+	c.graph = graph
+	return append(diagnostics, graphDiagnostics...)
+}
+
+// SearchTags queries the current catalog without filesystem side effects.
+func (c *Core) SearchTags(prefix string) ([]config.TagConfig, error) {
+	if c.catalog == nil {
+		return nil, fmt.Errorf("configuration has not been checked")
+	}
+	return c.catalog.SearchTags(prefix), nil
+}
+
+// OpenCollection opens and initializes one usable catalog collection. Invalid
+// collections are absent from the catalog and cannot be opened.
+func (c *Core) OpenCollection(ctx context.Context, name string) (CollectionDatabase, error) {
+	if c.catalog == nil {
+		return nil, fmt.Errorf("configuration has not been checked")
+	}
+	collectionConfig, _, ok := c.catalog.Collection(name)
+	if !ok {
+		return nil, fmt.Errorf("collection %q is missing or invalid", name)
+	}
+	location, err := config.CollectionLocation(collectionConfig)
+	if err != nil {
+		return nil, fmt.Errorf("resolve collection %q database: %w", collectionConfig.Name, err)
+	}
+	database, err := c.open(ctx, location)
+	if err != nil {
+		return nil, fmt.Errorf("open collection %q database: %w", collectionConfig.Name, err)
+	}
+	if err := database.Initialize(ctx); err != nil {
+		return nil, errors.Join(
+			fmt.Errorf("initialize collection %q database: %w", collectionConfig.Name, err),
+			closeNamedCollection(database, collectionConfig.Name),
+		)
+	}
+	return database, nil
 }
 
 // Init provisions the default application layout.
@@ -83,6 +125,13 @@ func (c *Core) Init(ctx context.Context) error {
 func closeCollection(database CollectionDatabase) error {
 	if err := database.Close(); err != nil {
 		return fmt.Errorf("close default collection database: %w", err)
+	}
+	return nil
+}
+
+func closeNamedCollection(database CollectionDatabase, name string) error {
+	if err := database.Close(); err != nil {
+		return fmt.Errorf("close collection %q database: %w", name, err)
 	}
 	return nil
 }

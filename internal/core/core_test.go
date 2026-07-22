@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"log/slog"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -111,6 +112,125 @@ func TestInitReturnsOpenFailureAndCanRetry(t *testing.T) {
 	if !database.initialized || !database.closed {
 		t.Fatalf("database lifecycle after retry: initialized=%t closed=%t", database.initialized, database.closed)
 	}
+}
+
+func TestCheckConfigBuildsCatalogAndGraphDiagnostics(t *testing.T) {
+	paths, appConfig := provisionTestConfig(t)
+	tag := "name: artist\ntype: text\ndemand:\n  - tag: missing\n"
+	if err := os.WriteFile(filepath.Join(paths.Tags, "artist.yaml"), []byte(tag), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	app, err := New(testLogger(), paths, func(context.Context, string) (CollectionDatabase, error) {
+		return &fakeDatabase{}, nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := app.LoadConfig(t.Context()); err != nil {
+		t.Fatal(err)
+	}
+	if app.AppConfig() != appConfig {
+		t.Fatalf("AppConfig() = %#v, want %#v", app.AppConfig(), appConfig)
+	}
+	diagnostics := app.CheckConfig(t.Context())
+	if !hasDiagnosticCode(diagnostics, "relationship.target_missing") {
+		t.Fatalf("CheckConfig() diagnostics = %#v", diagnostics)
+	}
+	tags, err := app.SearchTags("AR")
+	if err != nil {
+		t.Fatalf("SearchTags() error = %v", err)
+	}
+	if len(tags) != 1 || tags[0].Name != "artist" {
+		t.Fatalf("SearchTags(AR) = %#v", tags)
+	}
+}
+
+func TestOpenCollectionRejectsInvalidAndOpensIndependentValidCollection(t *testing.T) {
+	paths, _ := provisionTestConfig(t)
+	invalid := "name: broken\ntags:\n  require:\n    - storage: missing\n"
+	if err := os.WriteFile(
+		filepath.Join(paths.Collections, "broken.yaml"),
+		[]byte(invalid),
+		0o600,
+	); err != nil {
+		t.Fatal(err)
+	}
+	database := &fakeDatabase{}
+	openCalls := 0
+	app, err := New(testLogger(), paths, func(context.Context, string) (CollectionDatabase, error) {
+		openCalls++
+		return database, nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := app.LoadConfig(t.Context()); err != nil {
+		t.Fatal(err)
+	}
+	diagnostics := app.CheckConfig(t.Context())
+	if !diagnostics.HasErrors() {
+		t.Fatal("CheckConfig() diagnostics has no errors")
+	}
+	if _, err := app.OpenCollection(t.Context(), "broken"); err == nil {
+		t.Fatal("OpenCollection(broken) error = nil")
+	}
+	if openCalls != 0 {
+		t.Fatalf("opener called %d times for invalid collection", openCalls)
+	}
+	opened, err := app.OpenCollection(t.Context(), "MAIN")
+	if err != nil {
+		t.Fatalf("OpenCollection(MAIN) error = %v", err)
+	}
+	if opened != database || !database.initialized || openCalls != 1 {
+		t.Fatalf("opened=%#v initialized=%t calls=%d", opened, database.initialized, openCalls)
+	}
+}
+
+func TestOpenCollectionClosesAfterInitializeFailure(t *testing.T) {
+	paths, _ := provisionTestConfig(t)
+	database := &fakeDatabase{initializeErr: errors.New("broken schema")}
+	app, err := New(testLogger(), paths, func(context.Context, string) (CollectionDatabase, error) {
+		return database, nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := app.LoadConfig(t.Context()); err != nil {
+		t.Fatal(err)
+	}
+	if diagnostics := app.CheckConfig(t.Context()); diagnostics.HasErrors() {
+		t.Fatalf("CheckConfig() diagnostics = %#v", diagnostics)
+	}
+	if _, err := app.OpenCollection(t.Context(), "main"); err == nil {
+		t.Fatal("OpenCollection(main) error = nil")
+	}
+	if !database.closed {
+		t.Fatal("OpenCollection() did not close database after initialize failure")
+	}
+}
+
+func provisionTestConfig(t *testing.T) (config.Paths, config.AppConfig) {
+	t.Helper()
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	paths, err := config.PathsFromDir(filepath.Join(home, "config"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	appConfig, err := config.EnsureDefaults(paths)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return paths, appConfig
+}
+
+func hasDiagnosticCode(diagnostics config.Diagnostics, code string) bool {
+	for _, diagnostic := range diagnostics {
+		if diagnostic.Code == code {
+			return true
+		}
+	}
+	return false
 }
 
 func testLogger() *slog.Logger {

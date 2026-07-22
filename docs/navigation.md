@@ -54,8 +54,9 @@ freebooru/
 │   │   └── bootstrap_test.go         Bootstrap integration tests
 │   │
 │   ├── core/
-│   │   ├── core.go                   Shared load, check, and init workflows
-│   │   └── core_test.go              Workflow and database lifecycle tests
+│   │   ├── core.go                   Shared init, config snapshot, search, and open workflows
+│   │   ├── core_test.go              Workflow and database lifecycle tests
+│   │   └── integration_test.go       Multi-domain config integration fixture
 │   │
 │   ├── collection/
 │   │   ├── database.go               SQLite open, connection settings, ping, and close

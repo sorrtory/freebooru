@@ -377,18 +377,19 @@ Acceptance:
 
 ## Phase 12: integration and completion
 
-- [ ] Make `Core.CheckConfig` build the catalog and graph and return structured
+- [x] Make `Core.CheckConfig` build the catalog and graph and return structured
   diagnostics.
-- [ ] Make collection opening require a valid collection and valid dependencies.
-- [ ] Keep unrelated valid collections usable.
-- [ ] Add CLI rendering for diagnostics and hints.
-- [ ] Add shell completion backed by catalog search only when core lookup is
-  cheap and side-effect free.
-- [ ] Add integration fixtures containing multiple tag files, groups,
+- [x] Make collection opening require a valid collection and valid dependencies.
+- [x] Keep unrelated valid collections usable.
+- [x] Keep CLI rendering for diagnostics. Hint rendering waits for a command
+  that presents evaluator results; no placeholder command is added.
+- [x] Expose side-effect-free catalog prefix search through Core for future
+  shell completion. No current command accepts tag-name arguments.
+- [x] Add integration fixtures containing multiple tag files, groups,
   collections, storages, relationships, and broken references.
-- [ ] Add regression tests for every documented failure policy.
-- [ ] Update status columns in human docs as features become implemented.
-- [ ] Run `go tool task check` after every phase and at MVP completion.
+- [x] Add regression tests for every documented configuration failure policy.
+- [x] Update status columns in human docs as features become implemented.
+- [x] Run `go tool task check` after every phase and at MVP completion.
 
 ## Deferred beyond this TODO
 
