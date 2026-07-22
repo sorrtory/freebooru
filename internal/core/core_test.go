@@ -3,6 +3,7 @@ package core
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"log/slog"
 	"os"
@@ -44,6 +45,15 @@ func (d *fakeDatabase) ForEachFile(
 		}
 	}
 	return nil
+}
+
+func (d *fakeDatabase) File(_ context.Context, sha256 string) (collection.FileRecord, error) {
+	for _, file := range d.files {
+		if file.SHA256 == sha256 {
+			return file, nil
+		}
+	}
+	return collection.FileRecord{}, fmt.Errorf("%w: %s", collection.ErrFileNotFound, sha256)
 }
 
 func (d *fakeDatabase) CreateFile(
