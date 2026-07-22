@@ -9,12 +9,6 @@ import (
 	"strings"
 )
 
-// Init provisions the default application layout.
-func Init(paths Paths) error {
-	_, err := EnsureDefaults(paths)
-	return err
-}
-
 // EnsureDefaults creates missing default configuration and data directories
 // without modifying existing YAML files.
 func EnsureDefaults(paths Paths) (AppConfig, error) {

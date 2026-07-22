@@ -43,8 +43,8 @@ func TestCoreForInitAndDomainCheck(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewCore() error = %v", err)
 	}
-	if err := app.InitConfig(context.Background()); err != nil {
-		t.Fatalf("InitConfig() error = %v", err)
+	if err := app.Init(context.Background()); err != nil {
+		t.Fatalf("Init() error = %v", err)
 	}
 	app, err = NewCore(testLogger())
 	if err != nil {

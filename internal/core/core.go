@@ -39,9 +39,14 @@ func (c *Core) CheckConfig(context.Context) error {
 	return config.CheckDomain(c.paths)
 }
 
-// InitConfig provisions the default configuration layout.
-func (c *Core) InitConfig(context.Context) error {
-	return config.Init(c.paths)
+// Init provisions the default application layout.
+func (c *Core) Init(context.Context) error {
+	appConfig, err := config.EnsureDefaults(c.paths)
+	if err != nil {
+		return err
+	}
+	c.config = appConfig
+	return nil
 }
 
 // AppConfig returns the loaded application configuration.

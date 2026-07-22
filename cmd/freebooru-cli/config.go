@@ -17,10 +17,7 @@ func newConfigCommand(options *rootOptions) *cobra.Command {
 			return cmd.Help()
 		},
 	}
-	command.AddCommand(
-		newConfigInitCommand(options),
-		newConfigCheckCommand(options),
-	)
+	command.AddCommand(newConfigCheckCommand(options))
 	return command
 }
 
@@ -41,27 +38,6 @@ func newConfigCheckCommand(options *rootOptions) *cobra.Command {
 				return fmt.Errorf("configuration check failed: %w", err)
 			}
 			if _, err := fmt.Fprintln(cmd.OutOrStdout(), "Configuration is valid"); err != nil {
-				return fmt.Errorf("write result: %w", err)
-			}
-			return nil
-		},
-	}
-}
-
-func newConfigInitCommand(options *rootOptions) *cobra.Command {
-	return &cobra.Command{
-		Use:   "init",
-		Short: "Create the default FreeBooru configuration layout",
-		Args:  cobra.NoArgs,
-		RunE: func(cmd *cobra.Command, _ []string) error {
-			app, err := bootstrap.NewCore(newLogger(options.verbose))
-			if err != nil {
-				return err
-			}
-			if err := app.InitConfig(cmd.Context()); err != nil {
-				return fmt.Errorf("initialize configuration: %w", err)
-			}
-			if _, err := fmt.Fprintln(cmd.OutOrStdout(), "FreeBooru configuration initialized"); err != nil {
 				return fmt.Errorf("write result: %w", err)
 			}
 			return nil

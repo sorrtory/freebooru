@@ -189,15 +189,15 @@ func TestCollectionLocationUsesDefault(t *testing.T) {
 	}
 }
 
-func TestInitCreatesLayoutWithoutOverwriting(t *testing.T) {
+func TestEnsureDefaultsDoesNotOverwrite(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
 	paths, err := PathsFromDir(filepath.Join(home, "config"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := Init(paths); err != nil {
-		t.Fatalf("Init() error = %v", err)
+	if _, err := EnsureDefaults(paths); err != nil {
+		t.Fatalf("EnsureDefaults() error = %v", err)
 	}
 	for _, path := range []string{paths.App, paths.Storage, paths.Tags, paths.Collections} {
 		if _, err := os.Stat(path); err != nil {
@@ -208,14 +208,14 @@ func TestInitCreatesLayoutWithoutOverwriting(t *testing.T) {
 	if err := os.WriteFile(paths.App, custom, 0o600); err != nil {
 		t.Fatal(err)
 	}
-	if err := Init(paths); err != nil {
-		t.Fatalf("second Init() error = %v", err)
+	if _, err := EnsureDefaults(paths); err != nil {
+		t.Fatalf("second EnsureDefaults() error = %v", err)
 	}
 	got, err := os.ReadFile(paths.App)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if string(got) != string(custom) {
-		t.Fatalf("Init() overwrote existing app config: %q", got)
+		t.Fatalf("EnsureDefaults() overwrote existing app config: %q", got)
 	}
 }

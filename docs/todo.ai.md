@@ -24,7 +24,7 @@ passing.
 ## Phase 0: contract and baseline
 
 - [x] Remove `config init` from user-facing command lists in human and AI docs.
-- [ ] Record `freebooru-cli init` output and failure behavior in CLI docs.
+- [x] Record `freebooru-cli init` output and failure behavior in CLI docs.
 - [x] Run the existing tests before structural changes.
 - [x] Record any already-failing checks without changing unrelated code.
 
@@ -107,15 +107,15 @@ Acceptance:
 
 ## Phase 3: top-level application initialization
 
-- [ ] Add `Core.Init(ctx)` as the application initialization workflow.
-- [ ] Make it provision and load `freebooru.yaml`.
-- [ ] Make it provision and verify the default storage and collection.
-- [ ] Add a top-level Cobra `init` command that only calls `Core.Init` and
+- [x] Add `Core.Init(ctx)` as the application initialization workflow.
+- [x] Make it provision and load `freebooru.yaml`.
+- [x] Make it provision and verify the default storage and collection.
+- [x] Add a top-level Cobra `init` command that only calls `Core.Init` and
   formats the result.
-- [ ] Delete `newConfigInitCommand` and remove it from the `config` command.
-- [ ] Keep Cobra handlers free of YAML and filesystem business logic.
-- [ ] Use `RunE`, `cobra.NoArgs`, `cmd.OutOrStdout`, and `cmd.Context`.
-- [ ] Add isolated command tests using a fresh command tree and temporary
+- [x] Delete `newConfigInitCommand` and remove it from the `config` command.
+- [x] Keep Cobra handlers free of YAML and filesystem business logic.
+- [x] Use `RunE`, `cobra.NoArgs`, `cmd.OutOrStdout`, and `cmd.Context`.
+- [x] Add isolated command tests using a fresh command tree and temporary
   configuration roots.
 
 Acceptance:

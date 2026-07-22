@@ -35,6 +35,7 @@ func newRootCommand() *cobra.Command {
 		"enable debug logging",
 	)
 	root.AddCommand(
+		newInitCommand(options),
 		newConfigCommand(options),
 	)
 
