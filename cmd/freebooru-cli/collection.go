@@ -11,13 +11,21 @@ import (
 // fresh collection-scoped command tree, preserving normal leaf validation.
 func newCollectionCommand(options *rootOptions) *cobra.Command {
 	return &cobra.Command{
-		Use:                "collection <name> <command>",
-		Short:              "Run a command for an explicit collection",
-		Args:               dynamicCommandArgs(2),
+		Use:   "collection list | edit <name> | <name> <command>",
+		Short: "List, edit, or explicitly select a collection",
+		Long: "List or edit global collection definitions, or select a collection " +
+			"for a nested command without changing default_collection.",
+		Example: "  freebooru-cli collection list\n" +
+			"  freebooru-cli collection edit archive\n" +
+			"  freebooru-cli collection archive files list",
+		Args:               collectionCommandArgs,
 		DisableFlagParsing: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if isHelpArgument(args[0]) {
 				return cmd.Help()
+			}
+			if args[0] == "list" || args[0] == "edit" {
+				return executeNestedCommand(cmd, newCollectionCatalogCommand(options), args)
 			}
 			name := args[0]
 			if name == "" {
@@ -29,13 +37,11 @@ func newCollectionCommand(options *rootOptions) *cobra.Command {
 	}
 }
 
-func dynamicCommandArgs(minimum int) cobra.PositionalArgs {
-	return func(cmd *cobra.Command, args []string) error {
-		if len(args) == 1 && isHelpArgument(args[0]) {
-			return nil
-		}
-		return cobra.MinimumNArgs(minimum)(cmd, args)
+func collectionCommandArgs(cmd *cobra.Command, args []string) error {
+	if len(args) == 1 && (isHelpArgument(args[0]) || args[0] == "list") {
+		return nil
 	}
+	return cobra.MinimumNArgs(2)(cmd, args)
 }
 
 func isHelpArgument(value string) bool {
@@ -52,6 +58,8 @@ func newCollectionScopeCommand(options *rootOptions, name string) *cobra.Command
 		newImportCommand(options, name),
 		newTagCommand(options, name),
 		newSearchCommand(options, name),
+		newStorageCommand(options, name, false),
+		newFilesCommand(options, name),
 	)
 	return command
 }

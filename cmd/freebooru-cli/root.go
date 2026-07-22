@@ -42,6 +42,8 @@ func newRootCommand() *cobra.Command {
 		newTagCommand(options, ""),
 		newSearchCommand(options, ""),
 		newCollectionCommand(options),
+		newStorageCommand(options, "", true),
+		newFilesCommand(options, ""),
 	)
 
 	return root

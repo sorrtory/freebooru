@@ -685,6 +685,22 @@ Acceptance:
 - The release gate cannot pass while persistence or required CLI workflows are
   absent.
 
+## Phase 24: CLI browsing and config editing
+
+- [x] Add deterministic collection, storage, tag, and file listing through Core.
+- [x] Support default-collection and explicit `collection <name>` list routes.
+- [x] Open storage, collection, and tag source YAML through `$EDITOR` without a shell.
+- [x] Recheck configuration after an editor exits successfully.
+- [x] Document search syntax, AND semantics, examples, and list output contracts.
+- [x] Test routing, filtering, editor failures, and post-edit validation.
+- [x] Run the full release gate.
+
+Acceptance:
+
+- Frontends obtain catalog and persisted file lists through Core, not YAML or SQL.
+- Global edit targets and collection-scoped list targets are unambiguous.
+- CLI help and `docs/cli.md` describe the same commands and output.
+
 ## Deferred beyond this TODO
 
 - [ ] Define the database-encryption threat model and key lifecycle: creation,

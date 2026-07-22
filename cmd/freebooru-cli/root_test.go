@@ -23,3 +23,18 @@ func TestDynamicCommandsPrintHelpWithoutConfiguration(t *testing.T) {
 		})
 	}
 }
+
+func TestSearchHelpExplainsTypedANDTerms(t *testing.T) {
+	command := newRootCommand()
+	output := new(bytes.Buffer)
+	command.SetOut(output)
+	command.SetArgs([]string{"search", "--help"})
+	if err := command.Execute(); err != nil {
+		t.Fatalf("Execute() error = %v", err)
+	}
+	for _, text := range []string{"Every term must match", "!blocked", "score>=10"} {
+		if !strings.Contains(output.String(), text) {
+			t.Fatalf("search help does not contain %q: %s", text, output.String())
+		}
+	}
+}

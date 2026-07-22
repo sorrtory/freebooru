@@ -80,6 +80,11 @@ freebooru/
 │   │   ├── completion.go             Core-backed tag and value completion
 │   │   ├── completion_test.go        Config and persisted-state completion tests
 │   │   ├── collection.go             Explicit collection command dispatch
+│   │   ├── catalog.go                Collection/tag list and YAML edit commands
+│   │   ├── catalog_commands_test.go  List, scope, file filter, and editor tests
+│   │   ├── editor.go                 Direct `$EDITOR` execution and config recheck
+│   │   ├── files.go                  Collection file/storage assignment listing
+│   │   ├── storage.go                Collection storage listing and global editing
 │   │   ├── import.go                 Default and explicit collection file import
 │   │   ├── import_test.go            Import command routing, output, and validation tests
 │   │   ├── tag.go                    Typed tag/storage mutation and lookup commands
@@ -120,6 +125,8 @@ freebooru/
 │   │   ├── import_fields.go           Side-effect-free collection import form schema
 │   │   ├── import_fields_test.go      Required/optional field schema tests
 │   │   ├── core.go                   Shared init, config snapshot, search, and open workflows
+│   │   ├── catalog.go                Frontend-neutral catalog lists and source lookup
+│   │   ├── file_list.go              Persisted file/storage assignment listing
 │   │   ├── file.go                   Validated collection file lookup workflow
 │   │   ├── file_test.go              File lookup and database lifecycle tests
 │   │   ├── collection_state.go       Persisted state conversion and integrity checks
@@ -229,7 +236,7 @@ freebooru/
 │       ├── catalog_build.go          Catalog loading, normalization, and indexing
 │       ├── catalog_clone.go          Defensive copies for immutable query results
 │       ├── catalog_group.go          Implicit group index construction
-│       ├── catalog_query.go          Catalog lookup and prefix-search methods
+│       ├── catalog_query.go          Catalog lookup, listing, and prefix-search methods
 │       ├── catalog_resolve.go        Collection reference resolution
 │       ├── catalog_test.go           Catalog lookup, duplicate, and default tests
 │       ├── diagnostic.go             Structured configuration diagnostics

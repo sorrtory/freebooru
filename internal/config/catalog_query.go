@@ -65,6 +65,21 @@ func (c *Catalog) SearchTags(prefix string) []TagConfig {
 	return tags
 }
 
+// Collections returns defensive copies in normalized-name order.
+func (c *Catalog) Collections() []CollectionConfig {
+	keys := make([]string, 0, len(c.collections))
+	for key := range c.collections {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	collections := make([]CollectionConfig, 0, len(keys))
+	for _, key := range keys {
+		value, _, _ := c.Collection(key)
+		collections = append(collections, value)
+	}
+	return collections
+}
+
 // Collection returns a defensive copy using case-insensitive lookup.
 func (c *Catalog) Collection(name string) (CollectionConfig, Source, bool) {
 	entry, ok := c.collections[normalizeName(name)]

@@ -34,6 +34,12 @@ freebooru-cli collection main import <path> --interactive
 freebooru-cli collection main tag <operation>
 freebooru-cli collection main tag <sha256> get
 freebooru-cli collection main search <query>
+freebooru-cli collection list
+freebooru-cli collection edit main
+freebooru-cli collection main storage list
+freebooru-cli collection main tag list
+freebooru-cli collection main tag edit <name>
+freebooru-cli collection main files list [--storage <name>]
 ```
 
 When `default_collection` is `main`, commands that omit `collection main` use
@@ -43,6 +49,11 @@ that collection:
 freebooru-cli import <path>
 freebooru-cli tag <operation>
 freebooru-cli search <query>
+freebooru-cli storage list
+freebooru-cli storage edit
+freebooru-cli tag list
+freebooru-cli tag edit <name>
+freebooru-cli files list [--storage <name>]
 ```
 
 `default_collection` is a default, not mutable current-collection state. A GUI

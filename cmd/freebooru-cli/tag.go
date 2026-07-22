@@ -14,13 +14,25 @@ import (
 
 func newTagCommand(options *rootOptions, collectionName string) *cobra.Command {
 	return &cobra.Command{
-		Use:                "tag <sha256> <operation>",
-		Short:              "Read or mutate file tags",
-		Args:               dynamicCommandArgs(2),
+		Use:   "tag list | edit <name> | <sha256> <operation>",
+		Short: "List or edit tag definitions, or mutate file tags",
+		Long: "List tags imported by the selected collection, edit a tag's source " +
+			"YAML, or read and mutate the tags assigned to one indexed file.",
+		Example: "  freebooru-cli tag list\n" +
+			"  freebooru-cli tag edit rating\n" +
+			"  freebooru-cli tag <sha256> get",
+		Args:               tagCommandArgs,
 		DisableFlagParsing: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if isHelpArgument(args[0]) {
 				return cmd.Help()
+			}
+			if args[0] == "list" || args[0] == "edit" {
+				return executeNestedCommand(
+					cmd,
+					newTagCatalogCommand(options, collectionName),
+					args,
+				)
 			}
 			sha256, err := canonicalSHA256(args[0])
 			if err != nil {
@@ -30,6 +42,13 @@ func newTagCommand(options *rootOptions, collectionName string) *cobra.Command {
 			return executeNestedCommand(cmd, scope, args[1:])
 		},
 	}
+}
+
+func tagCommandArgs(cmd *cobra.Command, args []string) error {
+	if len(args) == 1 && (isHelpArgument(args[0]) || args[0] == "list") {
+		return nil
+	}
+	return cobra.MinimumNArgs(2)(cmd, args)
 }
 
 func newTagScopeCommand(options *rootOptions, collectionName, sha256 string) *cobra.Command {
