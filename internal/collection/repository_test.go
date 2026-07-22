@@ -1,9 +1,12 @@
 package collection
 
 import (
+	"context"
 	"errors"
 	"strings"
+	"sync"
 	"testing"
+	"time"
 )
 
 func TestDatabaseCreateAndLoadFile(t *testing.T) {
@@ -94,14 +97,23 @@ func TestDatabaseFileLoadsTypedTagsAndStorages(t *testing.T) {
 	database := openInitializedTestDatabase(t)
 	hash := strings.Repeat("e", 64)
 	score := int64(12)
+	title := "example"
+	day := "2026-07-22"
+	instant := "2026-07-22T12:30:00Z"
+	rating := "safe"
 	_, err := database.CreateFile(t.Context(), NewFile{
 		SHA256:         hash,
 		SizeBytes:      7,
 		SourcePath:     "/imports/tagged.txt",
 		SourceFilename: "tagged.txt",
 		Tags: []TagRecord{
+			{Name: "published", Type: "bool"},
+			{Name: "title", Type: "text", TextValue: &title},
 			{Name: "labels", Type: "multivalue", Values: []string{"first", "second"}},
 			{Name: "score", Type: "int", IntegerValue: &score},
+			{Name: "day", Type: "date", TextValue: &day},
+			{Name: "instant", Type: "datetime", TextValue: &instant},
+			{Name: "rating", Type: "value", TextValue: &rating},
 		},
 		Storages: []string{"default"},
 	})
@@ -112,18 +124,76 @@ func TestDatabaseFileLoadsTypedTagsAndStorages(t *testing.T) {
 	if err != nil {
 		t.Fatalf("File() error = %v", err)
 	}
-	if len(loaded.Tags) != 2 {
-		t.Fatalf("File() tags = %#v, want 2 tags", loaded.Tags)
+	if len(loaded.Tags) != 7 {
+		t.Fatalf("File() tags = %#v, want 7 tags", loaded.Tags)
 	}
-	if loaded.Tags[0].Name != "labels" || len(loaded.Tags[0].Values) != 2 {
-		t.Errorf("File() multivalue tag = %#v", loaded.Tags[0])
+	tags := tagsByName(loaded.Tags)
+	if len(tags["labels"].Values) != 2 {
+		t.Errorf("File() multivalue tag = %#v", tags["labels"])
 	}
-	if loaded.Tags[1].Name != "score" || loaded.Tags[1].IntegerValue == nil ||
-		*loaded.Tags[1].IntegerValue != 12 {
-		t.Errorf("File() integer tag = %#v", loaded.Tags[1])
+	if tags["score"].IntegerValue == nil || *tags["score"].IntegerValue != 12 {
+		t.Errorf("File() integer tag = %#v", tags["score"])
+	}
+	for name, want := range map[string]string{
+		"title": title, "day": day, "instant": instant, "rating": rating,
+	} {
+		if tags[name].TextValue == nil || *tags[name].TextValue != want {
+			t.Errorf("File() %s tag = %#v, want %q", name, tags[name], want)
+		}
+	}
+	if tags["published"].Type != "bool" {
+		t.Errorf("File() boolean tag = %#v", tags["published"])
 	}
 	if len(loaded.Storages) != 1 || loaded.Storages[0] != "default" {
 		t.Errorf("File() storages = %#v", loaded.Storages)
+	}
+}
+
+func TestDatabaseSupportsConcurrentReadersAndSerializedWriters(t *testing.T) {
+	database := openInitializedTestDatabase(t)
+	hash := strings.Repeat("4", 64)
+	if _, err := database.CreateFile(t.Context(), NewFile{
+		SHA256:         hash,
+		SizeBytes:      4,
+		SourcePath:     "/imports/concurrent.txt",
+		SourceFilename: "concurrent.txt",
+		Storages:       []string{"default"},
+	}); err != nil {
+		t.Fatalf("CreateFile() error = %v", err)
+	}
+	ctx, cancel := context.WithTimeout(t.Context(), 10*time.Second)
+	defer cancel()
+	start := make(chan struct{})
+	errorsFound := make(chan error, 6)
+	var group sync.WaitGroup
+	for range 4 {
+		group.Go(func() {
+			<-start
+			_, err := database.File(ctx, hash)
+			errorsFound <- err
+		})
+	}
+	for _, storage := range []string{"archive", "backup"} {
+		group.Go(func() {
+			<-start
+			_, err := database.AddStorage(ctx, hash, storage)
+			errorsFound <- err
+		})
+	}
+	close(start)
+	group.Wait()
+	close(errorsFound)
+	for err := range errorsFound {
+		if err != nil {
+			t.Fatalf("concurrent repository operation: %v", err)
+		}
+	}
+	file, err := database.File(t.Context(), hash)
+	if err != nil {
+		t.Fatalf("File() error = %v", err)
+	}
+	if len(file.Storages) != 3 {
+		t.Fatalf("File() storages = %q, want three serialized assignments", file.Storages)
 	}
 }
 
@@ -310,4 +380,12 @@ func openInitializedTestDatabase(t *testing.T) *Database {
 		t.Fatalf("Initialize() error = %v", err)
 	}
 	return database
+}
+
+func tagsByName(tags []TagRecord) map[string]TagRecord {
+	indexed := make(map[string]TagRecord, len(tags))
+	for _, tag := range tags {
+		indexed[tag.Name] = tag
+	}
+	return indexed
 }

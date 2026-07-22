@@ -488,7 +488,7 @@ Keep SQL and row conversion inside `internal/collection`.
   assignment is removed.
 - [x] Convert persisted assignments into evaluator input without losing types.
 - [x] Reject persisted values incompatible with the current catalog.
-- [ ] Test real SQLite round trips, concurrent readers, and serialized writers.
+- [x] Test real SQLite round trips, concurrent readers, and serialized writers.
 
 Acceptance:
 
