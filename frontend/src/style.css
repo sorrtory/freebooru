@@ -6,6 +6,7 @@
   text-rendering: optimizeLegibility;
   --accent: #b5f063;
   --error: #ff7d69;
+  --warning: #f3c76d;
   --line: rgb(232 239 219 / 14%);
   --muted: #9ea696;
   --text: #f0f2e9;

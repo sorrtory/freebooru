@@ -49,10 +49,12 @@ freebooru/
 │   ├── index.html                    Vue application document
 │   └── src/
 │       ├── main.ts                   Vue application entry point
-│       ├── App.vue                   Hello connection screen
-│       ├── App.test.ts               Hello screen success and retry tests
+│       ├── App.vue                   Application configuration status screen
+│       ├── App.test.ts               Status, diagnostics, and retry recovery tests
+│       ├── StatusDiagnostics.vue     Configuration diagnostic list
+│       ├── useApplicationStatus.ts   Status loading and retry state
 │       ├── api.ts                    Typed frontend HTTP client
-│       ├── api.test.ts               HTTP client contract tests
+│       ├── api.test.ts               Hello and status HTTP contract tests
 │       ├── style.css                 Global theme and reset
 │       └── vite-env.d.ts             Vite browser declarations
 ├── .vscode/
@@ -79,16 +81,17 @@ freebooru/
 │   │   ├── config.go                 `config check` and diagnostic rendering
 │   │   └── config_test.go            Diagnostic rendering tests
 │   ├── freebooru-server/
-│   │   └── main.go                   HTTP lifecycle and shared web handler wiring
+│   │   ├── main.go                   HTTP lifecycle and shared Core/web wiring
+│   │   └── main_test.go              Configured and fallback HTTP port tests
 │   └── freebooru-gui/
-│       ├── main.go                   Wails assets and internal API wiring
-│       ├── main_test.go              Desktop API middleware routing test
+│       ├── main.go                   Wails assets and shared Core/API wiring
+│       ├── main_test.go              Desktop API and middleware routing test
 │       └── wails.json                Wails build and Vue development configuration
 │
 ├── internal/
 │   ├── webapi/
-│   │   ├── handler.go               Shared versioned JSON API
-│   │   └── handler_test.go          Hello and API error contract tests
+│   │   ├── handler.go               Shared hello and Core status JSON API
+│   │   └── handler_test.go          API status, reload, and error contract tests
 │   ├── webui/
 │   │   ├── assets.go                Embedded Vue production bundle
 │   │   ├── handler.go               Static asset and SPA fallback handler
