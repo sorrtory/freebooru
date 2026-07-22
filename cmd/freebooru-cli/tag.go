@@ -50,6 +50,11 @@ func newTagAssignmentCommand(
 		Use:   operation + " <name[:value]>",
 		Short: operation + " one typed tag assignment",
 		Args:  cobra.ExactArgs(1),
+		ValidArgsFunction: completeFileAssignment(
+			options,
+			collectionName,
+			sha256,
+		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			app, err := loadCore(cmd.Context(), options)
 			if err != nil {

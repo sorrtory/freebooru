@@ -41,6 +41,8 @@ freebooru/
 │   │   ├── main.go                   CLI process entry point and exit handling
 │   │   ├── root.go                   Cobra root, --verbose, logger, command registration
 │   │   ├── app.go                    Shared checked Core construction for data commands
+│   │   ├── completion.go             Core-backed tag and value completion
+│   │   ├── completion_test.go        Config and persisted-state completion tests
 │   │   ├── collection.go             Explicit collection command dispatch
 │   │   ├── import.go                 Default and explicit collection file import
 │   │   ├── import_test.go            Import command routing, output, and validation tests
@@ -65,6 +67,10 @@ freebooru/
 │   ├── core/
 │   │   ├── assignment.go             Resolve CLI-style strings into typed tag assignments
 │   │   ├── assignment_test.go        Assignment syntax, typing, and repetition tests
+│   │   ├── evaluation_error.go       Structured invalid-state reasons for frontends
+│   │   ├── evaluation_error_test.go  Evaluator diagnostic rendering tests
+│   │   ├── import_fields.go           Side-effect-free collection import form schema
+│   │   ├── import_fields_test.go      Required/optional field schema tests
 │   │   ├── core.go                   Shared init, config snapshot, search, and open workflows
 │   │   ├── file.go                   Validated collection file lookup workflow
 │   │   ├── file_test.go              File lookup and database lifecycle tests

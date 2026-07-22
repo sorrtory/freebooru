@@ -626,7 +626,7 @@ Acceptance:
 
 - [x] Document arguments, flags, output, and exit behavior before each command.
 - [x] Add `collection <name> import <file>` and the documented default alias.
-- [ ] Add explicit `--interactive` import: prompt for missing required tags,
+- [x] Add explicit `--interactive` import: prompt for missing required tags,
   then offer skippable optional imported tags, and pass a complete request to
   Core.
 - [x] Add collection-specific and default typed tag add/set/remove commands.
@@ -635,10 +635,10 @@ Acceptance:
 - [x] Add collection-specific and default search commands.
 - [x] Accept repeated tag assignments during import using Phase 13 syntax.
 - [x] Print canonical SHA-256 after import and mutation.
-- [ ] Render evaluator failures and reasons without Cobra usage noise.
-- [ ] Add side-effect-free tag/value completion through Core.
-- [ ] Use `RunE`, argument validators, `cmd.Context`, and command writers.
-- [ ] Test fresh command trees, default/explicit collections, invalid input,
+- [x] Render evaluator failures and reasons without Cobra usage noise.
+- [x] Add side-effect-free tag/value completion through Core.
+- [x] Use `RunE`, argument validators, `cmd.Context`, and command writers.
+- [x] Test fresh command trees, default/explicit collections, invalid input,
   cancellation, output, and nonzero failures.
 
 Acceptance:

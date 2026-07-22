@@ -254,11 +254,7 @@ func (c *Core) validateTagMutation(
 	}
 	evaluation := checker.ValidateFile(state)
 	if !evaluation.Valid() {
-		return evaluation, fmt.Errorf(
-			"tag mutation has %d missing demands and %d active conflicts",
-			len(evaluation.MissingDemands),
-			len(evaluation.ActiveConflicts),
-		)
+		return evaluation, &EvaluationError{Operation: "tag mutation", Evaluation: evaluation}
 	}
 	return evaluation, nil
 }

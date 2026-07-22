@@ -2,7 +2,9 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"crypto/sha256"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -67,6 +69,83 @@ func TestImportCommandValidatesArgumentsAndAssignments(t *testing.T) {
 	command.SetArgs([]string{"import", path, "--tag", "unknown:value"})
 	if err := command.Execute(); err == nil || !strings.Contains(err.Error(), "not imported") {
 		t.Fatalf("invalid assignment error = %v", err)
+	}
+}
+
+func TestInteractiveImportPromptsForRequiredThenOptionalTags(t *testing.T) {
+	configHome := t.TempDir()
+	home := t.TempDir()
+	t.Setenv("XDG_CONFIG_HOME", configHome)
+	t.Setenv("HOME", home)
+	executeCLI(t, []string{"init"})
+	configDir := filepath.Join(configHome, "freebooru")
+	if err := os.WriteFile(
+		filepath.Join(configDir, "tags", "fields.yaml"),
+		[]byte("name: rating\ntype: value\nvalues:\n  - val: safe\n---\nname: reviewed\ntype: bool\n"),
+		0o600,
+	); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(
+		filepath.Join(configDir, "collections", "main.yaml"),
+		[]byte("name: main\ntags:\n  require:\n    - storage: default\n    - tag: rating\n  import:\n    - tag: reviewed\n"),
+		0o600,
+	); err != nil {
+		t.Fatal(err)
+	}
+	content := []byte("interactive import")
+	path := filepath.Join(t.TempDir(), "source.bin")
+	if err := os.WriteFile(path, content, 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	command := newRootCommand()
+	output := new(bytes.Buffer)
+	prompts := new(bytes.Buffer)
+	command.SetIn(strings.NewReader("safe\nyes\n"))
+	command.SetOut(output)
+	command.SetErr(prompts)
+	command.SetArgs([]string{"import", path, "--interactive"})
+	if err := command.Execute(); err != nil {
+		t.Fatalf("interactive import error = %v", err)
+	}
+	hash := fmt.Sprintf("%x", sha256.Sum256(content))
+	if output.String() != hash+"\n" {
+		t.Fatalf("interactive output = %q", output.String())
+	}
+	if got := prompts.String(); !strings.Contains(got, "required rating") ||
+		!strings.Contains(got, "optional reviewed") ||
+		strings.Index(got, "required rating") > strings.Index(got, "optional reviewed") {
+		t.Fatalf("prompts = %q", got)
+	}
+	if got := executeCLI(t, []string{"tag", hash, "get"}); got != "rating:safe\nreviewed\nstorage:default\n" {
+		t.Fatalf("persisted assignments = %q", got)
+	}
+}
+
+func TestImportCommandPropagatesCancellation(t *testing.T) {
+	configHome := t.TempDir()
+	home := t.TempDir()
+	t.Setenv("XDG_CONFIG_HOME", configHome)
+	t.Setenv("HOME", home)
+	executeCLI(t, []string{"init"})
+	path := filepath.Join(t.TempDir(), "source.bin")
+	if err := os.WriteFile(path, []byte("canceled import"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	ctx, cancel := context.WithCancel(t.Context())
+	cancel()
+	command := newRootCommand()
+	output := new(bytes.Buffer)
+	command.SetOut(output)
+	command.SetErr(new(bytes.Buffer))
+	command.SetArgs([]string{"import", path})
+	command.SetContext(ctx)
+	if err := command.Execute(); !errors.Is(err, context.Canceled) {
+		t.Fatalf("Execute() error = %v, want context.Canceled", err)
+	}
+	if output.Len() != 0 {
+		t.Fatalf("canceled output = %q", output.String())
 	}
 }
 

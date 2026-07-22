@@ -175,11 +175,7 @@ func (c *Core) validateImportState(
 	}
 	result := checker.ValidateFile(state)
 	if !result.Valid() {
-		return fmt.Errorf(
-			"import has %d missing demands and %d active conflicts",
-			len(result.MissingDemands),
-			len(result.ActiveConflicts),
-		)
+		return &EvaluationError{Operation: "import", Evaluation: result}
 	}
 	return nil
 }

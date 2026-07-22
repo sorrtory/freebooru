@@ -33,8 +33,9 @@ normalized tag name and then value.
 
 Interactive import prompts on standard error and reads standard input. It asks
 for missing required assignments first, then offers optional imported tags;
-the optional section may be skipped. It produces the same Core import request
-as non-interactive import.
+the optional section may be skipped. Boolean answers accept `true`/`false` or
+`yes`/`no`; multivalue answers are comma-separated. It produces the same Core
+import request as non-interactive import.
 
 Successful data commands write only their documented result to standard
 output. Diagnostics and verbose logs go to standard error. Invalid arguments,
