@@ -62,6 +62,7 @@ freebooru/
 │   │   ├── database.go               SQLite open, connection settings, ping, and close
 │   │   ├── database_test.go          Real SQLite lifecycle tests
 │   │   ├── repository.go             Persisted file records and repository queries
+│   │   ├── repository_write.go       Atomic collection-state writes
 │   │   ├── repository_test.go        Repository transaction and lookup tests
 │   │   ├── schema.go                 Schema initialization and version checks
 │   │   └── migrations/

@@ -14,6 +14,7 @@ func TestDatabaseCreateAndLoadFile(t *testing.T) {
 		SizeBytes:      42,
 		SourcePath:     "/imports/example.png",
 		SourceFilename: "example.png",
+		Storages:       []string{"default"},
 	})
 	if err != nil {
 		t.Fatalf("CreateFile() error = %v", err)
@@ -39,6 +40,7 @@ func TestDatabaseCreateFileRollsBackSourceFailure(t *testing.T) {
 	_, err := database.CreateFile(t.Context(), NewFile{
 		SHA256:    hash,
 		SizeBytes: 42,
+		Storages:  []string{"default"},
 	})
 	if err == nil {
 		t.Fatal("CreateFile() error = nil, want source constraint error")
@@ -56,6 +58,7 @@ func TestDatabaseCreateFileReturnsDuplicate(t *testing.T) {
 		SizeBytes:      42,
 		SourcePath:     "/imports/first.png",
 		SourceFilename: "first.png",
+		Storages:       []string{"default"},
 	})
 	if err != nil {
 		t.Fatalf("first CreateFile() error = %v", err)
@@ -65,6 +68,7 @@ func TestDatabaseCreateFileReturnsDuplicate(t *testing.T) {
 		SizeBytes:      42,
 		SourcePath:     "/imports/second.png",
 		SourceFilename: "second.png",
+		Storages:       []string{"archive"},
 	})
 	if !errors.Is(err, ErrDuplicateFile) {
 		t.Fatalf("second CreateFile() error = %v, want ErrDuplicateFile", err)
@@ -89,58 +93,20 @@ func TestDatabaseFileReturnsNotFound(t *testing.T) {
 func TestDatabaseFileLoadsTypedTagsAndStorages(t *testing.T) {
 	database := openInitializedTestDatabase(t)
 	hash := strings.Repeat("e", 64)
-	file, err := database.CreateFile(t.Context(), NewFile{
+	score := int64(12)
+	_, err := database.CreateFile(t.Context(), NewFile{
 		SHA256:         hash,
 		SizeBytes:      7,
 		SourcePath:     "/imports/tagged.txt",
 		SourceFilename: "tagged.txt",
+		Tags: []TagRecord{
+			{Name: "labels", Type: "multivalue", Values: []string{"first", "second"}},
+			{Name: "score", Type: "int", IntegerValue: &score},
+		},
+		Storages: []string{"default"},
 	})
 	if err != nil {
 		t.Fatalf("CreateFile() error = %v", err)
-	}
-	if _, err := database.db.ExecContext(
-		t.Context(),
-		`INSERT INTO file_tag (file_id, tag_name, tag_type, integer_value)
-		 VALUES (?, ?, ?, ?)`,
-		file.ID,
-		"score",
-		"int",
-		int64(12),
-	); err != nil {
-		t.Fatalf("insert integer tag: %v", err)
-	}
-	result, err := database.db.ExecContext(
-		t.Context(),
-		`INSERT INTO file_tag (file_id, tag_name, tag_type)
-		 VALUES (?, ?, ?)`,
-		file.ID,
-		"labels",
-		"multivalue",
-	)
-	if err != nil {
-		t.Fatalf("insert multivalue tag: %v", err)
-	}
-	tagID, err := result.LastInsertId()
-	if err != nil {
-		t.Fatalf("read multivalue tag id: %v", err)
-	}
-	for _, value := range []string{"first", "second"} {
-		if _, err := database.db.ExecContext(
-			t.Context(),
-			"INSERT INTO file_tag_value (file_tag_id, value) VALUES (?, ?)",
-			tagID,
-			value,
-		); err != nil {
-			t.Fatalf("insert multivalue %q: %v", value, err)
-		}
-	}
-	if _, err := database.db.ExecContext(
-		t.Context(),
-		"INSERT INTO file_storage (file_id, storage_name) VALUES (?, ?)",
-		file.ID,
-		"default",
-	); err != nil {
-		t.Fatalf("insert storage: %v", err)
 	}
 	loaded, err := database.File(t.Context(), hash)
 	if err != nil {

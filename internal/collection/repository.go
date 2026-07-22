@@ -5,8 +5,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-
-	"github.com/ncruces/go-sqlite3"
 )
 
 var (
@@ -51,6 +49,8 @@ type NewFile struct {
 	SizeBytes      int64
 	SourcePath     string
 	SourceFilename string
+	Tags           []TagRecord
+	Storages       []string
 }
 
 // DuplicateFileError carries the existing record rejected by CreateFile.
@@ -65,64 +65,6 @@ func (e *DuplicateFileError) Error() string {
 // Unwrap supports errors.Is(err, ErrDuplicateFile).
 func (e *DuplicateFileError) Unwrap() error {
 	return ErrDuplicateFile
-}
-
-// CreateFile records initial file and source metadata atomically.
-func (d *Database) CreateFile(ctx context.Context, input NewFile) (FileRecord, error) {
-	tx, err := d.db.BeginTx(ctx, nil)
-	if err != nil {
-		return FileRecord{}, fmt.Errorf("begin create file transaction: %w", err)
-	}
-	defer func() {
-		_ = tx.Rollback()
-	}()
-	result, err := tx.ExecContext(
-		ctx,
-		"INSERT INTO file (sha256, size_bytes) VALUES (?, ?)",
-		input.SHA256,
-		input.SizeBytes,
-	)
-	if err != nil {
-		if errors.Is(err, sqlite3.CONSTRAINT_UNIQUE) {
-			if rollbackErr := tx.Rollback(); rollbackErr != nil {
-				return FileRecord{}, errors.Join(
-					fmt.Errorf("create duplicate file %q: %w", input.SHA256, err),
-					fmt.Errorf("rollback duplicate file transaction: %w", rollbackErr),
-				)
-			}
-			existing, findErr := d.File(ctx, input.SHA256)
-			if findErr != nil {
-				return FileRecord{}, errors.Join(
-					fmt.Errorf("create duplicate file %q: %w", input.SHA256, err),
-					fmt.Errorf("load duplicate file: %w", findErr),
-				)
-			}
-			return FileRecord{}, &DuplicateFileError{Existing: existing}
-		}
-		return FileRecord{}, fmt.Errorf("insert file %q: %w", input.SHA256, err)
-	}
-	fileID, err := result.LastInsertId()
-	if err != nil {
-		return FileRecord{}, fmt.Errorf("read inserted file id: %w", err)
-	}
-	if _, err := tx.ExecContext(
-		ctx,
-		`INSERT INTO file_source (file_id, source_path, filename)
-		 VALUES (?, ?, ?)`,
-		fileID,
-		input.SourcePath,
-		input.SourceFilename,
-	); err != nil {
-		return FileRecord{}, fmt.Errorf("insert source for file %q: %w", input.SHA256, err)
-	}
-	if err := tx.Commit(); err != nil {
-		return FileRecord{}, fmt.Errorf("commit file %q: %w", input.SHA256, err)
-	}
-	file, err := d.File(ctx, input.SHA256)
-	if err != nil {
-		return FileRecord{}, fmt.Errorf("load created file %q: %w", input.SHA256, err)
-	}
-	return file, nil
 }
 
 // File loads one file and every persisted source, tag, and storage assignment.
