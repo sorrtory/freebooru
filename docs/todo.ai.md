@@ -624,8 +624,8 @@ Acceptance:
 
 ## Phase 21: CLI MVP commands
 
-- [ ] Document arguments, flags, output, and exit behavior before each command.
-- [ ] Add `collection <name> import <file>` and the documented default alias.
+- [x] Document arguments, flags, output, and exit behavior before each command.
+- [x] Add `collection <name> import <file>` and the documented default alias.
 - [ ] Add explicit `--interactive` import: prompt for missing required tags,
   then offer skippable optional imported tags, and pass a complete request to
   Core.
@@ -633,7 +633,7 @@ Acceptance:
 - [ ] Add collection-specific and default `tag <sha256> get` commands that
   return every assigned typed tag and storage.
 - [ ] Add collection-specific and default search commands.
-- [ ] Accept repeated tag assignments during import using Phase 13 syntax.
+- [x] Accept repeated tag assignments during import using Phase 13 syntax.
 - [ ] Print canonical SHA-256 after import and mutation.
 - [ ] Render evaluator failures and reasons without Cobra usage noise.
 - [ ] Add side-effect-free tag/value completion through Core.

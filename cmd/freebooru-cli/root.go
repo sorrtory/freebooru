@@ -9,6 +9,7 @@ import (
 
 type rootOptions struct {
 	verbose bool
+	newCore coreFactory
 }
 
 func Execute() error {
@@ -16,7 +17,7 @@ func Execute() error {
 }
 
 func newRootCommand() *cobra.Command {
-	options := &rootOptions{}
+	options := &rootOptions{newCore: defaultCoreFactory}
 	root := &cobra.Command{
 		Use:           "freebooru-cli",
 		Short:         "Interact with FreeBooru",
@@ -37,6 +38,8 @@ func newRootCommand() *cobra.Command {
 	root.AddCommand(
 		newInitCommand(options),
 		newConfigCommand(options),
+		newImportCommand(options, ""),
+		newCollectionCommand(options),
 	)
 
 	return root

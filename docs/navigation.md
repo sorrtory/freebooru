@@ -40,6 +40,10 @@ freebooru/
 │   ├── freebooru-cli/
 │   │   ├── main.go                   CLI process entry point and exit handling
 │   │   ├── root.go                   Cobra root, --verbose, logger, command registration
+│   │   ├── app.go                    Shared checked Core construction for data commands
+│   │   ├── collection.go             Explicit collection command dispatch
+│   │   ├── import.go                 Default and explicit collection file import
+│   │   ├── import_test.go            Import command routing, output, and validation tests
 │   │   ├── init.go                   `freebooru-cli init`
 │   │   ├── init_test.go              Initialization command tests
 │   │   ├── config.go                 `config check` and diagnostic rendering
@@ -55,6 +59,8 @@ freebooru/
 │   │   └── bootstrap_test.go         Bootstrap integration tests
 │   │
 │   ├── core/
+│   │   ├── assignment.go             Resolve CLI-style strings into typed tag assignments
+│   │   ├── assignment_test.go        Assignment syntax, typing, and repetition tests
 │   │   ├── core.go                   Shared init, config snapshot, search, and open workflows
 │   │   ├── file.go                   Validated collection file lookup workflow
 │   │   ├── file_test.go              File lookup and database lifecycle tests
