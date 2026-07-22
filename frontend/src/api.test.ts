@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { getHello, getStatus } from './api'
+import { evaluateImportDraft, getHello, getImportSchema, getStatus } from './api'
 
 describe('getHello', () => {
   it('accepts the server hello response', async () => {
@@ -110,5 +110,29 @@ describe('getStatus', () => {
     )
 
     await expect(getStatus(request)).rejects.toThrow('invalid status response')
+  })
+})
+
+describe('import workspace API', () => {
+  it('loads the explicit collection schema', async () => {
+    const body = { collection: 'Main Archive', fields: [{ name: 'rating', type: 'value', values: ['safe'], required: true }] }
+    const request = vi.fn<typeof fetch>().mockResolvedValue(new Response(JSON.stringify(body), { status: 200 }))
+
+    await expect(getImportSchema('Main Archive', request)).resolves.toEqual(body)
+    expect(request).toHaveBeenCalledWith('/api/v1/collections/Main%20Archive/imports/schema', { headers: { Accept: 'application/json' } })
+  })
+
+  it('evaluates typed assignments', async () => {
+    const body = { collection: 'main', assignments: [{ name: 'pages', type: 'int', value: 3, required: false }], missing_required: [], missing_demands: [], active_conflicts: [], suggestions: [], complete: true }
+    const request = vi.fn<typeof fetch>().mockResolvedValue(new Response(JSON.stringify(body), { status: 200 }))
+
+    await expect(evaluateImportDraft('main', { pages: 3 }, undefined, request)).resolves.toEqual(body)
+    expect(request).toHaveBeenCalledWith('/api/v1/collections/main/imports/evaluate', expect.objectContaining({ method: 'POST', body: JSON.stringify({ assignments: { pages: 3 } }) }))
+  })
+
+  it('reports structured API errors', async () => {
+    const request = vi.fn<typeof fetch>().mockResolvedValue(new Response(JSON.stringify({ error: { code: 'tag.value_invalid', message: 'pages must be an integer' } }), { status: 400 }))
+
+    await expect(evaluateImportDraft('main', { pages: 3.5 }, undefined, request)).rejects.toThrow('pages must be an integer')
   })
 })

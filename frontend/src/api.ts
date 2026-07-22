@@ -22,8 +22,58 @@ export interface ApplicationStatus {
   diagnostics: Diagnostic[]
 }
 
+export type TagType = 'bool' | 'text' | 'int' | 'date' | 'datetime' | 'value' | 'multivalue'
+export type TagValue = boolean | number | string | string[]
+
+export interface ImportField {
+  name: string
+  type: TagType
+  values: string[]
+  required: boolean
+}
+
+export interface ImportSchema {
+  collection: string
+  fields: ImportField[]
+}
+
+export interface Assignment extends Omit<ImportField, 'values'> {
+  value: TagValue
+}
+
+export interface Predicate {
+  presence: boolean
+  has: string[]
+  is?: TagValue
+  not: string[]
+  min?: number
+  max?: number
+  before?: string
+  after?: string
+  regex?: string
+}
+
+export interface Relationship {
+  kind: string
+  source_tag: string
+  source_value: string
+  target_tag: string
+  target: Predicate
+  reason: string
+}
+
+export interface ImportDraft {
+  collection: string
+  assignments: Assignment[]
+  missing_required: ImportField[]
+  missing_demands: Relationship[]
+  active_conflicts: Relationship[]
+  suggestions: Relationship[]
+  complete: boolean
+}
+
 interface ErrorResponse {
-  error?: string
+  error?: string | { code?: string; message?: string }
 }
 
 export async function getHello(request: typeof fetch = fetch): Promise<HelloResponse> {
@@ -33,7 +83,7 @@ export async function getHello(request: typeof fetch = fetch): Promise<HelloResp
 
   if (!response.ok) {
     const body = (await response.json().catch(() => ({}))) as ErrorResponse
-    throw new Error(body.error ?? `FreeBooru returned HTTP ${response.status}`)
+    throw new Error(errorMessage(body, response.status))
   }
 
   const body = (await response.json()) as Partial<HelloResponse>
@@ -54,7 +104,7 @@ export async function getStatus(request: typeof fetch = fetch): Promise<Applicat
 
   if (!response.ok) {
     const body = (await response.json().catch(() => ({}))) as ErrorResponse
-    throw new Error(body.error ?? `FreeBooru returned HTTP ${response.status}`)
+    throw new Error(errorMessage(body, response.status))
   }
 
   const body: unknown = await response.json()
@@ -62,6 +112,83 @@ export async function getStatus(request: typeof fetch = fetch): Promise<Applicat
     throw new Error('FreeBooru returned an invalid status response')
   }
   return body
+}
+
+export async function getImportSchema(
+  collection: string,
+  request: typeof fetch = fetch,
+): Promise<ImportSchema> {
+  const response = await request(importURL(collection, 'schema'), {
+    headers: { Accept: 'application/json' },
+  })
+  if (!response.ok) throw new Error(errorMessage(await errorBody(response), response.status))
+  const body: unknown = await response.json()
+  if (!isImportSchema(body)) throw new Error('FreeBooru returned an invalid import schema')
+  return body
+}
+
+export async function evaluateImportDraft(
+  collection: string,
+  assignments: Record<string, TagValue>,
+  signal?: AbortSignal,
+  request: typeof fetch = fetch,
+): Promise<ImportDraft> {
+  const response = await request(importURL(collection, 'evaluate'), {
+    method: 'POST',
+    headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+    body: JSON.stringify({ assignments }),
+    signal,
+  })
+  if (!response.ok) throw new Error(errorMessage(await errorBody(response), response.status))
+  const body: unknown = await response.json()
+  if (!isImportDraft(body)) throw new Error('FreeBooru returned an invalid import draft')
+  return body
+}
+
+function importURL(collection: string, action: 'schema' | 'evaluate') {
+  return `/api/v1/collections/${encodeURIComponent(collection)}/imports/${action}`
+}
+
+async function errorBody(response: Response): Promise<ErrorResponse> {
+  return (await response.json().catch(() => ({}))) as ErrorResponse
+}
+
+function errorMessage(body: ErrorResponse, status: number): string {
+  if (typeof body.error === 'string') return body.error
+  if (body.error && typeof body.error.message === 'string') return body.error.message
+  return `FreeBooru returned HTTP ${status}`
+}
+
+function isImportSchema(value: unknown): value is ImportSchema {
+  return isRecord(value) && typeof value.collection === 'string' && Array.isArray(value.fields) && value.fields.every(isImportField)
+}
+
+function isImportField(value: unknown): value is ImportField {
+  return isRecord(value) && typeof value.name === 'string' && isTagType(value.type) && Array.isArray(value.values) && value.values.every((item) => typeof item === 'string') && typeof value.required === 'boolean'
+}
+
+function isImportDraft(value: unknown): value is ImportDraft {
+  return isRecord(value) && typeof value.collection === 'string' && Array.isArray(value.assignments) && value.assignments.every(isAssignment) && Array.isArray(value.missing_required) && value.missing_required.every(isImportField) && Array.isArray(value.missing_demands) && value.missing_demands.every(isRelationship) && Array.isArray(value.active_conflicts) && value.active_conflicts.every(isRelationship) && Array.isArray(value.suggestions) && value.suggestions.every(isRelationship) && typeof value.complete === 'boolean'
+}
+
+function isAssignment(value: unknown): value is Assignment {
+  return isRecord(value) && typeof value.name === 'string' && isTagType(value.type) && typeof value.required === 'boolean' && isTagValue(value.value)
+}
+
+function isRelationship(value: unknown): value is Relationship {
+  return isRecord(value) && typeof value.kind === 'string' && typeof value.source_tag === 'string' && typeof value.source_value === 'string' && typeof value.target_tag === 'string' && isPredicate(value.target) && typeof value.reason === 'string'
+}
+
+function isPredicate(value: unknown): value is Predicate {
+  return isRecord(value) && typeof value.presence === 'boolean' && Array.isArray(value.has) && value.has.every((item) => typeof item === 'string') && Array.isArray(value.not) && value.not.every((item) => typeof item === 'string')
+}
+
+function isTagValue(value: unknown): value is TagValue {
+  return typeof value === 'boolean' || typeof value === 'number' || typeof value === 'string' || (Array.isArray(value) && value.every((item) => typeof item === 'string'))
+}
+
+function isTagType(value: unknown): value is TagType {
+  return ['bool', 'text', 'int', 'date', 'datetime', 'value', 'multivalue'].includes(String(value))
 }
 
 function isApplicationStatus(value: unknown): value is ApplicationStatus {

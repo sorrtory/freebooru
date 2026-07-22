@@ -49,12 +49,23 @@ freebooru/
 │   ├── index.html                    Vue application document
 │   └── src/
 │       ├── main.ts                   Vue application entry point
-│       ├── App.vue                   Application configuration status screen
+│       ├── App.vue                   Route outlet shared by web and Wails
 │       ├── App.test.ts               Status, diagnostics, and retry recovery tests
+│       ├── router.ts                 Status and explicit-collection import routes
+│       ├── pages/
+│       │   ├── StatusPage.vue        Runtime and configuration readiness screen
+│       │   ├── ImportPage.vue        Responsive three-area import workspace
+│       │   └── ImportPage.test.ts    Canonical draft workspace interaction tests
+│       ├── components/
+│       │   ├── AssignedTags.vue      Required and canonical assigned tag cards
+│       │   ├── ImportGuidance.vue    Demand and recommendation cards
+│       │   ├── TagCatalog.vue        Searchable unassigned-tag catalog
+│       │   └── TagField.vue          FreeBooru type-aware assignment editor
 │       ├── StatusDiagnostics.vue     Configuration diagnostic list
 │       ├── useApplicationStatus.ts   Status loading and retry state
-│       ├── api.ts                    Typed frontend HTTP client
-│       ├── api.test.ts               Hello and status HTTP contract tests
+│       ├── useImportDraft.ts         Canonical draft evaluation state and cancellation
+│       ├── api.ts                    Typed status and import HTTP client
+│       ├── api.test.ts               Status and import HTTP contract tests
 │       ├── style.css                 Global theme and reset
 │       └── vite-env.d.ts             Vite browser declarations
 ├── .vscode/

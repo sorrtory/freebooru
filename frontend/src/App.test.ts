@@ -1,7 +1,7 @@
 import { flushPromises, mount } from '@vue/test-utils'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import App from './App.vue'
+import StatusPage from './pages/StatusPage.vue'
 
 function response(body: unknown) {
   return new Response(JSON.stringify(body), { status: 200 })
@@ -11,7 +11,9 @@ afterEach(() => {
   vi.unstubAllGlobals()
 })
 
-describe('App', () => {
+const mountStatus = () => mount(StatusPage, { global: { stubs: { RouterLink: true } } })
+
+describe('StatusPage', () => {
   it('shows a ready desktop application', async () => {
     vi.stubGlobal(
       'fetch',
@@ -25,7 +27,7 @@ describe('App', () => {
       ),
     )
 
-    const wrapper = mount(App)
+    const wrapper = mountStatus()
     expect(wrapper.get('[role="status"]').text()).toContain('Loading')
     await flushPromises()
 
@@ -57,7 +59,7 @@ describe('App', () => {
       ),
     )
 
-    const wrapper = mount(App)
+    const wrapper = mountStatus()
     await flushPromises()
 
     expect(wrapper.get('h1').text()).toBe('FreeBooru is ready')
@@ -91,7 +93,7 @@ describe('App', () => {
       ),
     )
 
-    const wrapper = mount(App)
+    const wrapper = mountStatus()
     await flushPromises()
 
     expect(wrapper.get('h1').text()).toBe('Configuration needs attention')
@@ -130,7 +132,7 @@ describe('App', () => {
       )
     vi.stubGlobal('fetch', request)
 
-    const wrapper = mount(App)
+    const wrapper = mountStatus()
     await flushPromises()
     await wrapper.get('button').trigger('click')
     await flushPromises()
@@ -153,7 +155,7 @@ describe('App', () => {
       )
     vi.stubGlobal('fetch', request)
 
-    const wrapper = mount(App)
+    const wrapper = mountStatus()
     await flushPromises()
     expect(wrapper.get('[role="alert"]').text()).toContain('network unavailable')
 

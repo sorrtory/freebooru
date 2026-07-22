@@ -20,6 +20,7 @@
 ## GUI
 
 - Vue.js
+- Vue Router, used for runtime-independent status and collection workspace URLs
 - Wails v2
 
 ## Skills
