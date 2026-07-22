@@ -3,7 +3,6 @@ package core
 import (
 	"fmt"
 	"sort"
-	"strings"
 
 	"github.com/sorrtory/freebooru/internal/config"
 	"github.com/sorrtory/freebooru/internal/evaluator"
@@ -102,7 +101,7 @@ func (c *Core) collectImportAssignments(
 		if !ok {
 			return nil, nil, fmt.Errorf("tag %q does not exist", name)
 		}
-		values[tag.Name] = canonicalImportValue(tag, value)
+		values[tag.Name] = canonicalTagValue(tag, value)
 	}
 	return values, storages, nil
 }
@@ -183,30 +182,4 @@ func (c *Core) validateImportState(
 		)
 	}
 	return nil
-}
-
-func canonicalImportValue(tag config.TagConfig, value any) any {
-	canonical := func(value string) string {
-		for _, declared := range tag.Values {
-			if strings.EqualFold(declared.Val, value) {
-				return declared.Val
-			}
-		}
-		return value
-	}
-	switch tag.Type {
-	case config.TagTypeValue:
-		if text, ok := value.(string); ok {
-			return canonical(text)
-		}
-	case config.TagTypeMultivalue:
-		if items, ok := value.([]string); ok {
-			result := make([]string, 0, len(items))
-			for _, item := range items {
-				result = append(result, canonical(item))
-			}
-			return result
-		}
-	}
-	return value
 }

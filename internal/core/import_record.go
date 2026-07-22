@@ -21,22 +21,10 @@ func importTagRecords(catalog *config.Catalog, values map[string]any) []collecti
 	for _, name := range names {
 		value := values[name]
 		tag, _, _ := catalog.Tag(name)
-		record := collection.TagRecord{Name: tag.Name, Type: string(tag.Type)}
-		switch tag.Type {
-		case config.TagTypeBool:
-			if !value.(bool) {
-				continue
-			}
-		case config.TagTypeInt:
-			number := value.(int64)
-			record.IntegerValue = &number
-		case config.TagTypeMultivalue:
-			record.Values = append([]string(nil), value.([]string)...)
-		default:
-			text := value.(string)
-			record.TextValue = &text
+		if tag.Type == config.TagTypeBool && !value.(bool) {
+			continue
 		}
-		records = append(records, record)
+		records = append(records, tagRecord(tag, value))
 	}
 	return records
 }

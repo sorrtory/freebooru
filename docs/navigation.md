@@ -68,6 +68,8 @@ freebooru/
 │   │   ├── import_record.go           Typed import-to-database conversion
 │   │   ├── import_source.go           Verified remove-on-upload handling
 │   │   ├── import_test.go             Import defaults and validation tests
+│   │   ├── tag_assignment.go          Canonical typed tag mutation preparation
+│   │   ├── tag_assignment_test.go     Tag preparation and persistence-shape tests
 │   │   └── integration_test.go       Multi-domain config integration fixture
 │   │
 │   ├── collection/
