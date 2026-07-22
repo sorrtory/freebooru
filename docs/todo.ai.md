@@ -497,11 +497,12 @@ Acceptance:
 
 ## Phase 16: local content-addressed storage
 
-- [ ] Add a local backend rooted at the expanded configured path.
-- [ ] Derive `<root>/<sha[0:2]>/<sha>` from a validated lowercase SHA-256.
-- [ ] Reject malformed hashes, symlinked sources, directories, and non-regular
+- [x] Add a local backend rooted at an absolute path expanded by the config
+  boundary.
+- [x] Derive `<root>/<sha[0:2]>/<sha>` from a validated lowercase SHA-256.
+- [x] Reject malformed hashes, symlinked sources, directories, and non-regular
   files.
-- [ ] Stream bytes while calculating SHA-256 and size; never read whole files
+- [x] Stream bytes while calculating SHA-256 and size; never read whole files
   into memory.
 - [ ] Stage writes in the destination filesystem and atomically rename them.
 - [ ] Treat an existing verified content path as idempotent success.

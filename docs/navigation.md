@@ -13,7 +13,8 @@ cmd/freebooru-cli ─┐
 cmd/freebooru-gui ─┼─> internal/bootstrap ─> internal/core
 cmd/freebooru-server┘                         │
                                               ├─> internal/config
-                                              └─> internal/collection
+                                              ├─> internal/collection
+                                              └─> internal/storage
 ```
 
 - `bootstrap` constructs Core with concrete dependencies.
@@ -83,6 +84,10 @@ freebooru/
 │   │   ├── values.go                  Allowed-value hints and blocking reasons
 │   │   ├── state_test.go              State validation and active-source tests
 │   │   └── values_test.go             Candidate-value evaluation tests
+│   │
+│   ├── storage/
+│   │   ├── local.go                    Local content paths and streamed inspection
+│   │   └── local_test.go               Hash, source-type, and cancellation tests
 │   │
 │   └── config/
 │       ├── app.go                    Application config, defaults, loading, validation
