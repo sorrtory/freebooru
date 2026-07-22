@@ -43,6 +43,12 @@ type TagRecord struct {
 	Values       []string
 }
 
+// StorageChange describes the logical result of a storage mutation.
+type StorageChange struct {
+	Changed     bool
+	FileDeleted bool
+}
+
 // NewFile describes the immutable metadata recorded by an initial import.
 type NewFile struct {
 	SHA256         string

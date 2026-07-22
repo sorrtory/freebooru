@@ -483,8 +483,8 @@ Keep SQL and row conversion inside `internal/collection`.
 - [ ] Stream every persisted assignment for collection-open integrity checks
   without loading the complete collection into memory.
 - [ ] Add, replace, and remove typed tag values transactionally.
-- [ ] Add and remove logical storage assignments transactionally.
-- [ ] Delete a file through foreign-key cascades only when its final storage
+- [x] Add and remove logical storage assignments transactionally.
+- [x] Delete a file through foreign-key cascades only when its final storage
   assignment is removed.
 - [ ] Convert persisted assignments into evaluator input without losing types.
 - [ ] Reject persisted values incompatible with the current catalog.

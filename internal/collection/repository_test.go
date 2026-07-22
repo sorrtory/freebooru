@@ -127,6 +127,83 @@ func TestDatabaseFileLoadsTypedTagsAndStorages(t *testing.T) {
 	}
 }
 
+func TestDatabaseStorageMutations(t *testing.T) {
+	database := openInitializedTestDatabase(t)
+	hash := strings.Repeat("f", 64)
+	_, err := database.CreateFile(t.Context(), NewFile{
+		SHA256:         hash,
+		SizeBytes:      9,
+		SourcePath:     "/imports/stored.txt",
+		SourceFilename: "stored.txt",
+		Tags:           []TagRecord{{Name: "reviewed", Type: "bool"}},
+		Storages:       []string{"default"},
+	})
+	if err != nil {
+		t.Fatalf("CreateFile() error = %v", err)
+	}
+	change, err := database.AddStorage(t.Context(), hash, "archive")
+	if err != nil {
+		t.Fatalf("AddStorage() error = %v", err)
+	}
+	if !change.Changed || change.FileDeleted {
+		t.Fatalf("AddStorage() = %#v", change)
+	}
+	change, err = database.AddStorage(t.Context(), hash, "archive")
+	if err != nil {
+		t.Fatalf("repeated AddStorage() error = %v", err)
+	}
+	if change.Changed {
+		t.Fatalf("repeated AddStorage() = %#v, want no-op", change)
+	}
+	change, err = database.RemoveStorage(t.Context(), hash, "missing")
+	if err != nil {
+		t.Fatalf("missing RemoveStorage() error = %v", err)
+	}
+	if change.Changed {
+		t.Fatalf("missing RemoveStorage() = %#v, want no-op", change)
+	}
+	change, err = database.RemoveStorage(t.Context(), hash, "archive")
+	if err != nil {
+		t.Fatalf("RemoveStorage() error = %v", err)
+	}
+	if !change.Changed || change.FileDeleted {
+		t.Fatalf("RemoveStorage() = %#v", change)
+	}
+	change, err = database.RemoveStorage(t.Context(), hash, "default")
+	if err != nil {
+		t.Fatalf("final RemoveStorage() error = %v", err)
+	}
+	if !change.Changed || !change.FileDeleted {
+		t.Fatalf("final RemoveStorage() = %#v", change)
+	}
+	if _, err := database.File(t.Context(), hash); !errors.Is(err, ErrFileNotFound) {
+		t.Fatalf("File() after final removal error = %v, want ErrFileNotFound", err)
+	}
+	for _, table := range []string{"file_source", "file_tag", "file_storage"} {
+		var count int
+		if err := database.db.QueryRowContext(
+			t.Context(),
+			"SELECT COUNT(*) FROM "+table, //nolint:gosec // fixed test table allowlist.
+		).Scan(&count); err != nil {
+			t.Fatalf("count %s: %v", table, err)
+		}
+		if count != 0 {
+			t.Errorf("%s row count = %d, want 0", table, count)
+		}
+	}
+}
+
+func TestDatabaseStorageMutationsReturnNotFound(t *testing.T) {
+	database := openInitializedTestDatabase(t)
+	hash := strings.Repeat("1", 64)
+	if _, err := database.AddStorage(t.Context(), hash, "default"); !errors.Is(err, ErrFileNotFound) {
+		t.Fatalf("AddStorage() error = %v, want ErrFileNotFound", err)
+	}
+	if _, err := database.RemoveStorage(t.Context(), hash, "default"); !errors.Is(err, ErrFileNotFound) {
+		t.Fatalf("RemoveStorage() error = %v, want ErrFileNotFound", err)
+	}
+}
+
 func openInitializedTestDatabase(t *testing.T) *Database {
 	t.Helper()
 	database := openTestDatabase(t)
