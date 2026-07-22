@@ -523,18 +523,18 @@ Acceptance:
 
 Coordinate catalog, evaluator, repository, and local storages in Core.
 
-- [ ] Define an import request with collection, one source path, and explicit
+- [x] Define an import request with collection, one source path, and explicit
   tag assignments.
-- [ ] Resolve explicit or default collection through the validated snapshot.
+- [x] Resolve explicit or default collection through the validated snapshot.
 - [ ] Reject symlinks, directories, and non-regular sources before mutation.
 - [ ] Stream and stage the source once, producing SHA-256 and size.
-- [ ] Apply collection-required tags; require explicit values for required
+- [x] Apply collection-required tags; require explicit values for required
   non-boolean tags.
-- [ ] When no storage is explicit or required, use `default_storage_name` only
+- [x] When no storage is explicit or required, use `default_storage_name` only
   if it is available to the collection; otherwise fail before mutation.
-- [ ] Assign at least one valid storage using explicit assignments, collection
+- [x] Assign at least one valid storage using explicit assignments, collection
   requirements, and the documented default rule.
-- [ ] Build proposed `FileState` and reject missing demands or active conflicts.
+- [x] Build proposed `FileState` and reject missing demands or active conflicts.
 - [ ] Copy or verify content in every selected storage.
 - [ ] Commit file, source, typed tags, and storage assignments in one SQLite
   transaction.

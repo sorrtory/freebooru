@@ -59,6 +59,8 @@ freebooru/
 │   │   ├── collection_state.go       Persisted state conversion and integrity checks
 │   │   ├── collection_state_test.go  Persisted type conversion tests
 │   │   ├── core_test.go              Workflow and database lifecycle tests
+│   │   ├── import.go                  Import request preparation and validation
+│   │   ├── import_test.go             Import defaults and validation tests
 │   │   └── integration_test.go       Multi-domain config integration fixture
 │   │
 │   ├── collection/
