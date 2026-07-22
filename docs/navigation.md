@@ -86,6 +86,10 @@ freebooru/
 │   │   ├── repository_create.go      Atomic initial file persistence
 │   │   ├── repository_tag.go         Typed tag assignment mutations
 │   │   ├── repository_storage.go     Logical storage assignment mutations
+│   │   ├── repository_search.go      Snapshot-consistent paginated file search
+│   │   ├── repository_search_test.go Typed matching, ordering, and pagination tests
+│   │   ├── search_sql.go             Parameterized typed search SQL compilation
+│   │   ├── search_sql_test.go        SQL parameterization and boundary tests
 │   │   ├── repository_transaction.go Private write transaction helpers
 │   │   ├── repository_test.go        Repository transaction and lookup tests
 │   │   ├── schema.go                 Schema initialization and version checks
