@@ -59,6 +59,10 @@ func TestPrepareImportRejectsUnavailableAssignment(t *testing.T) {
 }
 
 func newImportTestCore(t *testing.T) *Core {
+	return newImportTestCoreWithDatabase(t, &fakeDatabase{})
+}
+
+func newImportTestCoreWithDatabase(t *testing.T, database CollectionDatabase) *Core {
 	t.Helper()
 	paths, _ := provisionTestConfig(t)
 	tags := `name: reviewed
@@ -93,7 +97,7 @@ tags:
 		t.Fatal(err)
 	}
 	app, err := New(testLogger(), paths, func(context.Context, string) (CollectionDatabase, error) {
-		return &fakeDatabase{}, nil
+		return database, nil
 	})
 	if err != nil {
 		t.Fatal(err)

@@ -17,6 +17,8 @@ type CollectionDatabase interface {
 	ForEachFile(context.Context, func(collection.FileRecord) error) error
 	File(context.Context, string) (collection.FileRecord, error)
 	CreateFile(context.Context, collection.NewFile) (collection.FileRecord, error)
+	SetTag(context.Context, string, collection.TagRecord) (collection.TagChange, error)
+	RemoveTag(context.Context, string, string) (collection.TagChange, error)
 	Close() error
 }
 
