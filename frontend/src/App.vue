@@ -56,6 +56,10 @@ onMounted(() => void reload())
           v-if="status.diagnostics.length > 0"
           :diagnostics="status.diagnostics"
         />
+        <p v-if="status.diagnostics.length > 0" class="diagnostic-count">
+          {{ status.diagnostics.length }}
+          {{ status.diagnostics.length === 1 ? 'diagnostic' : 'diagnostics' }}
+        </p>
 
         <button v-if="!status.ready" type="button" @click="reload">Retry</button>
       </template>
@@ -214,6 +218,13 @@ h1 {
   margin: 0 0 1rem;
   color: #ffc1b8;
   line-height: 1.5;
+}
+
+.diagnostic-count {
+  margin: 0.6rem 0 0;
+  color: var(--muted);
+  font: 0.72rem var(--mono);
+  text-align: right;
 }
 
 button {

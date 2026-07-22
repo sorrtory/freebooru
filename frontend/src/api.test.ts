@@ -66,6 +66,35 @@ describe('getStatus', () => {
     await expect(getStatus(request)).rejects.toThrow('temporarily unavailable')
   })
 
+  it('accepts an unready application status', async () => {
+    const body = {
+      ready: false,
+      mode: 'server',
+      default_collection: '',
+      diagnostics: [
+        {
+          severity: 'error',
+          code: 'application.config_load',
+          message: 'Configuration file is missing',
+          file: '',
+          document: 0,
+          field: '',
+        },
+      ],
+    }
+    const request = vi.fn<typeof fetch>().mockResolvedValue(
+      new Response(JSON.stringify(body), { status: 200 }),
+    )
+
+    await expect(getStatus(request)).resolves.toEqual(body)
+  })
+
+  it('rejects malformed JSON', async () => {
+    const request = vi.fn<typeof fetch>().mockResolvedValue(new Response('{', { status: 200 }))
+
+    await expect(getStatus(request)).rejects.toThrow()
+  })
+
   it.each([
     { ready: true, mode: 'worker', default_collection: 'main', diagnostics: [] },
     { ready: true, mode: 'server', default_collection: 'main' },

@@ -41,6 +41,7 @@ func (f *fakeApplication) AppConfig() config.AppConfig {
 }
 
 func TestNewRejectsInvalidDependencies(t *testing.T) {
+	var typedNil *fakeApplication
 	tests := []struct {
 		name string
 		mode Mode
@@ -48,6 +49,7 @@ func TestNewRejectsInvalidDependencies(t *testing.T) {
 	}{
 		{name: "invalid mode", mode: Mode("invalid"), app: &fakeApplication{}},
 		{name: "missing application", mode: ModeServer},
+		{name: "typed nil application", mode: ModeServer, app: typedNil},
 	}
 
 	for _, test := range tests {
@@ -205,6 +207,31 @@ func TestStatusMapsDiagnosticSource(t *testing.T) {
 	}
 	if len(status.Diagnostics) != 1 || status.Diagnostics[0] != want {
 		t.Fatalf("diagnostics = %#v, want %#v", status.Diagnostics, want)
+	}
+}
+
+func TestStatusPreservesMultipleDiagnostics(t *testing.T) {
+	app := &fakeApplication{
+		appConfig: config.DefaultAppConfig(),
+		diagnostics: config.Diagnostics{
+			{Severity: config.SeverityError, Code: "first", Message: "first problem"},
+			{Severity: config.SeverityError, Code: "second", Message: "second problem"},
+		},
+	}
+	response := httptest.NewRecorder()
+	mustNew(t, ModeServer, app).ServeHTTP(
+		response,
+		httptest.NewRequest(http.MethodGet, "/api/v1/status", nil),
+	)
+
+	var status StatusResponse
+	if err := json.NewDecoder(response.Body).Decode(&status); err != nil {
+		t.Fatalf("decode response: %v", err)
+	}
+	if len(status.Diagnostics) != 2 ||
+		status.Diagnostics[0].Code != "first" ||
+		status.Diagnostics[1].Code != "second" {
+		t.Fatalf("diagnostics = %#v, want first then second", status.Diagnostics)
 	}
 }
 

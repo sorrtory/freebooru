@@ -180,14 +180,14 @@ not fatal.
 
 ## Phase 0: finalize documentation and baseline
 
-- [ ] Extend [http-server.md](./http-server.md) with the complete status
+- [x] Extend [http-server.md](./http-server.md) with the complete status
   request, response, method, and readiness contract.
-- [ ] Extend [gui.md](./gui.md) with the configuration-ready, warning, and
+- [x] Extend [gui.md](./gui.md) with the configuration-ready, warning, and
   error screen behavior.
-- [ ] Confirm `GET /api/v1/hello` remains supported and documented.
-- [ ] Record that invalid configuration no longer prevents the server UI from
+- [x] Confirm `GET /api/v1/hello` remains supported and documented.
+- [x] Record that invalid configuration no longer prevents the server UI from
   starting on the default port.
-- [ ] Run `go tool task check` before implementation and record unrelated
+- [x] Run `go tool task check` before implementation and record unrelated
   failures.
 
 Acceptance:
@@ -196,14 +196,14 @@ Acceptance:
 
 ## Phase 1: define status DTOs and Core seam
 
-- [ ] Add API-only `StatusResponse` and `DiagnosticResponse` types.
-- [ ] Use explicit JSON tags for every response field.
-- [ ] Restrict `mode` and diagnostic `severity` to documented string values.
-- [ ] Add the minimal `Application` interface required by status inspection.
-- [ ] Change `webapi.New` to accept and validate the application dependency.
-- [ ] Update existing hello tests and both executable call sites for the new
+- [x] Add API-only `StatusResponse` and `DiagnosticResponse` types.
+- [x] Use explicit JSON tags for every response field.
+- [x] Restrict `mode` and diagnostic `severity` to documented string values.
+- [x] Add the minimal `Application` interface required by status inspection.
+- [x] Change `webapi.New` to accept and validate the application dependency.
+- [x] Update existing hello tests and both executable call sites for the new
   constructor.
-- [ ] Do not export internal handler implementation types unnecessarily.
+- [x] Do not export internal handler implementation types unnecessarily.
 
 Acceptance:
 
@@ -213,18 +213,18 @@ Acceptance:
 
 ## Phase 2: implement status inspection
 
-- [ ] Register only `GET /api/v1/status` on the new route.
-- [ ] Pass `request.Context()` to `LoadConfig` and `CheckConfig`.
-- [ ] Skip `CheckConfig` and `AppConfig` when `LoadConfig` fails.
-- [ ] Map a load failure to `application.config_load` and `ready: false`.
-- [ ] Map every config diagnostic without dropping severity, code, message,
+- [x] Register only `GET /api/v1/status` on the new route.
+- [x] Pass `request.Context()` to `LoadConfig` and `CheckConfig`.
+- [x] Skip `CheckConfig` and `AppConfig` when `LoadConfig` fails.
+- [x] Map a load failure to `application.config_load` and `ready: false`.
+- [x] Map every config diagnostic without dropping severity, code, message,
   file, document, or field.
-- [ ] Set `ready` from `Diagnostics.HasErrors()` after a successful load.
-- [ ] Include `default_collection` after a successful application load,
+- [x] Set `ready` from `Diagnostics.HasErrors()` after a successful load.
+- [x] Include `default_collection` after a successful application load,
   including when catalog diagnostics make status unready.
-- [ ] Preserve deterministic diagnostic ordering from Core.
-- [ ] Return an empty JSON array, not `null`, when there are no diagnostics.
-- [ ] Reject other methods with JSON `405` and `Allow: GET`.
+- [x] Preserve deterministic diagnostic ordering from Core.
+- [x] Return an empty JSON array, not `null`, when there are no diagnostics.
+- [x] Reject other methods with JSON `405` and `Allow: GET`.
 
 Acceptance:
 
@@ -233,18 +233,18 @@ Acceptance:
 
 ## Phase 3: test the API contract
 
-- [ ] Use a small fake implementing only the `Application` interface.
-- [ ] Test ready status with the default collection.
-- [ ] Test warning-only status remains ready.
-- [ ] Test one and multiple blocking diagnostics.
-- [ ] Test all diagnostic fields survive JSON mapping.
-- [ ] Test application load failure and stable diagnostic code.
-- [ ] Prove `CheckConfig` is not called after load failure.
-- [ ] Test empty diagnostics encode as `[]`.
-- [ ] Test runtime mode for server and desktop.
-- [ ] Test method rejection and unknown API paths.
-- [ ] Test request cancellation reaches the fake application.
-- [ ] Keep these as fast `httptest.ResponseRecorder` unit tests; no TCP socket
+- [x] Use a small fake implementing only the `Application` interface.
+- [x] Test ready status with the default collection.
+- [x] Test warning-only status remains ready.
+- [x] Test one and multiple blocking diagnostics.
+- [x] Test all diagnostic fields survive JSON mapping.
+- [x] Test application load failure and stable diagnostic code.
+- [x] Prove `CheckConfig` is not called after load failure.
+- [x] Test empty diagnostics encode as `[]`.
+- [x] Test runtime mode for server and desktop.
+- [x] Test method rejection and unknown API paths.
+- [x] Test request cancellation reaches the fake application.
+- [x] Keep these as fast `httptest.ResponseRecorder` unit tests; no TCP socket
   is needed for the handler contract.
 
 Acceptance:
@@ -254,15 +254,15 @@ Acceptance:
 
 ## Phase 4: wire Core into the server
 
-- [ ] Reuse the Core already created in `freebooru-server`.
-- [ ] Separate the port preflight from readiness response construction.
-- [ ] Use configured `http_port` after a successful application load.
-- [ ] Use the documented default port after load failure.
-- [ ] Log the preflight failure once with structured `slog` attributes.
-- [ ] Pass Core into `webapi.New`.
-- [ ] Keep configuration diagnostics non-fatal.
-- [ ] Preserve graceful shutdown and existing server timeouts.
-- [ ] Add focused tests for configured-port and fallback-port selection without
+- [x] Reuse the Core already created in `freebooru-server`.
+- [x] Separate the port preflight from readiness response construction.
+- [x] Use configured `http_port` after a successful application load.
+- [x] Use the documented default port after load failure.
+- [x] Log the preflight failure once with structured `slog` attributes.
+- [x] Pass Core into `webapi.New`.
+- [x] Keep configuration diagnostics non-fatal.
+- [x] Preserve graceful shutdown and existing server timeouts.
+- [x] Add focused tests for configured-port and fallback-port selection without
   binding a real port.
 
 Acceptance:
@@ -272,12 +272,12 @@ Acceptance:
 
 ## Phase 5: wire Core into Wails
 
-- [ ] Create a structured logger at the Wails process boundary.
-- [ ] Construct Core once through `bootstrap.NewCore` before `wails.Run`.
-- [ ] Pass the same Core instance into `webapi.New`.
-- [ ] Do not call `LoadConfig` as a fatal Wails startup requirement.
-- [ ] Preserve the existing API middleware and no-localhost-port architecture.
-- [ ] Update the middleware test to use a fake application and assert the real
+- [x] Create a structured logger at the Wails process boundary.
+- [x] Construct Core once through `bootstrap.NewCore` before `wails.Run`.
+- [x] Pass the same Core instance into `webapi.New`.
+- [x] Do not call `LoadConfig` as a fatal Wails startup requirement.
+- [x] Preserve the existing API middleware and no-localhost-port architecture.
+- [x] Update the middleware test to use a fake application and assert the real
   desktop status response.
 
 Acceptance:
@@ -287,15 +287,15 @@ Acceptance:
 
 ## Phase 6: implement the Vue status client
 
-- [ ] Add typed frontend `ApplicationStatus` and `Diagnostic` models matching
+- [x] Add typed frontend `ApplicationStatus` and `Diagnostic` models matching
   the HTTP schema.
-- [ ] Add `getStatus` using relative `fetch("/api/v1/status")`.
-- [ ] Validate critical runtime fields at the boundary before returning data
+- [x] Add `getStatus` using relative `fetch("/api/v1/status")`.
+- [x] Validate critical runtime fields at the boundary before returning data
   to components.
-- [ ] Treat non-2xx responses, malformed JSON, invalid mode, and invalid
+- [x] Treat non-2xx responses, malformed JSON, invalid mode, and invalid
   readiness fields as connection failures.
-- [ ] Preserve the complete diagnostic list and stable source metadata.
-- [ ] Unit-test ready, unready, malformed, and HTTP-error responses.
+- [x] Preserve the complete diagnostic list and stable source metadata.
+- [x] Unit-test ready, unready, malformed, and HTTP-error responses.
 
 Acceptance:
 
@@ -303,21 +303,21 @@ Acceptance:
 
 ## Phase 7: refactor the hello screen into focused UI
 
-- [ ] Replace the hello request with the status request.
-- [ ] Move request state and retry behavior into a `useApplicationStatus`
+- [x] Replace the hello request with the status request.
+- [x] Move request state and retry behavior into a `useApplicationStatus`
   composable once `App.vue` would otherwise mix orchestration and presentation.
-- [ ] Add a focused status summary component if diagnostics make `App.vue`
+- [x] Add a focused status summary component if diagnostics make `App.vue`
   responsible for multiple independent UI sections.
-- [ ] Preserve explicit loading, connection-error, and retry states.
-- [ ] Ready state shows runtime transport and default collection.
-- [ ] Warning state remains operational and displays warning count/details.
-- [ ] Unready state clearly says configuration needs attention.
-- [ ] Render diagnostic code, message, severity, file, document, and field when
+- [x] Preserve explicit loading, connection-error, and retry states.
+- [x] Ready state shows runtime transport and default collection.
+- [x] Warning state remains operational and displays warning count/details.
+- [x] Unready state clearly says configuration needs attention.
+- [x] Render diagnostic code, message, severity, file, document, and field when
   present.
-- [ ] Do not expose empty source fields as visual noise.
-- [ ] Keep Retry at least 44 by 44 CSS pixels and keyboard accessible.
-- [ ] Preserve mobile-first behavior at 375, 768, 1024, and 1440 CSS pixels.
-- [ ] Use semantic status/alert markup without announcing the entire diagnostic
+- [x] Do not expose empty source fields as visual noise.
+- [x] Keep Retry at least 44 by 44 CSS pixels and keyboard accessible.
+- [x] Preserve mobile-first behavior at 375, 768, 1024, and 1440 CSS pixels.
+- [x] Use semantic status/alert markup without announcing the entire diagnostic
   list repeatedly during refresh.
 
 Acceptance:
@@ -327,15 +327,15 @@ Acceptance:
 
 ## Phase 8: test frontend behavior
 
-- [ ] Test loading to ready state.
-- [ ] Test server and desktop transport labels.
-- [ ] Test default collection rendering.
-- [ ] Test warning-only status remains presented as usable.
-- [ ] Test blocking diagnostics render as unready.
-- [ ] Test optional diagnostic source fields are omitted when empty.
-- [ ] Test connection failure and retry recovery.
-- [ ] Test configuration repair and retry recovery using two status responses.
-- [ ] Keep tests focused on accessible text and roles rather than CSS classes.
+- [x] Test loading to ready state.
+- [x] Test server and desktop transport labels.
+- [x] Test default collection rendering.
+- [x] Test warning-only status remains presented as usable.
+- [x] Test blocking diagnostics render as unready.
+- [x] Test optional diagnostic source fields are omitted when empty.
+- [x] Test connection failure and retry recovery.
+- [x] Test configuration repair and retry recovery using two status responses.
+- [x] Keep tests focused on accessible text and roles rather than CSS classes.
 
 Acceptance:
 
@@ -344,18 +344,18 @@ Acceptance:
 
 ## Phase 9: end-to-end verification
 
-- [ ] Run frontend tests and production build.
-- [ ] Run all Go handler and executable tests.
-- [ ] Run `go tool task check`.
-- [ ] Build the standalone server and Wails application.
-- [ ] With valid configuration, verify both modes report `ready: true` and the
+- [x] Run frontend tests and production build.
+- [x] Run all Go handler and executable tests.
+- [x] Run `go tool task check`.
+- [x] Build the standalone server and Wails application.
+- [x] With valid configuration, verify both modes report `ready: true` and the
   same default collection.
-- [ ] With invalid configuration, verify both modes remain accessible and
+- [x] With invalid configuration, verify both modes remain accessible and
   report matching structured diagnostics.
-- [ ] Correct the invalid file and verify Retry recovers without restarting.
-- [ ] Verify Wails still reports `desktop` through the Vite development proxy.
-- [ ] Verify the committed production bundle matches the current Vue source.
-- [ ] Update [navigation.md](./navigation.md) for files added or moved.
+- [x] Correct the invalid file and verify Retry recovers without restarting.
+- [x] Verify Wails still reports `desktop` through the Vite development proxy.
+- [x] Verify the committed production bundle matches the current Vue source.
+- [x] Update [navigation.md](./navigation.md) for files added or moved.
 
 Final acceptance:
 
@@ -366,6 +366,23 @@ Final acceptance:
 - No collection or database is opened by status inspection.
 - No search, import, media, tag mutation, authentication, or remote binding was
   pulled into this slice.
+
+## Verification record
+
+Completed on 2026-07-22:
+
+- `go tool task check` passed frontend tests/build, formatting, lint, and all Go
+  tests with the Linux `webkit2_41` tag.
+- `go tool task server:build` and `go tool task gui:build` produced both
+  deliverables.
+- An isolated real server returned ready status, remained accessible with a
+  missing application YAML, and returned ready again after the same file was
+  restored without restarting the process.
+- Desktop mode and internal `/api` routing are covered by the Wails middleware
+  test; the development proxy remains fixed to Wails' `127.0.0.1:34115`
+  endpoint.
+- The production Vue bundle was rebuilt after the final source change and is
+  committed under `internal/webui/dist`.
 
 ## Deferred next slices
 

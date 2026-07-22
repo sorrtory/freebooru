@@ -26,6 +26,7 @@ describe('App', () => {
     )
 
     const wrapper = mount(App)
+    expect(wrapper.get('[role="status"]').text()).toContain('Loading')
     await flushPromises()
 
     expect(wrapper.get('h1').text()).toBe('FreeBooru is ready')
@@ -60,10 +61,12 @@ describe('App', () => {
     await flushPromises()
 
     expect(wrapper.get('h1').text()).toBe('FreeBooru is ready')
+    expect(wrapper.text()).toContain('Web server')
     expect(wrapper.get('[aria-label="Configuration diagnostics"]').text()).toContain(
       'tag.unused',
     )
     expect(wrapper.text()).toContain('/config/tags/example.yaml · document 2 · name')
+    expect(wrapper.text()).toContain('1 diagnostic')
   })
 
   it('shows configuration errors without empty source metadata', async () => {

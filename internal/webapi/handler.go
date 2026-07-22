@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"reflect"
 	"sync"
 
 	"github.com/sorrtory/freebooru/internal/config"
@@ -51,7 +52,7 @@ func New(mode Mode, app Application) (http.Handler, error) {
 	if mode != ModeServer && mode != ModeDesktop {
 		return nil, fmt.Errorf("invalid API mode %q", mode)
 	}
-	if app == nil {
+	if app == nil || isNilApplication(app) {
 		return nil, fmt.Errorf("application is required")
 	}
 
@@ -85,6 +86,16 @@ func New(mode Mode, app Application) (http.Handler, error) {
 		writeJSON(response, http.StatusNotFound, map[string]string{"error": "API endpoint not found"})
 	})
 	return mux, nil
+}
+
+func isNilApplication(app Application) bool {
+	value := reflect.ValueOf(app)
+	switch value.Kind() {
+	case reflect.Chan, reflect.Func, reflect.Interface, reflect.Map, reflect.Pointer, reflect.Slice:
+		return value.IsNil()
+	default:
+		return false
+	}
 }
 
 func applicationStatus(ctx context.Context, mode Mode, app Application) StatusResponse {
