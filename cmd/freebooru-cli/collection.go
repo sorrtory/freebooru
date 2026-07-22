@@ -35,6 +35,7 @@ func newCollectionScopeCommand(options *rootOptions, name string) *cobra.Command
 	command.AddCommand(
 		newImportCommand(options, name),
 		newTagCommand(options, name),
+		newSearchCommand(options, name),
 	)
 	return command
 }

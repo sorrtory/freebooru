@@ -40,6 +40,7 @@ func newRootCommand() *cobra.Command {
 		newConfigCommand(options),
 		newImportCommand(options, ""),
 		newTagCommand(options, ""),
+		newSearchCommand(options, ""),
 		newCollectionCommand(options),
 	)
 

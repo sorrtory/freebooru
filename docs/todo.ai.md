@@ -632,7 +632,7 @@ Acceptance:
 - [x] Add collection-specific and default typed tag add/set/remove commands.
 - [x] Add collection-specific and default `tag <sha256> get` commands that
   return every assigned typed tag and storage.
-- [ ] Add collection-specific and default search commands.
+- [x] Add collection-specific and default search commands.
 - [x] Accept repeated tag assignments during import using Phase 13 syntax.
 - [x] Print canonical SHA-256 after import and mutation.
 - [ ] Render evaluator failures and reasons without Cobra usage noise.

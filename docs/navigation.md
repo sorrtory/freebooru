@@ -46,6 +46,8 @@ freebooru/
 │   │   ├── import_test.go            Import command routing, output, and validation tests
 │   │   ├── tag.go                    Typed tag/storage mutation and lookup commands
 │   │   ├── tag_test.go               Tag routing, persistence, output, and validation tests
+│   │   ├── search.go                 Typed search and pagination commands
+│   │   ├── search_test.go            Default/explicit search and pagination tests
 │   │   ├── init.go                   `freebooru-cli init`
 │   │   ├── init_test.go              Initialization command tests
 │   │   ├── config.go                 `config check` and diagnostic rendering
