@@ -79,6 +79,8 @@ freebooru/
 │   │   ├── search_test.go             Search resolution, pagination, and lifecycle tests
 │   │   ├── session.go                 Core-owned validated collection lifecycle
 │   │   ├── session_test.go            Session ownership, close, and cancellation tests
+│   │   ├── hints.go                   Collection tag and persisted value completion APIs
+│   │   ├── hints_test.go              Collection filtering and value availability tests
 │   │   └── integration_test.go       Multi-domain config integration fixture
 │   │
 │   ├── collection/

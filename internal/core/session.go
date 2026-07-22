@@ -2,6 +2,7 @@ package core
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/sorrtory/freebooru/internal/config"
@@ -22,6 +23,12 @@ type collectionSession struct {
 func (c *Core) OpenCollection(ctx context.Context, name string) error {
 	c.sessionMu.Lock()
 	defer c.sessionMu.Unlock()
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	if name == "" {
+		name = c.config.DefaultCollection
+	}
 	if c.session != nil {
 		return fmt.Errorf(
 			"collection %q is already open; close it before opening %q",
@@ -35,6 +42,65 @@ func (c *Core) OpenCollection(ctx context.Context, name string) error {
 	}
 	c.session = session
 	return nil
+}
+
+type releaseCollectionSession func(*error)
+
+func (c *Core) acquireCollectionSession(
+	ctx context.Context,
+	requested string,
+) (*collectionSession, releaseCollectionSession, error) {
+	c.sessionMu.Lock()
+	if err := ctx.Err(); err != nil {
+		c.sessionMu.Unlock()
+		return nil, nil, err
+	}
+	if requested == "" {
+		requested = c.config.DefaultCollection
+	}
+	if c.session != nil {
+		if normalizeStateName(c.session.name) != normalizeStateName(requested) {
+			openName := c.session.name
+			c.sessionMu.Unlock()
+			return nil, nil, fmt.Errorf(
+				"collection %q is open; close it before using collection %q",
+				openName,
+				requested,
+			)
+		}
+		return c.session, func(*error) {
+			c.sessionMu.Unlock()
+		}, nil
+	}
+	session, err := c.buildCollectionSession(ctx, requested)
+	if err != nil {
+		c.sessionMu.Unlock()
+		return nil, nil, err
+	}
+	c.session = session
+	released := false
+	return session, func(operationErr *error) {
+		if released {
+			return
+		}
+		released = true
+		c.session = nil
+		if closeErr := session.database.Close(); closeErr != nil {
+			*operationErr = errors.Join(
+				*operationErr,
+				fmt.Errorf("close collection %q database: %w", session.name, closeErr),
+			)
+		}
+		c.sessionMu.Unlock()
+	}, nil
+}
+
+func (s *collectionSession) storage(name string) (localStorage, error) {
+	storage, ok := s.storages[normalizeStateName(name)]
+	if !ok {
+		return localStorage{}, fmt.Errorf("storage %q is not imported by the collection", name)
+	}
+	return storage, nil
 }
 
 func (c *Core) buildCollectionSession(

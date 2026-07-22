@@ -2,7 +2,6 @@ package core
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"reflect"
 
@@ -152,14 +151,12 @@ func (c *Core) applyTagMutation(
 	assignment preparedTagAssignment,
 	kind tagMutationKind,
 ) (result TagMutationResult, err error) {
-	database, err := c.openCollectionDatabase(ctx, collectionName)
+	session, release, err := c.acquireCollectionSession(ctx, collectionName)
 	if err != nil {
 		return TagMutationResult{}, err
 	}
-	defer func() {
-		err = errors.Join(err, closeNamedCollection(database, collectionName))
-	}()
-	record, err := database.File(ctx, sha256)
+	defer release(&err)
+	record, err := session.database.File(ctx, sha256)
 	if err != nil {
 		return TagMutationResult{}, fmt.Errorf("load file %q: %w", sha256, err)
 	}
@@ -178,11 +175,11 @@ func (c *Core) applyTagMutation(
 	var change collection.TagChange
 	switch kind {
 	case tagMutationAdd:
-		change, err = database.AddTag(ctx, sha256, assignment.record)
+		change, err = session.database.AddTag(ctx, sha256, assignment.record)
 	case tagMutationSet:
-		change, err = database.SetTag(ctx, sha256, assignment.record)
+		change, err = session.database.SetTag(ctx, sha256, assignment.record)
 	case tagMutationRemove:
-		change, err = database.RemoveTag(ctx, sha256, assignment.tag.Name)
+		change, err = session.database.RemoveTag(ctx, sha256, assignment.tag.Name)
 	default:
 		return result, fmt.Errorf("unsupported tag mutation")
 	}

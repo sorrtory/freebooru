@@ -32,22 +32,16 @@ func (c *Core) AddStorage(
 	ctx context.Context,
 	request StorageMutationRequest,
 ) (result StorageMutationResult, err error) {
-	collectionName, references, availability, err := c.tagMutationCollection(request.Collection)
+	session, release, err := c.acquireCollectionSession(ctx, request.Collection)
 	if err != nil {
 		return StorageMutationResult{}, err
 	}
-	target, err := c.resolveMutableStorage(request.Storage, availability)
+	defer release(&err)
+	target, err := session.storage(request.Storage)
 	if err != nil {
 		return StorageMutationResult{}, err
 	}
-	database, err := c.openCollectionDatabase(ctx, collectionName)
-	if err != nil {
-		return StorageMutationResult{}, err
-	}
-	defer func() {
-		err = errors.Join(err, closeNamedCollection(database, collectionName))
-	}()
-	record, err := database.File(ctx, request.SHA256)
+	record, err := session.database.File(ctx, request.SHA256)
 	if err != nil {
 		return StorageMutationResult{}, fmt.Errorf("load file %q: %w", request.SHA256, err)
 	}
@@ -55,11 +49,16 @@ func (c *Core) AddStorage(
 	if !containsStorage(proposed, target.provider.Name) {
 		proposed = append(proposed, target.provider.Name)
 	}
-	result.Evaluation, err = c.validateStorageMutation(record, proposed, references.Required, availability)
+	result.Evaluation, err = c.validateStorageMutation(
+		record,
+		proposed,
+		session.references.Required,
+		session.availability,
+	)
 	if err != nil {
 		return result, err
 	}
-	sourcePath, err := c.storageCopySource(record, target, availability)
+	sourcePath, err := storageCopySource(record, target, session.storages)
 	if err != nil {
 		return result, err
 	}
@@ -73,7 +72,7 @@ func (c *Core) AddStorage(
 			cleanupStorageCopy(target.backend, stored),
 		)
 	}
-	change, err := database.AddStorage(ctx, record.SHA256, target.provider.Name)
+	change, err := session.database.AddStorage(ctx, record.SHA256, target.provider.Name)
 	if err != nil {
 		return result, errors.Join(
 			fmt.Errorf("persist storage %q for file %q: %w", target.provider.Name, record.SHA256, err),
@@ -90,22 +89,16 @@ func (c *Core) RemoveStorage(
 	ctx context.Context,
 	request StorageMutationRequest,
 ) (result StorageMutationResult, err error) {
-	collectionName, references, availability, err := c.tagMutationCollection(request.Collection)
+	session, release, err := c.acquireCollectionSession(ctx, request.Collection)
 	if err != nil {
 		return StorageMutationResult{}, err
 	}
-	target, err := c.resolveMutableStorage(request.Storage, availability)
+	defer release(&err)
+	target, err := session.storage(request.Storage)
 	if err != nil {
 		return StorageMutationResult{}, err
 	}
-	database, err := c.openCollectionDatabase(ctx, collectionName)
-	if err != nil {
-		return StorageMutationResult{}, err
-	}
-	defer func() {
-		err = errors.Join(err, closeNamedCollection(database, collectionName))
-	}()
-	record, err := database.File(ctx, request.SHA256)
+	record, err := session.database.File(ctx, request.SHA256)
 	if err != nil {
 		return StorageMutationResult{}, fmt.Errorf("load file %q: %w", request.SHA256, err)
 	}
@@ -113,11 +106,16 @@ func (c *Core) RemoveStorage(
 		return result, nil
 	}
 	proposed := removeStorageName(record.Storages, target.provider.Name)
-	result.Evaluation, err = c.validateStorageMutation(record, proposed, references.Required, availability)
+	result.Evaluation, err = c.validateStorageMutation(
+		record,
+		proposed,
+		session.references.Required,
+		session.availability,
+	)
 	if err != nil {
 		return result, err
 	}
-	change, err := database.RemoveStorage(ctx, record.SHA256, target.provider.Name)
+	change, err := session.database.RemoveStorage(ctx, record.SHA256, target.provider.Name)
 	if err != nil {
 		return result, fmt.Errorf(
 			"persist removal of storage %q for file %q: %w",
@@ -161,10 +159,10 @@ func (c *Core) validateStorageMutation(
 	return c.validateTagMutation(values, storages, required)
 }
 
-func (c *Core) storageCopySource(
+func storageCopySource(
 	record collection.FileRecord,
 	target localStorage,
-	availability collectionAvailability,
+	storages map[string]localStorage,
 ) (string, error) {
 	targetPath, err := target.backend.ContentPath(record.SHA256)
 	if err != nil {
@@ -173,9 +171,9 @@ func (c *Core) storageCopySource(
 	var sourcePath string
 	targetAssigned := false
 	for _, name := range record.Storages {
-		current, err := c.resolveMutableStorage(name, availability)
-		if err != nil {
-			return "", err
+		current, ok := storages[normalizeStateName(name)]
+		if !ok {
+			return "", fmt.Errorf("storage %q is not bound to the collection session", name)
 		}
 		path, err := current.backend.ContentPath(record.SHA256)
 		if err != nil {

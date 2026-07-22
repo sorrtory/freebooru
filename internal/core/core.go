@@ -56,6 +56,11 @@ func New(logger *slog.Logger, paths config.Paths, open CollectionOpener) (*Core,
 
 // LoadConfig loads the required application configuration.
 func (c *Core) LoadConfig(context.Context) error {
+	c.sessionMu.Lock()
+	defer c.sessionMu.Unlock()
+	if c.session != nil {
+		return fmt.Errorf("close collection %q before loading configuration", c.session.name)
+	}
 	appConfig, err := config.LoadApp(c.paths.App)
 	if err != nil {
 		return fmt.Errorf("load application configuration: %w", err)
@@ -67,6 +72,15 @@ func (c *Core) LoadConfig(context.Context) error {
 // CheckConfig rebuilds the immutable domain and relationship snapshots and
 // returns all discoverable diagnostics.
 func (c *Core) CheckConfig(context.Context) config.Diagnostics {
+	c.sessionMu.Lock()
+	defer c.sessionMu.Unlock()
+	if c.session != nil {
+		return config.Diagnostics{{
+			Severity: config.SeverityError,
+			Code:     "application.collection_open",
+			Message:  fmt.Sprintf("close collection %q before checking configuration", c.session.name),
+		}}
+	}
 	catalog, diagnostics := config.LoadCatalog(c.paths, c.config)
 	graph, graphDiagnostics := config.BuildValidatedGraph(catalog)
 	c.catalog = catalog
@@ -76,6 +90,8 @@ func (c *Core) CheckConfig(context.Context) config.Diagnostics {
 
 // SearchTags queries the current catalog without filesystem side effects.
 func (c *Core) SearchTags(prefix string) ([]config.TagConfig, error) {
+	c.sessionMu.Lock()
+	defer c.sessionMu.Unlock()
 	if c.catalog == nil {
 		return nil, fmt.Errorf("configuration has not been checked")
 	}
@@ -122,6 +138,11 @@ func (c *Core) openCollectionDatabase(ctx context.Context, name string) (Collect
 
 // Init provisions the default application layout.
 func (c *Core) Init(ctx context.Context) error {
+	c.sessionMu.Lock()
+	defer c.sessionMu.Unlock()
+	if c.session != nil {
+		return fmt.Errorf("close collection %q before initializing the application", c.session.name)
+	}
 	appConfig, err := config.EnsureDefaults(c.paths)
 	if err != nil {
 		return err
@@ -162,4 +183,8 @@ func closeNamedCollection(database CollectionDatabase, name string) error {
 }
 
 // AppConfig returns the loaded application configuration.
-func (c *Core) AppConfig() config.AppConfig { return c.config }
+func (c *Core) AppConfig() config.AppConfig {
+	c.sessionMu.Lock()
+	defer c.sessionMu.Unlock()
+	return c.config
+}

@@ -2,7 +2,6 @@ package core
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/sorrtory/freebooru/internal/collection"
@@ -46,14 +45,12 @@ func (c *Core) Search(
 	if err != nil {
 		return nil, err
 	}
-	database, err := c.openCollectionDatabase(ctx, collectionName)
+	session, release, err := c.acquireCollectionSession(ctx, collectionName)
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err = errors.Join(err, closeNamedCollection(database, collectionName))
-	}()
-	files, err = database.Search(ctx, repositoryRequest)
+	defer release(&err)
+	files, err = session.database.Search(ctx, repositoryRequest)
 	if err != nil {
 		return nil, fmt.Errorf("search collection %q: %w", collectionName, err)
 	}

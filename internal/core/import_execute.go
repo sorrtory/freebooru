@@ -28,28 +28,17 @@ func (c *Core) Import(ctx context.Context, request ImportRequest) (result Import
 	if err != nil {
 		return ImportResult{}, fmt.Errorf("resolve import source %q: %w", request.SourcePath, err)
 	}
-	database, err := c.openCollectionDatabase(ctx, prepared.collection.Name)
+	session, release, err := c.acquireCollectionSession(ctx, prepared.collection.Name)
 	if err != nil {
 		return ImportResult{}, err
 	}
-	closed := false
-	defer func() {
-		if !closed {
-			if closeErr := database.Close(); closeErr != nil {
-				err = errors.Join(err, fmt.Errorf(
-					"close collection %q after import failure: %w",
-					prepared.collection.Name,
-					closeErr,
-				))
-			}
-		}
-	}()
+	defer release(&err)
 	copies, err := storeImportCopies(ctx, sourcePath, prepared.storages)
 	if err != nil {
 		return ImportResult{}, errors.Join(err, cleanupStoredCopies(copies))
 	}
 	first := copies[0].file
-	record, err := database.CreateFile(ctx, collection.NewFile{
+	record, err := session.database.CreateFile(ctx, collection.NewFile{
 		SHA256:         first.SHA256,
 		SizeBytes:      first.SizeBytes,
 		SourcePath:     sourcePath,
@@ -67,10 +56,6 @@ func (c *Core) Import(ctx context.Context, request ImportRequest) (result Import
 		RecordCreated: true,
 		CreatedCopies: createdStorageNames(copies),
 	}
-	if err := database.Close(); err != nil {
-		return result, fmt.Errorf("close imported collection %q: %w", prepared.collection.Name, err)
-	}
-	closed = true
 	if c.config.RemoveOnUpload {
 		if err := removeImportedSource(ctx, sourcePath, first, copies); err != nil {
 			return result, err

@@ -598,23 +598,23 @@ Acceptance:
 
 One process owns at most one open collection session in the MVP.
 
-- [ ] Replace raw database handles returned to frontends with a Core-owned
+- [x] Replace raw database handles returned to frontends with a Core-owned
   session.
-- [ ] Open and initialize one validated collection at a time.
-- [ ] Bind collection config, catalog subset, graph, evaluator, repository, and
+- [x] Open and initialize one validated collection at a time.
+- [x] Bind collection config, catalog subset, graph, evaluator, repository, and
   storage backends into the session.
-- [ ] Before publishing the session, validate every persisted tag name, tag
+- [x] Before publishing the session, validate every persisted tag name, tag
   type, typed value, and storage name against the current catalog and evaluate
   every reconstructed file state.
-- [ ] Refuse to open a collection containing incompatible persisted state and
+- [x] Refuse to open a collection containing incompatible persisted state and
   report the affected SHA-256 values without preventing application startup or
   unrelated collections from opening.
-- [ ] Reject opening a second collection before closing the first.
-- [ ] Expose import, mutation, lookup, hints, and search through Core.
-- [ ] Propagate context cancellation through hashing, copying, SQL, and search.
-- [ ] Close the database exactly once on success, failure, and shutdown.
-- [ ] Keep frontend types out of Core APIs.
-- [ ] Test lifecycle, failed open, repeated close, cancellation, and independent
+- [x] Reject opening a second collection before closing the first.
+- [x] Expose import, mutation, lookup, hints, and search through Core.
+- [x] Propagate context cancellation through hashing, copying, SQL, and search.
+- [x] Close the database exactly once on success, failure, and shutdown.
+- [x] Keep frontend types out of Core APIs.
+- [x] Test lifecycle, failed open, repeated close, cancellation, and independent
   valid collections.
 
 Acceptance:
