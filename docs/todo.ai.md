@@ -348,8 +348,8 @@ Acceptance:
 Build a consumer over `Catalog + Graph`; do not add mutable file state to the
 graph itself.
 
-- [ ] Define a typed representation of the tags currently assigned to a file.
-- [ ] Evaluate active source conditions.
+- [x] Define a typed representation of the tags currently assigned to a file.
+- [x] Evaluate active source conditions.
 - [ ] Return missing demands and active conflicts.
 - [ ] Return non-binding suggestions separately from validity errors.
 - [ ] Return all declared values through the catalog.

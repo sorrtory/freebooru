@@ -64,6 +64,10 @@ freebooru/
 │   │   └── migrations/
 │   │       └── 001_initial.sql        Initial schema-migrations table
 │   │
+│   ├── evaluator/
+│   │   ├── state.go                   Immutable validated file tag state
+│   │   └── state_test.go              State validation and active-source tests
+│   │
 │   └── config/
 │       ├── app.go                    Application config, defaults, loading, validation
 │       ├── storage.go                Storage config and validation
