@@ -204,6 +204,105 @@ func TestDatabaseStorageMutationsReturnNotFound(t *testing.T) {
 	}
 }
 
+func TestDatabaseTagMutations(t *testing.T) {
+	database := openInitializedTestDatabase(t)
+	hash := strings.Repeat("2", 64)
+	scoreOne := int64(1)
+	_, err := database.CreateFile(t.Context(), NewFile{
+		SHA256:         hash,
+		SizeBytes:      11,
+		SourcePath:     "/imports/tags.txt",
+		SourceFilename: "tags.txt",
+		Tags: []TagRecord{
+			{Name: "labels", Type: "multivalue", Values: []string{"first"}},
+			{Name: "score", Type: "int", IntegerValue: &scoreOne},
+		},
+		Storages: []string{"default"},
+	})
+	if err != nil {
+		t.Fatalf("CreateFile() error = %v", err)
+	}
+	change, err := database.AddTag(t.Context(), hash, TagRecord{
+		Name: "score", Type: "int", IntegerValue: &scoreOne,
+	})
+	if err != nil {
+		t.Fatalf("identical AddTag() error = %v", err)
+	}
+	if change.Changed {
+		t.Fatalf("identical AddTag() = %#v, want no-op", change)
+	}
+	scoreTwo := int64(2)
+	if _, err := database.AddTag(t.Context(), hash, TagRecord{
+		Name: "score", Type: "int", IntegerValue: &scoreTwo,
+	}); !errors.Is(err, ErrTagAlreadyAssigned) {
+		t.Fatalf("replacement AddTag() error = %v, want ErrTagAlreadyAssigned", err)
+	}
+	change, err = database.AddTag(t.Context(), hash, TagRecord{
+		Name: "labels", Type: "multivalue", Values: []string{"first", "second"},
+	})
+	if err != nil {
+		t.Fatalf("multivalue AddTag() error = %v", err)
+	}
+	if !change.Changed {
+		t.Fatalf("multivalue AddTag() = %#v, want change", change)
+	}
+	if _, err := database.SetTag(t.Context(), hash, TagRecord{
+		Name: "score", Type: "int", IntegerValue: &scoreTwo,
+	}); err != nil {
+		t.Fatalf("SetTag() error = %v", err)
+	}
+	change, err = database.RemoveTag(t.Context(), hash, "labels")
+	if err != nil {
+		t.Fatalf("RemoveTag() error = %v", err)
+	}
+	if !change.Changed {
+		t.Fatalf("RemoveTag() = %#v, want change", change)
+	}
+	change, err = database.RemoveTag(t.Context(), hash, "labels")
+	if err != nil {
+		t.Fatalf("repeated RemoveTag() error = %v", err)
+	}
+	if change.Changed {
+		t.Fatalf("repeated RemoveTag() = %#v, want no-op", change)
+	}
+	loaded, err := database.File(t.Context(), hash)
+	if err != nil {
+		t.Fatalf("File() error = %v", err)
+	}
+	if len(loaded.Tags) != 1 || loaded.Tags[0].Name != "score" ||
+		loaded.Tags[0].IntegerValue == nil || *loaded.Tags[0].IntegerValue != 2 {
+		t.Fatalf("File() tags = %#v", loaded.Tags)
+	}
+}
+
+func TestDatabaseTagMutationRejectsInvalidRecord(t *testing.T) {
+	database := openInitializedTestDatabase(t)
+	hash := strings.Repeat("3", 64)
+	_, err := database.CreateFile(t.Context(), NewFile{
+		SHA256:         hash,
+		SizeBytes:      3,
+		SourcePath:     "/imports/invalid.txt",
+		SourceFilename: "invalid.txt",
+		Storages:       []string{"default"},
+	})
+	if err != nil {
+		t.Fatalf("CreateFile() error = %v", err)
+	}
+	text := "not an integer"
+	if _, err := database.AddTag(t.Context(), hash, TagRecord{
+		Name: "score", Type: "int", TextValue: &text,
+	}); err == nil {
+		t.Fatal("AddTag() error = nil, want invalid record error")
+	}
+	loaded, err := database.File(t.Context(), hash)
+	if err != nil {
+		t.Fatalf("File() error = %v", err)
+	}
+	if len(loaded.Tags) != 0 {
+		t.Fatalf("File() tags = %#v, want no assignments", loaded.Tags)
+	}
+}
+
 func openInitializedTestDatabase(t *testing.T) *Database {
 	t.Helper()
 	database := openTestDatabase(t)

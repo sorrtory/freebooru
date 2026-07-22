@@ -482,7 +482,7 @@ Keep SQL and row conversion inside `internal/collection`.
 - [x] Load one file with every typed tag and storage assignment.
 - [ ] Stream every persisted assignment for collection-open integrity checks
   without loading the complete collection into memory.
-- [ ] Add, replace, and remove typed tag values transactionally.
+- [x] Add, replace, and remove typed tag values transactionally.
 - [x] Add and remove logical storage assignments transactionally.
 - [x] Delete a file through foreign-key cascades only when its final storage
   assignment is removed.

@@ -12,6 +12,8 @@ var (
 	ErrFileNotFound = errors.New("collection file not found")
 	// ErrDuplicateFile means that a collection already indexes the content.
 	ErrDuplicateFile = errors.New("collection file already exists")
+	// ErrTagAlreadyAssigned means add cannot replace an existing scalar value.
+	ErrTagAlreadyAssigned = errors.New("collection tag already assigned")
 )
 
 // FileRecord is one persisted collection file and all of its assignments.
@@ -47,6 +49,11 @@ type TagRecord struct {
 type StorageChange struct {
 	Changed     bool
 	FileDeleted bool
+}
+
+// TagChange describes whether a tag mutation changed persisted state.
+type TagChange struct {
+	Changed bool
 }
 
 // NewFile describes the immutable metadata recorded by an initial import.
