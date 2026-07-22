@@ -76,6 +76,12 @@ values:
 ---
 name: score
 type: int
+---
+name: labels
+type: multivalue
+values:
+  - val: first
+  - val: second
 `
 	if err := os.WriteFile(filepath.Join(paths.Tags, "import.yaml"), []byte(tags), 0o600); err != nil {
 		t.Fatal(err)
@@ -88,6 +94,7 @@ tags:
     - tag: rating
   import:
     - tag: score
+    - tag: labels
 `
 	if err := os.WriteFile(
 		filepath.Join(paths.Collections, "main.yaml"),

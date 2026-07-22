@@ -23,6 +23,7 @@ type fakeDatabase struct {
 	files         []collection.FileRecord
 	createErr     error
 	created       *collection.NewFile
+	addedTag      *collection.TagRecord
 	setTag        *collection.TagRecord
 	removedTag    string
 }
@@ -81,6 +82,16 @@ func (d *fakeDatabase) SetTag(
 ) (collection.TagChange, error) {
 	tagCopy := tag
 	d.setTag = &tagCopy
+	return collection.TagChange{Changed: true}, nil
+}
+
+func (d *fakeDatabase) AddTag(
+	_ context.Context,
+	_ string,
+	tag collection.TagRecord,
+) (collection.TagChange, error) {
+	tagCopy := tag
+	d.addedTag = &tagCopy
 	return collection.TagChange{Changed: true}, nil
 }
 

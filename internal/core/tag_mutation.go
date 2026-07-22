@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"reflect"
 
 	"github.com/sorrtory/freebooru/internal/collection"
 	"github.com/sorrtory/freebooru/internal/config"
@@ -32,6 +33,43 @@ type TagMutationResult struct {
 	Evaluation evaluator.Evaluation
 }
 
+type tagMutationKind uint8
+
+const (
+	tagMutationAdd tagMutationKind = iota
+	tagMutationSet
+	tagMutationRemove
+)
+
+// AddTag validates a proposed addition before persistence. Scalar additions
+// cannot replace a different existing value; multivalue additions are merged.
+func (c *Core) AddTag(
+	ctx context.Context,
+	request TagMutationRequest,
+) (TagMutationResult, error) {
+	collectionName, references, availability, err := c.tagMutationCollection(request.Collection)
+	if err != nil {
+		return TagMutationResult{}, err
+	}
+	assignment, err := c.prepareTagAssignment(request.Tag, request.Value, availability)
+	if err != nil {
+		return TagMutationResult{}, err
+	}
+	kind := tagMutationAdd
+	if !assignment.present {
+		kind = tagMutationRemove
+	}
+	return c.applyTagMutation(
+		ctx,
+		collectionName,
+		request.SHA256,
+		references,
+		availability,
+		assignment,
+		kind,
+	)
+}
+
 // SetTag validates a complete proposed file state before replacing one tag.
 // Boolean false removes the tag because false represents absence.
 func (c *Core) SetTag(
@@ -46,6 +84,10 @@ func (c *Core) SetTag(
 	if err != nil {
 		return TagMutationResult{}, err
 	}
+	kind := tagMutationSet
+	if !assignment.present {
+		kind = tagMutationRemove
+	}
 	return c.applyTagMutation(
 		ctx,
 		collectionName,
@@ -53,6 +95,7 @@ func (c *Core) SetTag(
 		references,
 		availability,
 		assignment,
+		kind,
 	)
 }
 
@@ -76,6 +119,7 @@ func (c *Core) RemoveTag(
 		references,
 		availability,
 		preparedTagAssignment{tag: tag},
+		tagMutationRemove,
 	)
 }
 
@@ -106,6 +150,7 @@ func (c *Core) applyTagMutation(
 	references config.ResolvedReferences,
 	availability collectionAvailability,
 	assignment preparedTagAssignment,
+	kind tagMutationKind,
 ) (result TagMutationResult, err error) {
 	database, err := c.OpenCollection(ctx, collectionName)
 	if err != nil {
@@ -122,9 +167,8 @@ func (c *Core) applyTagMutation(
 	if err != nil {
 		return TagMutationResult{}, fmt.Errorf("reconstruct file %q: %w", sha256, err)
 	}
-	deleteAssignment(values, assignment.tag.Name)
-	if assignment.present {
-		values[assignment.tag.Name] = assignment.value
+	if err := proposeTagMutation(values, assignment, kind); err != nil {
+		return TagMutationResult{}, err
 	}
 	result.Evaluation, err = c.validateTagMutation(values, record.Storages, references.Required)
 	if err != nil {
@@ -132,16 +176,67 @@ func (c *Core) applyTagMutation(
 	}
 
 	var change collection.TagChange
-	if assignment.present {
+	switch kind {
+	case tagMutationAdd:
+		change, err = database.AddTag(ctx, sha256, assignment.record)
+	case tagMutationSet:
 		change, err = database.SetTag(ctx, sha256, assignment.record)
-	} else {
+	case tagMutationRemove:
 		change, err = database.RemoveTag(ctx, sha256, assignment.tag.Name)
+	default:
+		return result, fmt.Errorf("unsupported tag mutation")
 	}
 	if err != nil {
 		return result, fmt.Errorf("persist tag %q for file %q: %w", assignment.tag.Name, sha256, err)
 	}
 	result.Changed = change.Changed
 	return result, nil
+}
+
+func proposeTagMutation(
+	values map[string]any,
+	assignment preparedTagAssignment,
+	kind tagMutationKind,
+) error {
+	existing, assigned := assignmentValue(values, assignment.tag.Name)
+	if kind == tagMutationAdd && assigned {
+		if assignment.tag.Type == config.TagTypeMultivalue {
+			assignment.value = mergeTagValues(existing.([]string), assignment.value.([]string))
+		} else if !reflect.DeepEqual(existing, assignment.value) {
+			return fmt.Errorf("%w: %s", collection.ErrTagAlreadyAssigned, assignment.tag.Name)
+		}
+	}
+	deleteAssignment(values, assignment.tag.Name)
+	if kind != tagMutationRemove {
+		values[assignment.tag.Name] = assignment.value
+	}
+	return nil
+}
+
+func assignmentValue(values map[string]any, name string) (any, bool) {
+	for current, value := range values {
+		if normalizeStateName(current) == normalizeStateName(name) {
+			return value, true
+		}
+	}
+	return nil, false
+}
+
+func mergeTagValues(existing, added []string) []string {
+	merged := append([]string(nil), existing...)
+	for _, candidate := range added {
+		found := false
+		for _, current := range merged {
+			if normalizeStateName(current) == normalizeStateName(candidate) {
+				found = true
+				break
+			}
+		}
+		if !found {
+			merged = append(merged, candidate)
+		}
+	}
+	return merged
 }
 
 func (c *Core) validateTagMutation(
