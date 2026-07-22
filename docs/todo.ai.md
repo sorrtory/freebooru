@@ -287,16 +287,16 @@ Acceptance:
 Build the graph for validation and future config-editor queries, not merely as
 a cycle checker.
 
-- [ ] Represent a source condition as a tag plus optional predefined value.
-- [ ] Represent relationship kind as `suggest`, `demand`, or `conflict`.
+- [x] Represent a source condition as a tag plus optional predefined value.
+- [x] Represent relationship kind as `suggest`, `demand`, or `conflict`.
 - [ ] Represent the target as a tag plus a compiled typed predicate.
-- [ ] Preserve `reason` and YAML source location on every edge.
-- [ ] Build forward and reverse adjacency indexes.
-- [ ] Never infer reverse edges.
-- [ ] Keep graph construction deterministic.
-- [ ] Provide outgoing and incoming/backlink queries.
-- [ ] Filter edges by relationship kind without rebuilding indexes.
-- [ ] Allow future editor APIs to find definitions referenced by an edge.
+- [x] Preserve `reason` and YAML source location on every edge.
+- [x] Build forward and reverse adjacency indexes.
+- [x] Never infer reverse edges.
+- [x] Keep graph construction deterministic.
+- [x] Provide outgoing and incoming/backlink queries.
+- [x] Filter edges by relationship kind without rebuilding indexes.
+- [x] Allow future editor APIs to find definitions referenced by an edge.
 
 Graph query target:
 

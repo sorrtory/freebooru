@@ -72,6 +72,9 @@ freebooru/
 │       ├── tag_validate.go           Tag-local schema validation
 │       ├── tag_value.go              Typed tag-value validation
 │       ├── tag_value_test.go         Tag type and boundary tests
+│       ├── graph.go                  Directed relationship graph types
+│       ├── graph_build.go            Deterministic forward/reverse graph indexes
+│       ├── graph_query.go            Relationship and backlink queries
 │       ├── paths.go                  Standard FreeBooru config paths
 │       ├── path.go                   $HOME/~ expansion and absolute-path validation
 │       ├── path_test.go              Path expansion tests
