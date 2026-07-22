@@ -106,6 +106,40 @@ func TestCatalogSearchTagsUsesNormalizedPrefix(t *testing.T) {
 	}
 }
 
+func TestCatalogExposesStoragesAsBuiltInTagValues(t *testing.T) {
+	paths := writeCatalogFixture(t)
+	catalog, diagnostics := LoadCatalog(paths, DefaultAppConfig())
+	if diagnostics.HasErrors() {
+		t.Fatalf("LoadCatalog() diagnostics = %#v", diagnostics)
+	}
+	tag, source, ok := catalog.Tag("STORAGE")
+	if !ok || tag.Name != "storage" || tag.Type != TagTypeMultivalue {
+		t.Fatalf("Tag(STORAGE) = %#v, %#v, %t", tag, source, ok)
+	}
+	values := catalog.DeclaredValues("storage")
+	if len(values) != 1 || values[0].Val != "default" {
+		t.Fatalf("DeclaredValues(storage) = %#v", values)
+	}
+	if source.File != paths.Storage {
+		t.Fatalf("storage tag source = %q, want %q", source.File, paths.Storage)
+	}
+}
+
+func TestCatalogAllowsTagAndGroupNameCollision(t *testing.T) {
+	paths := writeCatalogFixture(t)
+	writeTestFile(t, filepath.Join(paths.Tags, "content.yaml"), "name: content\ntype: bool\n")
+	catalog, diagnostics := LoadCatalog(paths, DefaultAppConfig())
+	if diagnostics.HasErrors() {
+		t.Fatalf("LoadCatalog() diagnostics = %#v", diagnostics)
+	}
+	if _, _, ok := catalog.Tag("content"); !ok {
+		t.Fatal("Tag(content) not found")
+	}
+	if _, ok := catalog.Group("content"); !ok {
+		t.Fatal("Group(content) not found")
+	}
+}
+
 func TestLoadCatalogExpandsCollectionGroups(t *testing.T) {
 	paths := writeCatalogFixture(t)
 	content := "name: main\ntags:\n  require:\n    - storage: DEFAULT\n  import:\n    - group: CONTENT\n    - tag: Rating\n"

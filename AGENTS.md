@@ -27,7 +27,7 @@ The FreeBooru is explicit. It doesn't imply anything. It is up to you to define 
 The config is done in yaml. It is the key to the minimal tag quantity and quality you want to have in your booru. The config is usually stored in `$HOME/.config/freebooru/` folder.
 
 - **freebooru.yaml** - defines the application config, like the default collection, application settings, etc.
-- **storage.yaml** - defines the storage backends you can use. Note that storage is the tag too. So you can copy or delete file by assigning or removing the storage tag. 
+- **storage.yaml** - defines the storage backends you can use. Note that storage is the tag too. So you can copy or delete file by assigning or removing the storage tag.
 - **collections** - defines the collections you want to have. Each collection has its own config file.
 - **tags** - defines the tags you want to have. Each tag has its own config and can be imported into multiple collections.
 
@@ -38,11 +38,23 @@ Note that config values are not case-sensitive.
 See [Configuration Example](docs/config-example.md) for details.
 See [Configuration Specification](docs/config-spec.md) for details.
 
-## Code quality
+## Code
+
+### Quality
 
 We use `golangci-lint` for linting and formatting.
 We also use `task` as a task runner.
 It is required to run `go tool task check` to verify the code quality.
+
+### Navigation
+
+See [Navigation](docs/navigation.md) for details.
+Update this file if you want to add new files or change the structure of the project.
+
+### Dependencies
+
+See [Dependencies](docs/dependencies.md) for details.
+Update this file if you want to add new dependencies or change the existing ones.
 
 ## Contributing
 

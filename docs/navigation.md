@@ -70,6 +70,8 @@ freebooru/
 │       ├── collections.go            Collection config and tag references
 │       ├── tags.go                   Tag, predefined-value, and relationship models
 │       ├── tag_validate.go           Tag-local schema validation
+│       ├── tag_value.go              Typed tag-value validation
+│       ├── tag_value_test.go         Tag type and boundary tests
 │       ├── paths.go                  Standard FreeBooru config paths
 │       ├── path.go                   $HOME/~ expansion and absolute-path validation
 │       ├── path_test.go              Path expansion tests
@@ -81,6 +83,7 @@ freebooru/
 │       ├── decode.go                 Strict YAML document decoding
 │       ├── validate.go               Domain validation orchestration
 │       ├── catalog.go                Immutable catalog types and lookup API
+│       ├── catalog_builtin.go        Reserved tags derived from domain config
 │       ├── catalog_build.go          Catalog loading, normalization, and indexing
 │       ├── catalog_clone.go          Defensive copies for immutable query results
 │       ├── catalog_group.go          Implicit group index construction

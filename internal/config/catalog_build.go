@@ -39,6 +39,7 @@ func LoadCatalog(paths Paths, app AppConfig) (*Catalog, Diagnostics) {
 		func(tag TagConfig) string { return tag.Name },
 		diagnostics,
 	)
+	catalog.addStorageTag(paths.Storage)
 	catalog.groups = buildGroups(catalog.tags)
 	catalog.collections, diagnostics = indexDefinitions(
 		collections,
