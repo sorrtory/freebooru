@@ -20,7 +20,22 @@ func newImportCommand(root *rootOptions, collectionName string) *cobra.Command {
 	command := &cobra.Command{
 		Use:   "import <file>",
 		Short: "Import one regular file",
-		Args:  cobra.ExactArgs(1),
+		Long: "Import one regular file into the selected collection. The command " +
+			"stores the content in every assigned storage and prints its SHA-256.\n\n" +
+			"Use --tag once per assignment. Boolean tags use --tag name; valued " +
+			"tags use --tag name:value. Repeat a multivalue tag for each value. " +
+			"Required boolean and storage tags are supplied from the collection config. " +
+			"Use --interactive to prompt for missing required values and optional tags.",
+		Example: "  # Import into default_collection\n" +
+			"  freebooru-cli import ./image.png\n\n" +
+			"  # Assign boolean, scalar, and repeated multivalue tags\n" +
+			"  freebooru-cli import ./image.png --tag reviewed --tag rating:safe " +
+			"--tag labels:portrait --tag labels:outdoors\n\n" +
+			"  # Prompt for missing and optional assignments\n" +
+			"  freebooru-cli import ./image.png --interactive\n\n" +
+			"  # Import into an explicit collection\n" +
+			"  freebooru-cli collection archive import ./image.png --tag rating:safe",
+		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			app, err := loadCore(cmd.Context(), root)
 			if err != nil {

@@ -44,6 +44,26 @@ func TestImportCommandsUseDefaultAndExplicitCollections(t *testing.T) {
 	}
 }
 
+func TestImportHelpExplainsAssignmentsAndCollectionSelection(t *testing.T) {
+	command := newRootCommand()
+	output := new(bytes.Buffer)
+	command.SetOut(output)
+	command.SetArgs([]string{"import", "--help"})
+	if err := command.Execute(); err != nil {
+		t.Fatalf("Execute() error = %v", err)
+	}
+	for _, text := range []string{
+		"Boolean tags use --tag name",
+		"--tag labels:portrait --tag labels:outdoors",
+		"--interactive",
+		"collection archive import",
+	} {
+		if !strings.Contains(output.String(), text) {
+			t.Fatalf("import help does not contain %q: %s", text, output.String())
+		}
+	}
+}
+
 func TestImportCommandValidatesArgumentsAndAssignments(t *testing.T) {
 	configHome := t.TempDir()
 	home := t.TempDir()

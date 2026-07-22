@@ -59,6 +59,13 @@ the optional section may be skipped. Boolean answers accept `true`/`false` or
 `yes`/`no`; multivalue answers are comma-separated. It produces the same Core
 import request as non-interactive import.
 
+Import accepts exactly one regular file. It prints the content SHA-256 after
+the storage copies and collection record are committed. Required boolean tags
+and required storage assignments come from the collection configuration. Other
+required valued tags must be provided with `--tag` or answered in interactive
+mode. `--tag` may be repeated: boolean tags use `--tag name`, scalar tags use
+`--tag name:value`, and multivalue tags repeat the same name once per value.
+
 Successful data commands write only their documented result to standard
 output. Diagnostics and verbose logs go to standard error. Invalid arguments,
 configuration, evaluator failures, cancellation, and persistence failures
@@ -83,6 +90,18 @@ Import into the configured default collection and inspect the result:
 sha=$(freebooru-cli import ./image.png --tag reviewed --tag rating:safe)
 freebooru-cli tag "$sha" get
 freebooru-cli search reviewed rating:safe
+```
+
+Assign several kinds of tags or let the CLI prompt for them:
+
+```bash
+freebooru-cli import ./image.png \
+  --tag reviewed \
+  --tag rating:safe \
+  --tag labels:portrait \
+  --tag labels:outdoors
+
+freebooru-cli import ./image.png --interactive
 ```
 
 Run the same workflows against an explicit collection without changing
