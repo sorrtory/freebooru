@@ -70,8 +70,8 @@ freebooru/
 │   │   ├── import_test.go             Import defaults and validation tests
 │   │   ├── tag_assignment.go          Canonical typed tag mutation preparation
 │   │   ├── tag_assignment_test.go     Tag preparation and persistence-shape tests
-│   │   ├── tag_mutation.go            Validated persisted tag replacement workflow
-│   │   ├── tag_mutation_test.go       Tag replacement and required-state tests
+│   │   ├── tag_mutation.go            Validated persisted tag set/remove workflows
+│   │   ├── tag_mutation_test.go       Tag mutation and required-state tests
 │   │   └── integration_test.go       Multi-domain config integration fixture
 │   │
 │   ├── collection/

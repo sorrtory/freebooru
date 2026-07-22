@@ -19,6 +19,13 @@ type TagMutationRequest struct {
 	Value      any
 }
 
+// TagRemovalRequest identifies one complete tag assignment to remove.
+type TagRemovalRequest struct {
+	Collection string
+	SHA256     string
+	Tag        string
+}
+
 // TagMutationResult reports persistence and relationship effects.
 type TagMutationResult struct {
 	Changed    bool
@@ -30,27 +37,76 @@ type TagMutationResult struct {
 func (c *Core) SetTag(
 	ctx context.Context,
 	request TagMutationRequest,
-) (result TagMutationResult, err error) {
-	if c.catalog == nil || c.graph == nil {
-		return TagMutationResult{}, fmt.Errorf("configuration has not been checked")
+) (TagMutationResult, error) {
+	collectionName, references, availability, err := c.tagMutationCollection(request.Collection)
+	if err != nil {
+		return TagMutationResult{}, err
 	}
-	collectionName := request.Collection
-	if collectionName == "" {
-		collectionName = c.config.DefaultCollection
-	}
-	references, ok := c.catalog.CollectionReferences(collectionName)
-	if !ok {
-		return TagMutationResult{}, fmt.Errorf(
-			"collection %q is missing or invalid",
-			collectionName,
-		)
-	}
-	availability := newCollectionAvailability(references)
 	assignment, err := c.prepareTagAssignment(request.Tag, request.Value, availability)
 	if err != nil {
 		return TagMutationResult{}, err
 	}
+	return c.applyTagMutation(
+		ctx,
+		collectionName,
+		request.SHA256,
+		references,
+		availability,
+		assignment,
+	)
+}
 
+// RemoveTag validates the state without an assignment before removing it.
+func (c *Core) RemoveTag(
+	ctx context.Context,
+	request TagRemovalRequest,
+) (TagMutationResult, error) {
+	collectionName, references, availability, err := c.tagMutationCollection(request.Collection)
+	if err != nil {
+		return TagMutationResult{}, err
+	}
+	tag, err := c.resolveMutableTag(request.Tag, availability)
+	if err != nil {
+		return TagMutationResult{}, err
+	}
+	return c.applyTagMutation(
+		ctx,
+		collectionName,
+		request.SHA256,
+		references,
+		availability,
+		preparedTagAssignment{tag: tag},
+	)
+}
+
+func (c *Core) tagMutationCollection(
+	requested string,
+) (string, config.ResolvedReferences, collectionAvailability, error) {
+	if c.catalog == nil || c.graph == nil {
+		return "", config.ResolvedReferences{}, collectionAvailability{},
+			fmt.Errorf("configuration has not been checked")
+	}
+	if requested == "" {
+		requested = c.config.DefaultCollection
+	}
+	references, ok := c.catalog.CollectionReferences(requested)
+	if !ok {
+		return "", config.ResolvedReferences{}, collectionAvailability{}, fmt.Errorf(
+			"collection %q is missing or invalid",
+			requested,
+		)
+	}
+	return requested, references, newCollectionAvailability(references), nil
+}
+
+func (c *Core) applyTagMutation(
+	ctx context.Context,
+	collectionName string,
+	sha256 string,
+	references config.ResolvedReferences,
+	availability collectionAvailability,
+	assignment preparedTagAssignment,
+) (result TagMutationResult, err error) {
 	database, err := c.OpenCollection(ctx, collectionName)
 	if err != nil {
 		return TagMutationResult{}, err
@@ -58,13 +114,13 @@ func (c *Core) SetTag(
 	defer func() {
 		err = errors.Join(err, closeNamedCollection(database, collectionName))
 	}()
-	record, err := database.File(ctx, request.SHA256)
+	record, err := database.File(ctx, sha256)
 	if err != nil {
-		return TagMutationResult{}, fmt.Errorf("load file %q: %w", request.SHA256, err)
+		return TagMutationResult{}, fmt.Errorf("load file %q: %w", sha256, err)
 	}
 	values, err := persistedValues(record, c.catalog, availability)
 	if err != nil {
-		return TagMutationResult{}, fmt.Errorf("reconstruct file %q: %w", request.SHA256, err)
+		return TagMutationResult{}, fmt.Errorf("reconstruct file %q: %w", sha256, err)
 	}
 	deleteAssignment(values, assignment.tag.Name)
 	if assignment.present {
@@ -77,12 +133,12 @@ func (c *Core) SetTag(
 
 	var change collection.TagChange
 	if assignment.present {
-		change, err = database.SetTag(ctx, request.SHA256, assignment.record)
+		change, err = database.SetTag(ctx, sha256, assignment.record)
 	} else {
-		change, err = database.RemoveTag(ctx, request.SHA256, assignment.tag.Name)
+		change, err = database.RemoveTag(ctx, sha256, assignment.tag.Name)
 	}
 	if err != nil {
-		return result, fmt.Errorf("persist tag %q for file %q: %w", assignment.tag.Name, request.SHA256, err)
+		return result, fmt.Errorf("persist tag %q for file %q: %w", assignment.tag.Name, sha256, err)
 	}
 	result.Changed = change.Changed
 	return result, nil

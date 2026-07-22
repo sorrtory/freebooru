@@ -20,16 +20,9 @@ func (c *Core) prepareTagAssignment(
 	value any,
 	availability collectionAvailability,
 ) (preparedTagAssignment, error) {
-	key := normalizeStateName(name)
-	if key == "storage" {
-		return preparedTagAssignment{}, fmt.Errorf("storage assignments use the storage workflow")
-	}
-	if _, ok := availability.importedTags[key]; !ok {
-		return preparedTagAssignment{}, fmt.Errorf("tag %q is not imported by the collection", name)
-	}
-	tag, _, ok := c.catalog.Tag(name)
-	if !ok {
-		return preparedTagAssignment{}, fmt.Errorf("tag %q does not exist", name)
+	tag, err := c.resolveMutableTag(name, availability)
+	if err != nil {
+		return preparedTagAssignment{}, err
 	}
 	value = canonicalTagValue(tag, value)
 	if err := config.VerifyTagValue(tag, value); err != nil {
@@ -44,6 +37,24 @@ func (c *Core) prepareTagAssignment(
 		record:  tagRecord(tag, value),
 		present: true,
 	}, nil
+}
+
+func (c *Core) resolveMutableTag(
+	name string,
+	availability collectionAvailability,
+) (config.TagConfig, error) {
+	key := normalizeStateName(name)
+	if key == "storage" {
+		return config.TagConfig{}, fmt.Errorf("storage assignments use the storage workflow")
+	}
+	if _, ok := availability.importedTags[key]; !ok {
+		return config.TagConfig{}, fmt.Errorf("tag %q is not imported by the collection", name)
+	}
+	tag, _, ok := c.catalog.Tag(name)
+	if !ok {
+		return config.TagConfig{}, fmt.Errorf("tag %q does not exist", name)
+	}
+	return tag, nil
 }
 
 func canonicalTagValue(tag config.TagConfig, value any) any {
