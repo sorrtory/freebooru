@@ -40,6 +40,7 @@ freebooru/
 ├── go.sum                            Dependency checksums
 ├── .golangci.yml                     Linter and formatter configuration
 ├── .gitignore                        Ignored files
+├── docs/todo-frontend-refinement.ai.md Phased frontend refinement contract
 ├── frontend/                         Shared Vue 3 and TypeScript application
 │   ├── package.json                  Frontend dependencies and commands
 │   ├── package-lock.json             Reproducible frontend dependency lock
