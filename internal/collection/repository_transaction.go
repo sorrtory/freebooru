@@ -14,6 +14,9 @@ func (d *Database) writeTransaction(
 ) (err error) {
 	tx, err := d.db.BeginTx(ctx, nil)
 	if err != nil {
+		if contextErr := ctx.Err(); contextErr != nil {
+			err = errors.Join(err, contextErr)
+		}
 		return fmt.Errorf("begin %s transaction: %w", operation, err)
 	}
 	defer func() {

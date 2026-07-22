@@ -102,6 +102,7 @@ freebooru/
 │   ├── collection/
 │   │   ├── database.go               SQLite open, connection settings, ping, and close
 │   │   ├── database_test.go          Real SQLite lifecycle tests
+│   │   ├── database_concurrency_test.go Independent connections, contention, and retry tests
 │   │   ├── repository.go             Persisted file records and repository queries
 │   │   ├── repository_iterate.go     Bounded-memory collection state streaming
 │   │   ├── repository_iterate_test.go Streaming order and failure tests

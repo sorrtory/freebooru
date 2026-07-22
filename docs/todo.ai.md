@@ -648,8 +648,8 @@ Acceptance:
 
 ## Phase 22: failure, concurrency, and recovery tests
 
-- [ ] Test simultaneous GUI-like and CLI-like database connections.
-- [ ] Test busy-timeout behavior and transaction contention.
+- [x] Test simultaneous GUI-like and CLI-like database connections.
+- [x] Test busy-timeout behavior and transaction contention.
 - [ ] Test source modification during import.
 - [ ] Test cancellation during hashing, each copy, and SQL mutation.
 - [ ] Test multi-storage failure after each copy.
