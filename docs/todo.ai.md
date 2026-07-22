@@ -289,7 +289,7 @@ a cycle checker.
 
 - [x] Represent a source condition as a tag plus optional predefined value.
 - [x] Represent relationship kind as `suggest`, `demand`, or `conflict`.
-- [ ] Represent the target as a tag plus a compiled typed predicate.
+- [x] Represent the target as a tag plus a compiled typed predicate.
 - [x] Preserve `reason` and YAML source location on every edge.
 - [x] Build forward and reverse adjacency indexes.
 - [x] Never infer reverse edges.
@@ -331,12 +331,11 @@ Acceptance:
 - [x] Reject `is` combined with another predicate.
 - [x] Validate referenced predefined values.
 - [x] Reject invalid ranges and regular expressions.
-- [ ] Allow `suggest` cycles and `demand` cycles.
+- [x] Allow `suggest` cycles and `demand` cycles.
 - [x] Reject self-demand and self-conflict.
-- [ ] Reject the same source condition demanding and conflicting with the same
+- [x] Reject the same source condition demanding and conflicting with the same
   target condition.
-- [x] Report graph target and self-reference diagnostics with source and target
-  context. Predicate and contradiction diagnostics remain.
+- [x] Report all graph diagnostics with source and target context.
 
 Acceptance:
 

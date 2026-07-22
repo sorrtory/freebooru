@@ -76,7 +76,9 @@ freebooru/
 │       ├── graph_build.go            Deterministic forward/reverse graph indexes
 │       ├── graph_check.go            Cross-file relationship validation
 │       ├── graph_compile.go          Compile valid edges into a usable graph
+│       ├── graph_contradiction.go    Demand/conflict semantic comparison
 │       ├── graph_query.go            Relationship and backlink queries
+│       ├── graph_validate.go         Complete graph validation pipeline
 │       ├── predicate_compile.go      Predicate shape and combination dispatcher
 │       ├── predicate_is.go           Typed scalar equality compilation
 │       ├── predicate_set.go          Predefined-value membership compilation
