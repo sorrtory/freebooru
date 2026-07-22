@@ -629,12 +629,12 @@ Acceptance:
 - [ ] Add explicit `--interactive` import: prompt for missing required tags,
   then offer skippable optional imported tags, and pass a complete request to
   Core.
-- [ ] Add collection-specific and default typed tag add/set/remove commands.
-- [ ] Add collection-specific and default `tag <sha256> get` commands that
+- [x] Add collection-specific and default typed tag add/set/remove commands.
+- [x] Add collection-specific and default `tag <sha256> get` commands that
   return every assigned typed tag and storage.
 - [ ] Add collection-specific and default search commands.
 - [x] Accept repeated tag assignments during import using Phase 13 syntax.
-- [ ] Print canonical SHA-256 after import and mutation.
+- [x] Print canonical SHA-256 after import and mutation.
 - [ ] Render evaluator failures and reasons without Cobra usage noise.
 - [ ] Add side-effect-free tag/value completion through Core.
 - [ ] Use `RunE`, argument validators, `cmd.Context`, and command writers.

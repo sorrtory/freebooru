@@ -44,6 +44,8 @@ freebooru/
 │   │   ├── collection.go             Explicit collection command dispatch
 │   │   ├── import.go                 Default and explicit collection file import
 │   │   ├── import_test.go            Import command routing, output, and validation tests
+│   │   ├── tag.go                    Typed tag/storage mutation and lookup commands
+│   │   ├── tag_test.go               Tag routing, persistence, output, and validation tests
 │   │   ├── init.go                   `freebooru-cli init`
 │   │   ├── init_test.go              Initialization command tests
 │   │   ├── config.go                 `config check` and diagnostic rendering

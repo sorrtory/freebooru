@@ -39,6 +39,7 @@ func newRootCommand() *cobra.Command {
 		newInitCommand(options),
 		newConfigCommand(options),
 		newImportCommand(options, ""),
+		newTagCommand(options, ""),
 		newCollectionCommand(options),
 	)
 

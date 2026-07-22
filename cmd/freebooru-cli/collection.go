@@ -21,12 +21,7 @@ func newCollectionCommand(options *rootOptions) *cobra.Command {
 				return fmt.Errorf("collection name is required")
 			}
 			scope := newCollectionScopeCommand(options, name)
-			scope.SetArgs(args[1:])
-			scope.SetIn(cmd.InOrStdin())
-			scope.SetOut(cmd.OutOrStdout())
-			scope.SetErr(cmd.ErrOrStderr())
-			scope.SetContext(cmd.Context())
-			return scope.Execute()
+			return executeNestedCommand(cmd, scope, args[1:])
 		},
 	}
 }
@@ -37,6 +32,18 @@ func newCollectionScopeCommand(options *rootOptions, name string) *cobra.Command
 		SilenceUsage:  true,
 		SilenceErrors: true,
 	}
-	command.AddCommand(newImportCommand(options, name))
+	command.AddCommand(
+		newImportCommand(options, name),
+		newTagCommand(options, name),
+	)
 	return command
+}
+
+func executeNestedCommand(parent, nested *cobra.Command, args []string) error {
+	nested.SetArgs(args)
+	nested.SetIn(parent.InOrStdin())
+	nested.SetOut(parent.OutOrStdout())
+	nested.SetErr(parent.ErrOrStderr())
+	nested.SetContext(parent.Context())
+	return nested.Execute()
 }
