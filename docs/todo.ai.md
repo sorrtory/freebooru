@@ -554,12 +554,12 @@ Acceptance:
 ## Phase 18: persisted tag and storage mutation
 
 - [x] Load persisted files into `FileState`.
-- [ ] Implement add/set/remove for every tag type.
-- [ ] Canonicalize tag and predefined-value names.
-- [ ] Treat boolean false as removal.
-- [ ] Enforce collection imports and required tags.
-- [ ] Evaluate the complete proposed state before mutation.
-- [ ] Return demands, conflicts, suggestions, and originating reasons.
+- [x] Implement add/set/remove for every tag type.
+- [x] Canonicalize tag and predefined-value names.
+- [x] Treat boolean false as removal.
+- [x] Enforce collection imports and required tags.
+- [x] Evaluate the complete proposed state before mutation.
+- [x] Return demands, conflicts, suggestions, and originating reasons.
 - [ ] Adding `storage:<name>` copies/verifies content before logical commit.
 - [ ] Removing `storage:<name>` updates SQLite and deletes exactly that copy
   with recoverable failure reporting.

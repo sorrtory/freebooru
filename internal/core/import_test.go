@@ -82,6 +82,31 @@ type: multivalue
 values:
   - val: first
   - val: second
+---
+name: flag
+type: bool
+---
+name: title
+type: text
+---
+name: day
+type: date
+---
+name: instant
+type: datetime
+---
+name: trigger
+type: bool
+suggest:
+  - tag: score
+    reason: a score would help
+demand:
+  - tag: title
+    reason: triggered files need a title
+conflict:
+  - tag: reviewed
+    is: true
+    reason: trigger conflicts with reviewed
 `
 	if err := os.WriteFile(filepath.Join(paths.Tags, "import.yaml"), []byte(tags), 0o600); err != nil {
 		t.Fatal(err)
@@ -95,6 +120,11 @@ tags:
   import:
     - tag: score
     - tag: labels
+    - tag: flag
+    - tag: title
+    - tag: day
+    - tag: instant
+    - tag: trigger
 `
 	if err := os.WriteFile(
 		filepath.Join(paths.Collections, "main.yaml"),

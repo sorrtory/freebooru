@@ -2,12 +2,100 @@ package core
 
 import (
 	"errors"
+	"reflect"
 	"strings"
 	"testing"
 
 	"github.com/sorrtory/freebooru/internal/collection"
 	"github.com/sorrtory/freebooru/internal/config"
 )
+
+func TestSetTagPersistsEveryTagType(t *testing.T) {
+	tests := []struct {
+		name  string
+		tag   string
+		value any
+	}{
+		{name: "bool", tag: "flag", value: true},
+		{name: "text", tag: "title", value: "example"},
+		{name: "int", tag: "score", value: int64(7)},
+		{name: "date", tag: "day", value: "2026-07-22"},
+		{name: "datetime", tag: "instant", value: "2026-07-22T10:30:00Z"},
+		{name: "value", tag: "rating", value: "questionable"},
+		{name: "multivalue", tag: "labels", value: []string{"first", "second"}},
+	}
+	for index, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			hash := strings.Repeat(string(rune('1'+index)), 64)
+			rating := "safe"
+			database := &fakeDatabase{files: []collection.FileRecord{{
+				SHA256: hash,
+				Tags: []collection.TagRecord{
+					{Name: "reviewed", Type: "bool"},
+					{Name: "rating", Type: "value", TextValue: &rating},
+				},
+				Storages: []string{"default"},
+			}}}
+			app := newImportTestCoreWithDatabase(t, database)
+
+			if _, err := app.SetTag(t.Context(), TagMutationRequest{
+				SHA256: hash,
+				Tag:    tt.tag,
+				Value:  tt.value,
+			}); err != nil {
+				t.Fatalf("SetTag() error = %v", err)
+			}
+			if database.setTag == nil {
+				t.Fatal("SetTag() did not persist a record")
+			}
+			got, err := persistedTagValue(*database.setTag)
+			if err != nil {
+				t.Fatalf("persistedTagValue() error = %v", err)
+			}
+			if !reflect.DeepEqual(got, tt.value) {
+				t.Fatalf("persisted value = %#v, want %#v", got, tt.value)
+			}
+		})
+	}
+}
+
+func TestSetTagReturnsGraphViolationsSuggestionsAndReasons(t *testing.T) {
+	hash := strings.Repeat("8", 64)
+	rating := "safe"
+	database := &fakeDatabase{files: []collection.FileRecord{{
+		SHA256: hash,
+		Tags: []collection.TagRecord{
+			{Name: "reviewed", Type: "bool"},
+			{Name: "rating", Type: "value", TextValue: &rating},
+		},
+		Storages: []string{"default"},
+	}}}
+	app := newImportTestCoreWithDatabase(t, database)
+
+	result, err := app.SetTag(t.Context(), TagMutationRequest{
+		SHA256: hash,
+		Tag:    "trigger",
+		Value:  true,
+	})
+	if err == nil {
+		t.Fatal("SetTag() error = nil, want graph validation error")
+	}
+	if len(result.Evaluation.MissingDemands) != 1 ||
+		result.Evaluation.MissingDemands[0].Reason != "triggered files need a title" {
+		t.Fatalf("missing demands = %#v", result.Evaluation.MissingDemands)
+	}
+	if len(result.Evaluation.ActiveConflicts) != 1 ||
+		result.Evaluation.ActiveConflicts[0].Reason != "trigger conflicts with reviewed" {
+		t.Fatalf("active conflicts = %#v", result.Evaluation.ActiveConflicts)
+	}
+	if len(result.Evaluation.Suggestions) != 1 ||
+		result.Evaluation.Suggestions[0].Reason != "a score would help" {
+		t.Fatalf("suggestions = %#v", result.Evaluation.Suggestions)
+	}
+	if database.setTag != nil {
+		t.Fatalf("invalid mutation persisted = %#v", database.setTag)
+	}
+}
 
 func TestAddTagValidatesThenPersistsNewAssignment(t *testing.T) {
 	hash := strings.Repeat("e", 64)
