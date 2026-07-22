@@ -19,6 +19,10 @@ type ImportField struct {
 func (c *Core) ImportFields(collectionName string) ([]ImportField, error) {
 	c.sessionMu.Lock()
 	defer c.sessionMu.Unlock()
+	return c.importFields(collectionName)
+}
+
+func (c *Core) importFields(collectionName string) ([]ImportField, error) {
 	if c.catalog == nil {
 		return nil, fmt.Errorf("configuration has not been checked")
 	}

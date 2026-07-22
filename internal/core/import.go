@@ -43,8 +43,15 @@ func (c *Core) prepareImport(request ImportRequest) (preparedImport, error) {
 	if err != nil {
 		return preparedImport{}, err
 	}
-	if err := c.addRequiredAssignments(values, storageNames, references.Required); err != nil {
+	missingRequired, err := c.applyRequiredAssignments(values, storageNames, references.Required)
+	if err != nil {
 		return preparedImport{}, err
+	}
+	if len(missingRequired) > 0 {
+		return preparedImport{}, fmt.Errorf(
+			"required tag %q needs an explicit value",
+			missingRequired[0],
+		)
 	}
 	if len(storageNames) == 0 {
 		key := normalizeStateName(c.config.DefaultStorageName)
@@ -106,11 +113,12 @@ func (c *Core) collectImportAssignments(
 	return values, storages, nil
 }
 
-func (c *Core) addRequiredAssignments(
+func (c *Core) applyRequiredAssignments(
 	values map[string]any,
 	storages map[string]string,
 	required []config.TagReference,
-) error {
+) ([]string, error) {
+	missing := make([]string, 0)
 	for _, reference := range required {
 		if reference.Storage != "" {
 			storages[normalizeStateName(reference.Storage)] = reference.Storage
@@ -121,14 +129,15 @@ func (c *Core) addRequiredAssignments(
 		}
 		tag, _, ok := c.catalog.Tag(reference.Tag)
 		if !ok {
-			return fmt.Errorf("required tag %q does not exist", reference.Tag)
+			return nil, fmt.Errorf("required tag %q does not exist", reference.Tag)
 		}
-		if tag.Type != config.TagTypeBool {
-			return fmt.Errorf("required tag %q needs an explicit value", tag.Name)
+		if tag.Type == config.TagTypeBool {
+			values[tag.Name] = true
+			continue
 		}
-		values[tag.Name] = true
+		missing = append(missing, tag.Name)
 	}
-	return nil
+	return missing, nil
 }
 
 func (c *Core) resolveImportStorages(
