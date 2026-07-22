@@ -65,6 +65,8 @@ freebooru/
 │   │       └── 001_initial.sql        Initial schema-migrations table
 │   │
 │   ├── evaluator/
+│   │   ├── evaluator.go               Relationship evaluation and result API
+│   │   ├── predicate.go               Compiled predicate matching
 │   │   ├── state.go                   Immutable validated file tag state
 │   │   └── state_test.go              State validation and active-source tests
 │   │

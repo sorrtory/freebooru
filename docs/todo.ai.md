@@ -350,15 +350,15 @@ graph itself.
 
 - [x] Define a typed representation of the tags currently assigned to a file.
 - [x] Evaluate active source conditions.
-- [ ] Return missing demands and active conflicts.
-- [ ] Return non-binding suggestions separately from validity errors.
-- [ ] Return all declared values through the catalog.
+- [x] Return missing demands and active conflicts.
+- [x] Return non-binding suggestions separately from validity errors.
+- [x] Return all declared values through the catalog.
 - [ ] Return currently allowed values through the evaluator.
 - [ ] Explain why a value is unavailable using the originating edges and
   reasons.
-- [ ] Support prefix tag search through the catalog.
-- [ ] Support incoming relationship/backlink display through the graph.
-- [ ] Keep APIs usable by CLI, GUI, and server without Cobra or HTTP types.
+- [x] Support prefix tag search through the catalog.
+- [x] Support incoming relationship/backlink display through the graph.
+- [x] Keep APIs usable by CLI, GUI, and server without Cobra or HTTP types.
 
 Evaluator query target:
 

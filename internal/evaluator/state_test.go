@@ -101,7 +101,10 @@ func testCatalog(t *testing.T) *config.Catalog {
 	if err != nil {
 		t.Fatal(err)
 	}
-	tags := "name: reviewed\ntype: bool\n---\n" +
+	tags := "name: reviewed\ntype: bool\n" +
+		"suggest:\n  - tag: rating\n    has: [safe]\n" +
+		"demand:\n  - tag: rating\n    has: [safe]\n" +
+		"conflict:\n  - tag: rating\n    has: [explicit]\n---\n" +
 		"name: rating\ntype: multivalue\nvalues:\n  - val: safe\n  - val: explicit\n"
 	if err := os.WriteFile(filepath.Join(paths.Tags, "state.yaml"), []byte(tags), 0o600); err != nil {
 		t.Fatal(err)
