@@ -1,5 +1,10 @@
 package config
 
+import (
+	"regexp"
+	"time"
+)
+
 // RelationshipKind identifies the meaning of a directed relationship edge.
 type RelationshipKind string
 
@@ -17,17 +22,17 @@ type SourceCondition struct {
 	Value string
 }
 
-// Predicate is the uncompiled target condition decoded from YAML.
-// Phase 10 validates compatibility with the target tag and compiles it.
+// Predicate is a target condition compiled to the target tag's concrete type.
 type Predicate struct {
-	Has    []any
-	Is     any
-	Not    []any
-	Min    *int64
-	Max    *int64
-	Before string
-	After  string
-	Regex  string
+	Presence bool
+	Has      []string
+	Is       any
+	Not      []string
+	Min      *int64
+	Max      *int64
+	Before   *time.Time
+	After    *time.Time
+	Regex    *regexp.Regexp
 }
 
 // Location identifies the exact configuration field that declared an edge.
@@ -44,6 +49,7 @@ type Edge struct {
 	Predicate Predicate
 	Reason    string
 	Location  Location
+	raw       Relationship
 }
 
 // Graph is an immutable relationship snapshot with forward and reverse indexes.

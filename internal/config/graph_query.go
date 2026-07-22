@@ -49,7 +49,7 @@ func cloneEdges(edges []Edge) []Edge {
 }
 
 func cloneEdge(edge Edge) Edge {
-	edge.Predicate.Has = append([]any(nil), edge.Predicate.Has...)
-	edge.Predicate.Not = append([]any(nil), edge.Predicate.Not...)
+	edge.Predicate.Has = append([]string(nil), edge.Predicate.Has...)
+	edge.Predicate.Not = append([]string(nil), edge.Predicate.Not...)
 	return edge
 }

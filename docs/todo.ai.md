@@ -317,19 +317,20 @@ Acceptance:
 
 ## Phase 10: predicate compilation and graph checking
 
-- [ ] Compile relationship predicates once during catalog construction.
+- [x] Compile relationship predicates once from an immutable catalog and raw
+  graph before evaluation.
 - [x] Validate target availability in every collection that imports the source.
 - [x] Do not auto-import relationship targets.
-- [ ] Implement presence matching when no predicate is provided.
-- [ ] Implement typed `is`, including boolean absence for `is: false`.
-- [ ] Implement multivalue `has` and value/multivalue `not`.
-- [ ] Implement inclusive integer `min` and `max`.
-- [ ] Implement strict date/datetime `before` and `after`.
-- [ ] Compile text `regex` with Go regexp semantics.
-- [ ] Permit only `min`+`max`, `before`+`after`, and `has`+`not` combinations.
-- [ ] Reject `is` combined with another predicate.
-- [ ] Validate referenced predefined values.
-- [ ] Reject invalid ranges and regular expressions.
+- [x] Implement presence matching when no predicate is provided.
+- [x] Implement typed `is`, including boolean absence for `is: false`.
+- [x] Implement multivalue `has` and value/multivalue `not`.
+- [x] Implement inclusive integer `min` and `max`.
+- [x] Implement strict date/datetime `before` and `after`.
+- [x] Compile text `regex` with Go regexp semantics.
+- [x] Permit only `min`+`max`, `before`+`after`, and `has`+`not` combinations.
+- [x] Reject `is` combined with another predicate.
+- [x] Validate referenced predefined values.
+- [x] Reject invalid ranges and regular expressions.
 - [ ] Allow `suggest` cycles and `demand` cycles.
 - [x] Reject self-demand and self-conflict.
 - [ ] Reject the same source condition demanding and conflicting with the same

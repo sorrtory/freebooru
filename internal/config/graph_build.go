@@ -76,8 +76,8 @@ func (g *Graph) addRelationshipLists(
 				Kind:      list.kind,
 				Source:    source,
 				TargetTag: relationship.Tag,
-				Predicate: predicateFromRelationship(relationship),
 				Reason:    relationship.Reason,
+				raw:       relationship,
 				Location: Location{
 					Source: location,
 					Field:  fmt.Sprintf("%s%s[%d]", fieldPrefix, list.field, index),
@@ -94,19 +94,6 @@ func (g *Graph) addEdge(edge Edge) {
 	g.outgoing[sourceKey] = append(g.outgoing[sourceKey], edge)
 	g.incoming[targetKey] = append(g.incoming[targetKey], edge)
 	g.edges = append(g.edges, edge)
-}
-
-func predicateFromRelationship(relationship Relationship) Predicate {
-	return Predicate{
-		Has:    append([]any(nil), relationship.Has...),
-		Is:     relationship.Is,
-		Not:    append([]any(nil), relationship.Not...),
-		Min:    relationship.Min,
-		Max:    relationship.Max,
-		Before: relationship.Before,
-		After:  relationship.After,
-		Regex:  relationship.Regex,
-	}
 }
 
 func sourceConditionKey(source SourceCondition) string {

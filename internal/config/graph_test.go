@@ -63,18 +63,21 @@ func TestBuildGraphIndexesValueLevelRelationships(t *testing.T) {
 
 func TestGraphQueriesReturnDefensivePredicateCopies(t *testing.T) {
 	paths := writeCatalogFixture(t)
-	artist := "name: artist\ntype: text\nsuggest:\n  - tag: rating\n    has: [safe]\n"
+	artist := "name: artist\ntype: text\nsuggest:\n  - tag: storage\n    has: [default]\n"
 	writeTestFile(t, filepath.Join(paths.Tags, "artist.yaml"), artist)
 	catalog, diagnostics := LoadCatalog(paths, DefaultAppConfig())
 	if diagnostics.HasErrors() {
 		t.Fatalf("LoadCatalog() diagnostics = %#v", diagnostics)
 	}
-	graph := BuildGraph(catalog)
+	graph, compileDiagnostics := CompileGraph(catalog, BuildGraph(catalog))
+	if compileDiagnostics.HasErrors() {
+		t.Fatalf("CompileGraph() diagnostics = %#v", compileDiagnostics)
+	}
 	source := SourceCondition{Tag: "artist"}
 	edges := graph.Suggestions(source)
 	edges[0].Predicate.Has[0] = "changed"
 	again := graph.Suggestions(source)
-	if again[0].Predicate.Has[0] != "safe" {
+	if again[0].Predicate.Has[0] != "default" {
 		t.Fatalf("Suggestions() exposed graph predicate: %#v", again)
 	}
 }

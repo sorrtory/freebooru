@@ -75,7 +75,12 @@ freebooru/
 │       ├── graph.go                  Directed relationship graph types
 │       ├── graph_build.go            Deterministic forward/reverse graph indexes
 │       ├── graph_check.go            Cross-file relationship validation
+│       ├── graph_compile.go          Compile valid edges into a usable graph
 │       ├── graph_query.go            Relationship and backlink queries
+│       ├── predicate_compile.go      Predicate shape and combination dispatcher
+│       ├── predicate_is.go           Typed scalar equality compilation
+│       ├── predicate_set.go          Predefined-value membership compilation
+│       ├── predicate_bounds.go       Numeric, temporal, and regex compilation
 │       ├── paths.go                  Standard FreeBooru config paths
 │       ├── path.go                   $HOME/~ expansion and absolute-path validation
 │       ├── path_test.go              Path expansion tests
