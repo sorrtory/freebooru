@@ -34,6 +34,9 @@ type fakeDatabase struct {
 	onAddStorage             func()
 	removeStorageErr         error
 	onRemoveStorage          func()
+	searchRequest            *collection.SearchRequest
+	searchFiles              []collection.FileRecord
+	searchErr                error
 }
 
 func (d *fakeDatabase) Initialize(context.Context) error {
@@ -146,6 +149,18 @@ func (d *fakeDatabase) RemoveStorage(
 		Changed:     true,
 		FileDeleted: d.removeStorageDeletesFile,
 	}, nil
+}
+
+func (d *fakeDatabase) Search(
+	_ context.Context,
+	request collection.SearchRequest,
+) ([]collection.FileRecord, error) {
+	requestCopy := request
+	d.searchRequest = &requestCopy
+	if d.searchErr != nil {
+		return nil, d.searchErr
+	}
+	return append([]collection.FileRecord(nil), d.searchFiles...), nil
 }
 
 func TestInitInitializesAndClosesDefaultCollection(t *testing.T) {

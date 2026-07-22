@@ -22,6 +22,7 @@ type CollectionDatabase interface {
 	RemoveTag(context.Context, string, string) (collection.TagChange, error)
 	AddStorage(context.Context, string, string) (collection.StorageChange, error)
 	RemoveStorage(context.Context, string, string) (collection.StorageChange, error)
+	Search(context.Context, collection.SearchRequest) ([]collection.FileRecord, error)
 	Close() error
 }
 

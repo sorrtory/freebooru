@@ -576,18 +576,18 @@ Acceptance:
 
 ## Phase 19: search
 
-- [ ] Implement the documented query parser independently of Cobra and SQL.
-- [ ] Resolve query names through the selected collection catalog.
-- [ ] Compile typed equality, presence/absence, range, and membership terms.
-- [ ] Combine every term with AND; reject OR, grouping, negated values, fuzzy
+- [x] Implement the documented query parser independently of Cobra and SQL.
+- [x] Resolve query names through the selected collection catalog.
+- [x] Compile typed equality, presence/absence, range, and membership terms.
+- [x] Combine every term with AND; reject OR, grouping, negated values, fuzzy
   matching, and unsupported operators.
-- [ ] Use SQL parameters only; never interpolate user values.
-- [ ] Search only tags imported by the selected collection.
-- [ ] Return SHA-256, original name, size, and assigned tags needed by clients.
-- [ ] Order by `imported_at` descending and full SHA-256 ascending.
-- [ ] Implement non-negative limit/offset pagination with defaults of 100 and
+- [x] Use SQL parameters only; never interpolate user values.
+- [x] Search only tags imported by the selected collection.
+- [x] Return SHA-256, original name, size, and assigned tags needed by clients.
+- [x] Order by `imported_at` descending and full SHA-256 ascending.
+- [x] Implement non-negative limit/offset pagination with defaults of 100 and
   0.
-- [ ] Test every type, combined terms, no matches, malformed queries, and
+- [x] Test every type, combined terms, no matches, malformed queries, and
   SQL-injection-shaped input.
 
 Acceptance:
