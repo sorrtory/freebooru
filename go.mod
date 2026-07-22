@@ -88,10 +88,15 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/mitchellh/hashstructure/v2 v2.0.2 // indirect
 	github.com/muesli/cancelreader v0.2.2 // indirect
+	github.com/ncruces/go-sqlite3 v0.35.2 // indirect
+	github.com/ncruces/go-sqlite3-wasm/v3 v3.2.35303 // indirect
+	github.com/ncruces/go-strftime v1.0.0 // indirect
+	github.com/ncruces/julianday v1.0.0 // indirect
 	github.com/pierrec/lz4/v4 v4.1.27 // indirect
 	github.com/planetscale/vtprotobuf v0.6.1-0.20250313105119-ba97887b0a25 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/puzpuzpuz/xsync/v4 v4.5.0 // indirect
+	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/sajari/fuzzy v1.0.0 // indirect
 	github.com/spf13/cobra v1.10.2 // indirect
@@ -120,7 +125,7 @@ require (
 	golang.org/x/sync v0.21.0 // indirect
 	golang.org/x/sys v0.46.0 // indirect
 	golang.org/x/term v0.44.0 // indirect
-	golang.org/x/text v0.38.0 // indirect
+	golang.org/x/text v0.39.0 // indirect
 	golang.org/x/time v0.15.0 // indirect
 	google.golang.org/api v0.287.0 // indirect
 	google.golang.org/genproto v0.0.0-20260630182238-925bb5da69e7 // indirect
@@ -129,6 +134,9 @@ require (
 	google.golang.org/grpc v1.82.0 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
+	modernc.org/libc v1.74.1 // indirect
+	modernc.org/mathutil v1.7.1 // indirect
+	modernc.org/memory v1.11.0 // indirect
 	mvdan.cc/sh/moreinterp v0.0.0-20260120230322-19def062a997 // indirect
 	mvdan.cc/sh/v3 v3.13.2-0.20260613075524-2255122b577b // indirect
 )

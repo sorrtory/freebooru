@@ -27,7 +27,7 @@ initialize configuration
 The CLI must support at least:
 
 ```bash
-freebooru-cli config init
+freebooru-cli init
 freebooru-cli config check
 freebooru-cli collection main import <path>
 freebooru-cli collection main tag <operation>
@@ -48,7 +48,7 @@ it.
 
 ## Configuration initialization
 
-`freebooru-cli config init` must create the initial configuration without
+`freebooru-cli init` must create the initial configuration without
 overwriting existing files:
 
 ```text
@@ -250,7 +250,7 @@ contracts defined for the MVP.
 
 The MVP is complete when:
 
-1. `config init` creates a usable default configuration without overwriting
+1. `init` creates a usable default configuration without overwriting
    existing configuration.
 2. `config check` detects malformed YAML, invalid fields, duplicates, and broken
    references.

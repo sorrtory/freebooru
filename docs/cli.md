@@ -5,6 +5,7 @@ It calls the FreeBooru core.
 
 ## Commands
 
+- `init` - initialize the application, default storage, default collection, and
+  collection database
 - `config` - work with FreeBooru config files
     - `check` - check config validity
-    - `init` - initialize config files with default values

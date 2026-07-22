@@ -4,6 +4,7 @@
 
 - cobra
 - goccy/go-yaml 
+- ncruces/go-sqlite3, selected to support a future Adiantum VFS encryption mode
 
 ## Skills
 
