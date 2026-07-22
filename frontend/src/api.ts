@@ -41,6 +41,39 @@ export interface CollectionInfo extends CollectionSummary {
   total_size_bytes: number
 }
 
+export interface FileAssignment {
+  name: string
+  type: TagType
+  value: TagValue
+}
+
+export interface FileSource {
+  filename: string
+  observed_at: string
+}
+
+export interface FileRecord {
+  sha256: string
+  filename: string
+  size_bytes: number
+  mime_type: string
+  imported_at: string
+  updated_at: string
+  last_interaction_at: string
+  assignments: FileAssignment[]
+  storages: string[]
+  sources: FileSource[]
+  content_url: string
+}
+
+export interface FilePage {
+  files: FileRecord[]
+  limit: number
+  offset: number
+  has_more: boolean
+  next_offset: number | null
+}
+
 export type TagType = 'bool' | 'text' | 'int' | 'date' | 'datetime' | 'value' | 'multivalue'
 export type TagValue = boolean | number | string | string[]
 
@@ -177,6 +210,22 @@ export async function createCollection(name: string, request: typeof fetch = fet
   }, isCollectionInfo, 'collection', request)
 }
 
+export async function getFiles(
+  collection: string,
+  terms: string[] = [],
+  offset = 0,
+  signal?: AbortSignal,
+  request: typeof fetch = fetch,
+): Promise<FilePage> {
+  const query = new URLSearchParams({ limit: '24', offset: String(offset) })
+  for (const term of terms) query.append('term', term)
+  return requestJSON(`/api/v1/collections/${encodeURIComponent(collection)}/files?${query}`, { signal }, isFilePage, 'file results', request)
+}
+
+export async function getFile(collection: string, sha256: string, signal?: AbortSignal, request: typeof fetch = fetch): Promise<FileRecord> {
+  return requestJSON(`/api/v1/collections/${encodeURIComponent(collection)}/files/${encodeURIComponent(sha256)}`, { signal }, isFileRecord, 'file', request)
+}
+
 export async function evaluateImportDraft(
   collection: string,
   assignments: Record<string, TagValue>,
@@ -299,6 +348,22 @@ function isCollectionSummary(value: unknown): value is CollectionSummary {
 
 function isCollectionInfo(value: unknown): value is CollectionInfo {
   return isRecord(value) && isCollectionSummary(value) && typeof value.comment === 'string' && typeof value.tag_count === 'number' && typeof value.required_count === 'number' && Array.isArray(value.storages) && value.storages.every((item) => typeof item === 'string') && typeof value.file_count === 'number' && typeof value.total_size_bytes === 'number'
+}
+
+function isFilePage(value: unknown): value is FilePage {
+  return isRecord(value) && Array.isArray(value.files) && value.files.every(isFileRecord) && typeof value.limit === 'number' && typeof value.offset === 'number' && typeof value.has_more === 'boolean' && (value.next_offset === null || typeof value.next_offset === 'number')
+}
+
+function isFileRecord(value: unknown): value is FileRecord {
+  return isRecord(value) && typeof value.sha256 === 'string' && typeof value.filename === 'string' && typeof value.size_bytes === 'number' && typeof value.mime_type === 'string' && typeof value.imported_at === 'string' && typeof value.updated_at === 'string' && typeof value.last_interaction_at === 'string' && Array.isArray(value.assignments) && value.assignments.every(isFileAssignment) && Array.isArray(value.storages) && value.storages.every((item) => typeof item === 'string') && Array.isArray(value.sources) && value.sources.every(isFileSource) && typeof value.content_url === 'string'
+}
+
+function isFileAssignment(value: unknown): value is FileAssignment {
+  return isRecord(value) && typeof value.name === 'string' && isTagType(value.type) && isTagValue(value.value)
+}
+
+function isFileSource(value: unknown): value is FileSource {
+  return isRecord(value) && typeof value.filename === 'string' && typeof value.observed_at === 'string'
 }
 
 function isApplicationStatus(value: unknown): value is ApplicationStatus {

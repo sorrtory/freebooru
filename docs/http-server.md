@@ -104,6 +104,22 @@ Creation atomically publishes a new collection configuration cloned from the
 current default collection's validated tag/storage imports. Collection JSON
 contains safe counts and names, never local configuration or database paths.
 
+Collection browsing and search use the same explicit scope:
+
+```http
+GET  /api/v1/collections/{collection}/files?term=rating:safe&limit=24&offset=0
+GET  /api/v1/collections/{collection}/files/{sha256}
+GET  /api/v1/collections/{collection}/files/{sha256}/content
+HEAD /api/v1/collections/{collection}/files/{sha256}/content
+```
+
+An omitted `term` browses the collection newest-first. Repeated `term`
+parameters are combined as an AND query. List responses are bounded to 100
+records and expose an offset plus `has_more`; file JSON never exposes storage
+or source paths. Content responses support byte ranges. Active media types are
+limited to a small image, audio, video, PDF, and plain-text allowlist; other
+types are downloaded as attachments and all responses disable MIME sniffing.
+
 All import calls name their collection explicitly and behave identically over
 the standalone server and the Wails asset server:
 

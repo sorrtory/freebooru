@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/sorrtory/freebooru/internal/collection"
 	"github.com/sorrtory/freebooru/internal/config"
 	"github.com/sorrtory/freebooru/internal/core"
 	"github.com/sorrtory/freebooru/internal/webapi"
@@ -48,6 +49,15 @@ func (fakeApplication) DescribeCollection(context.Context, string) (core.Collect
 
 func (fakeApplication) CreateCollection(context.Context, string) (core.CollectionInfo, error) {
 	return core.CollectionInfo{}, nil
+}
+func (fakeApplication) Search(context.Context, core.FileSearchRequest) ([]collection.FileRecord, error) {
+	return nil, nil
+}
+func (fakeApplication) GetFile(context.Context, string, string) (collection.FileRecord, error) {
+	return collection.FileRecord{}, nil
+}
+func (fakeApplication) OpenFileContent(context.Context, string, string) (core.FileContent, error) {
+	return core.FileContent{}, nil
 }
 
 func TestAPIMiddlewareRoutesOnlyAPIRequests(t *testing.T) {

@@ -9,6 +9,7 @@ import (
 	"reflect"
 	"sync"
 
+	"github.com/sorrtory/freebooru/internal/collection"
 	"github.com/sorrtory/freebooru/internal/config"
 	"github.com/sorrtory/freebooru/internal/core"
 )
@@ -34,6 +35,9 @@ type Application interface {
 	ListCollections() ([]config.CollectionConfig, error)
 	DescribeCollection(context.Context, string) (core.CollectionInfo, error)
 	CreateCollection(context.Context, string) (core.CollectionInfo, error)
+	Search(context.Context, core.FileSearchRequest) ([]collection.FileRecord, error)
+	GetFile(context.Context, string, string) (collection.FileRecord, error)
+	OpenFileContent(context.Context, string, string) (core.FileContent, error)
 }
 
 // DiagnosticResponse is one configuration problem exposed to the frontend.

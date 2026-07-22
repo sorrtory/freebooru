@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/sorrtory/freebooru/internal/collection"
 	"github.com/sorrtory/freebooru/internal/config"
 	"github.com/sorrtory/freebooru/internal/core"
 )
@@ -31,6 +32,22 @@ type fakeApplication struct {
 	collections      []config.CollectionConfig
 	collectionInfo   core.CollectionInfo
 	collectionErr    error
+	files            []collection.FileRecord
+	file             collection.FileRecord
+}
+
+func (f *fakeApplication) Search(_ context.Context, request core.FileSearchRequest) ([]collection.FileRecord, error) {
+	f.collection = request.Collection
+	return f.files, f.collectionErr
+}
+
+func (f *fakeApplication) GetFile(_ context.Context, collectionName, _ string) (collection.FileRecord, error) {
+	f.collection = collectionName
+	return f.file, f.collectionErr
+}
+
+func (f *fakeApplication) OpenFileContent(context.Context, string, string) (core.FileContent, error) {
+	return core.FileContent{}, f.collectionErr
 }
 
 func (f *fakeApplication) ListCollections() ([]config.CollectionConfig, error) {

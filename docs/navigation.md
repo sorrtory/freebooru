@@ -65,6 +65,8 @@ freebooru/
 │       │   ├── CollectionSwitcher.vue Searchable explicit collection switcher
 │       │   ├── ThemeMenu.vue         System/light/dark preference menu
 │       │   ├── ThemeMenu.test.ts     Theme application and persistence test
+│       │   ├── FileCard.vue          Compact safe file thumbnail and summary
+│       │   ├── FileResults.vue       Shared browse/search grid and pagination
 │       │   ├── AssignedTags.vue      Required and canonical assigned tag cards
 │       │   ├── ImportGuidance.vue    Demand and recommendation cards
 │       │   ├── TagCatalog.vue        Searchable unassigned-tag catalog
@@ -72,8 +74,11 @@ freebooru/
 │       ├── StatusDiagnostics.vue     Configuration diagnostic list
 │       ├── useApplicationStatus.ts   Status loading and retry state
 │       ├── useCollections.ts         Cached collection list and creation state
+│       ├── useFileSearch.ts          Cancel-safe paginated file query state
 │       ├── useTheme.ts               System-aware persisted theme state
 │       ├── useImportDraft.ts         Canonical draft evaluation state and cancellation
+│       ├── searchQuery.ts            Quoted browser search tokenizer
+│       ├── searchQuery.test.ts       Search tokenizer boundary tests
 │       ├── api.ts                    Typed status and import HTTP client
 │       ├── api.test.ts               Status and import HTTP contract tests
 │       ├── style.css                 Global theme and reset
@@ -120,6 +125,8 @@ freebooru/
 │   │   ├── handler_test.go          API status, reload, and error contract tests
 │   │   ├── collections.go           Collection list, creation, and safe summary API
 │   │   ├── collections_test.go      Collection HTTP contract tests
+│   │   ├── files.go                 Safe file browse, detail, and content API
+│   │   ├── files_test.go            File API scope and disclosure tests
 │   │   ├── import.go                Import schema, evaluation, and upload API
 │   │   └── import_test.go           Import HTTP contract tests
 │   ├── webui/
@@ -144,6 +151,8 @@ freebooru/
 │   │   ├── file_list.go              Persisted file/storage assignment listing
 │   │   ├── file.go                   Validated collection file lookup workflow
 │   │   ├── file_test.go              File lookup and database lifecycle tests
+│   │   ├── file_content.go           Validated stored-content read workflow
+│   │   ├── file_content_test.go      Stored-content integration test
 │   │   ├── collection_state.go       Persisted state conversion and integrity checks
 │   │   ├── collection_state_test.go  Persisted types, requirements, and relationship tests
 │   │   ├── core_test.go              Workflow and database lifecycle tests

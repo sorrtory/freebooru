@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { createCollection, evaluateImportDraft, getCollection, getCollections, getHello, getImportSchema, getStatus, importFile } from './api'
+import { createCollection, evaluateImportDraft, getCollection, getCollections, getFiles, getHello, getImportSchema, getStatus, importFile } from './api'
 
 describe('getHello', () => {
   it('accepts the server hello response', async () => {
@@ -168,5 +168,13 @@ describe('collection API', () => {
 
     await expect(createCollection('art', request)).resolves.toEqual(info)
     expect(request).toHaveBeenCalledWith('/api/v1/collections', expect.objectContaining({ method: 'POST', body: JSON.stringify({ name: 'art' }) }))
+  })
+
+  it('encodes repeated typed search terms and pagination', async () => {
+    const page = { files: [], limit: 24, offset: 24, has_more: false, next_offset: null }
+    const request = vi.fn<typeof fetch>().mockResolvedValue(new Response(JSON.stringify(page), { status: 200 }))
+
+    await expect(getFiles('main', ['rating:safe', 'title:hello world'], 24, undefined, request)).resolves.toEqual(page)
+    expect(request.mock.calls[0][0]).toBe('/api/v1/collections/main/files?limit=24&offset=24&term=rating%3Asafe&term=title%3Ahello+world')
   })
 })

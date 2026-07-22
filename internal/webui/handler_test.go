@@ -10,6 +10,7 @@ import (
 	"testing"
 	"testing/fstest"
 
+	"github.com/sorrtory/freebooru/internal/collection"
 	"github.com/sorrtory/freebooru/internal/config"
 	"github.com/sorrtory/freebooru/internal/core"
 	"github.com/sorrtory/freebooru/internal/webapi"
@@ -51,6 +52,15 @@ func (staticApplication) DescribeCollection(context.Context, string) (core.Colle
 
 func (staticApplication) CreateCollection(context.Context, string) (core.CollectionInfo, error) {
 	return core.CollectionInfo{}, nil
+}
+func (staticApplication) Search(context.Context, core.FileSearchRequest) ([]collection.FileRecord, error) {
+	return nil, nil
+}
+func (staticApplication) GetFile(context.Context, string, string) (collection.FileRecord, error) {
+	return collection.FileRecord{}, nil
+}
+func (staticApplication) OpenFileContent(context.Context, string, string) (core.FileContent, error) {
+	return core.FileContent{}, nil
 }
 
 func TestHandlerServesAssetsAndSPAFallback(t *testing.T) {

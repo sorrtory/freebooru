@@ -29,13 +29,16 @@ func (c *Core) Search(
 	if err != nil {
 		return nil, err
 	}
-	query, err := querysearch.Parse(request.Terms)
-	if err != nil {
-		return nil, err
-	}
-	resolved, err := querysearch.Resolve(query, c.catalog, references)
-	if err != nil {
-		return nil, err
+	resolved := querysearch.ResolvedQuery{}
+	if len(request.Terms) > 0 {
+		query, err := querysearch.Parse(request.Terms)
+		if err != nil {
+			return nil, err
+		}
+		resolved, err = querysearch.Resolve(query, c.catalog, references)
+		if err != nil {
+			return nil, err
+		}
 	}
 	limit := DefaultSearchLimit
 	if request.Limit != nil {

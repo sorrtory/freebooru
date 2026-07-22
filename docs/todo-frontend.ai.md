@@ -330,15 +330,15 @@ in presentation components.
 
 ### Phase 3: all files and search
 
-- [ ] Complete summary DTO, content URL, stable pagination, and cancellation
+- [x] Complete summary DTO, content URL, stable pagination, and cancellation
   contracts from `todo-gui-library.ai.md`.
-- [ ] Implement responsive reusable `FileResults` and `FileCard` components.
-- [ ] Implement dedicated All files route and empty-collection state.
-- [ ] Implement URL-backed Search route, deliberate submit, and syntax errors.
-- [ ] Add concise and expanded search help matching the supported grammar.
-- [ ] Test non-image files, broken previews, no matches, paging, and stale
+- [x] Implement responsive reusable `FileResults` and `FileCard` components.
+- [x] Implement dedicated All files route and empty-collection state.
+- [x] Implement URL-backed Search route, deliberate submit, and syntax errors.
+- [x] Add concise and expanded search help matching the supported grammar.
+- [x] Test non-image files, broken previews, no matches, paging, and stale
   responses.
-- [ ] Commit this phase independently.
+- [x] Commit this phase independently.
 
 ### Phase 4: file detail and tag editing
 
