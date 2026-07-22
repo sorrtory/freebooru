@@ -267,5 +267,6 @@ freebooru/
     ├── todo-gui.ai.md                Hello web and Wails implementation checklist
     ├── todo-gui-core.ai.md           Core readiness GUI implementation checklist
     ├── todo-gui-library.ai.md        Collection, search, content, import, and tag UI contract
+    ├── todo-frontend.ai.md           Konata palette and frontend implementation plan
     └── user-story.excalidraw         Editable user-flow diagram
 ```
