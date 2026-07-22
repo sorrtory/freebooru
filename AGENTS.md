@@ -22,6 +22,8 @@ The FreeBooru is explicit. It doesn't imply anything. It is up to you to define 
   bunch of tags, that are imported from the tags folder. You can have multiple collections, each with its own config and storage backends.
 - **tag** - a tag is a label that can be assigned to a file. Tag has a type
 - **freebooru-cli** - the command line interface for FreeBooru. It is used to manage config validity, collections and tags. It allows you to tag files - save the tags to the database.
+- **freebooru-server** - the HTTP server for FreeBooru. It is used to serve the frontend and provide an API for the frontend to interact with the backend.
+- **freebooru-gui** - the Wails desktop application for FreeBooru. It is used to provide a GUI for the FreeBooru Core.
 
 ## Configuration
 
@@ -56,6 +58,21 @@ Update this file if you want to add new files or change the structure of the pro
 
 See [Dependencies](docs/dependencies.md) for details.
 Update this file if you want to add new dependencies or change the existing ones.
+
+## FreeBooru Client
+
+FreeBooru can be called in three different ways:
+
+- cli - calls core directly from the command line
+- wails desktop app - calls http server and runs the vuejs frontend in a desktop application
+- web app - calls http server and runs the vuejs frontend in a web application
+
+All three ways use the same core and the same configuration.
+The frontend is just a way to interact with the core.
+
+See [CLI](docs/cli.md) for command line details.
+See [GUI](docs/gui.md) for frontend details.
+See [HTTP Server](docs/http-server.md) for backend details.
 
 ## Contributing
 

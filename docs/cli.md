@@ -8,19 +8,19 @@ It calls the FreeBooru core.
 All commands use the configured `default_collection` unless they begin with
 `collection <name>`. Explicit collection selection never changes that default.
 
-| Command | Arguments and flags | Standard output |
-| --- | --- | --- |
-| `init` | no arguments | `FreeBooru initialized` |
-| `config check` | no arguments | `Configuration is valid` |
-| `import <file>` | repeatable `--tag name[:value]`; optional `--interactive` | imported SHA-256 |
-| `collection <name> import <file>` | same as `import` | imported SHA-256 |
-| `tag <sha256> add <name[:value]>` | no flags | canonical SHA-256 |
-| `tag <sha256> set <name[:value]>` | no flags | canonical SHA-256 |
-| `tag <sha256> remove <name[:value]>` | a value is required only for `storage` | canonical SHA-256 |
-| `tag <sha256> get` | no flags | one canonical `name[:value]` assignment per line |
-| `collection <name> tag ...` | same operations as `tag` | same as `tag` |
-| `search <term>...` | `--limit` defaults to `100`; `--offset` defaults to `0` | one matching SHA-256 per line |
-| `collection <name> search <term>...` | same as `search` | same as `search` |
+| Command                              | Arguments and flags                                       | Standard output                                  |
+| ------------------------------------ | --------------------------------------------------------- | ------------------------------------------------ |
+| `init`                               | no arguments                                              | `FreeBooru initialized`                          |
+| `config check`                       | no arguments                                              | `Configuration is valid`                         |
+| `import <file>`                      | repeatable `--tag name[:value]`; optional `--interactive` | imported SHA-256                                 |
+| `collection <name> import <file>`    | same as `import`                                          | imported SHA-256                                 |
+| `tag <sha256> add <name[:value]>`    | no flags                                                  | canonical SHA-256                                |
+| `tag <sha256> set <name[:value]>`    | no flags                                                  | canonical SHA-256                                |
+| `tag <sha256> remove <name[:value]>` | a value is required only for `storage`                    | canonical SHA-256                                |
+| `tag <sha256> get`                   | no flags                                                  | one canonical `name[:value]` assignment per line |
+| `collection <name> tag ...`          | same operations as `tag`                                  | same as `tag`                                    |
+| `search <term>...`                   | `--limit` defaults to `100`; `--offset` defaults to `0`   | one matching SHA-256 per line                    |
+| `collection <name> search <term>...` | same as `search`                                          | same as `search`                                 |
 
 Repeated `--tag` flags preserve their order. A boolean assignment is written
 as `name`; every other type uses `name:value`. The first colon separates the
