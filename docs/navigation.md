@@ -87,7 +87,9 @@ freebooru/
 │   │
 │   ├── storage/
 │   │   ├── local.go                    Local content paths and streamed inspection
-│   │   └── local_test.go               Hash, source-type, and cancellation tests
+│   │   ├── local_write.go              Atomic local content storage and deletion
+│   │   ├── local_test.go               Hash, source-type, and inspection tests
+│   │   └── local_write_test.go         Storage, corruption, and cleanup tests
 │   │
 │   └── config/
 │       ├── app.go                    Application config, defaults, loading, validation

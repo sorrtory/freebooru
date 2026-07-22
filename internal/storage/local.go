@@ -46,32 +46,15 @@ func (s *Local) ContentPath(hash string) (string, error) {
 // Inspect streams one regular source file to calculate its identity and size.
 // It rejects symbolic links and detects replacement between inspection and open.
 func (s *Local) Inspect(ctx context.Context, path string) (result InspectedFile, err error) {
-	info, err := os.Lstat(path)
+	file, err := openRegular(path)
 	if err != nil {
-		return InspectedFile{}, fmt.Errorf("inspect source %q: %w", path, err)
-	}
-	if info.Mode()&os.ModeSymlink != 0 {
-		return InspectedFile{}, fmt.Errorf("source %q is a symbolic link", path)
-	}
-	if !info.Mode().IsRegular() {
-		return InspectedFile{}, fmt.Errorf("source %q is not a regular file", path)
-	}
-	file, err := os.Open(path)
-	if err != nil {
-		return InspectedFile{}, fmt.Errorf("open source %q: %w", path, err)
+		return InspectedFile{}, err
 	}
 	defer func() {
 		if closeErr := file.Close(); closeErr != nil {
 			err = errors.Join(err, fmt.Errorf("close source %q: %w", path, closeErr))
 		}
 	}()
-	openedInfo, err := file.Stat()
-	if err != nil {
-		return InspectedFile{}, fmt.Errorf("stat opened source %q: %w", path, err)
-	}
-	if !openedInfo.Mode().IsRegular() || !os.SameFile(info, openedInfo) {
-		return InspectedFile{}, fmt.Errorf("source %q changed while being opened", path)
-	}
 	digest := sha256.New()
 	size, err := io.CopyBuffer(digest, contextReader{ctx: ctx, reader: file}, make([]byte, copyBufferSize))
 	if err != nil {
@@ -82,6 +65,46 @@ func (s *Local) Inspect(ctx context.Context, path string) (result InspectedFile,
 		SHA256:    hex.EncodeToString(digest.Sum(nil)),
 		SizeBytes: size,
 	}, nil
+}
+
+func openRegular(path string) (*os.File, error) {
+	info, err := os.Lstat(path)
+	if err != nil {
+		return nil, fmt.Errorf("inspect source %q: %w", path, err)
+	}
+	if info.Mode()&os.ModeSymlink != 0 {
+		return nil, fmt.Errorf("source %q is a symbolic link", path)
+	}
+	if !info.Mode().IsRegular() {
+		return nil, fmt.Errorf("source %q is not a regular file", path)
+	}
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, fmt.Errorf("open source %q: %w", path, err)
+	}
+	openedInfo, err := file.Stat()
+	if err != nil {
+		closeErr := file.Close()
+		return nil, errors.Join(
+			fmt.Errorf("stat opened source %q: %w", path, err),
+			wrapCloseError(closeErr, path),
+		)
+	}
+	if !openedInfo.Mode().IsRegular() || !os.SameFile(info, openedInfo) {
+		closeErr := file.Close()
+		return nil, errors.Join(
+			fmt.Errorf("source %q changed while being opened", path),
+			wrapCloseError(closeErr, path),
+		)
+	}
+	return file, nil
+}
+
+func wrapCloseError(err error, path string) error {
+	if err == nil {
+		return nil
+	}
+	return fmt.Errorf("close source %q: %w", path, err)
 }
 
 func validateSHA256(hash string) error {

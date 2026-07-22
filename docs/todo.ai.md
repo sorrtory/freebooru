@@ -504,13 +504,13 @@ Acceptance:
   files.
 - [x] Stream bytes while calculating SHA-256 and size; never read whole files
   into memory.
-- [ ] Stage writes in the destination filesystem and atomically rename them.
-- [ ] Treat an existing verified content path as idempotent success.
-- [ ] Treat an existing path with unexpected size or digest as corruption.
-- [ ] Remove only copies created by the current failed operation.
-- [ ] Delete copies idempotently and remove empty shard directories when
+- [x] Stage writes in the destination filesystem and atomically rename them.
+- [x] Treat an existing verified content path as idempotent success.
+- [x] Treat an existing path with unexpected size or digest as corruption.
+- [x] Remove only copies created by the current failed operation.
+- [x] Delete copies idempotently and remove empty shard directories when
   practical.
-- [ ] Keep source deletion outside the storage backend.
+- [x] Keep source deletion outside the storage backend.
 - [ ] Test empty and large files, duplicates, corruption, permissions,
   cancellation, and cleanup.
 
