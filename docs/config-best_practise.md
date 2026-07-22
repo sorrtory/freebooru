@@ -40,7 +40,7 @@ The filename is organization for humans; `groups` in each tag document is the
 semantic group membership. One file per group is a good default, but a tag may
 belong to multiple groups and larger catalogs may use nested directories.
 
-The starter `universe` values are `irl`, `lucky_star`, and `original`.
+The starter `universe` values are `irl`, `lucky_star`, and 
 `character:konata_izumi` demonstrates localized aliases and demands
 `universe:lucky_star` with an explanatory reason. Replace or extend this small
 vocabulary for the collection. A character value should normally demand its
@@ -58,12 +58,12 @@ values and they should not be duplicated as YAML tags:
 | upload/import time | set by the collection database | stored |
 | record creation and update times | set by the collection database | stored |
 | original path and filename | captured from the import source | stored |
-| file/MIME type | inspect the bytes, never trust only the suffix | planned |
-| last interaction time | update on a clearly defined user interaction | planned |
+| file/MIME type | inspect the bytes, never trust only the suffix | stored |
+| last interaction time | explicit tag, storage, or relationship mutation | stored |
 
 This metadata is required by the data model even though it is not listed under
-the collection's `tags.require`. Search should eventually expose it through
-system predicates such as `sha256:`, `filesize:`, and `imported_at:`. The
+the collection's `tags.require`. Search exposes it through read-only system
+tags such as `sha256:`, `filesize:`, `filetype:`, and `imported_at:`. The
 `metadata` YAML group is reserved for descriptive, user-managed provenance such
 as `source`; it does not shadow system properties.
 
@@ -82,6 +82,7 @@ display order. The parent should be the preferred or canonical file, not
 necessarily the oldest upload. Ordered works such as comic pages belong in a
 collection/pool with an explicit position rather than a version family.
 
-File relationships are not part of the current configuration or database
-specification. They should be designed as first-class database records rather
-than encoded as tag text.
+File relationships are first-class database records rather than tag text. Each
+child has at most one parent, relationship kinds are `variant`, `alternate`, or
+`derived`, and cycles are rejected. Core exposes setting, removing, and listing
+direct children; an end-user CLI and GUI workflow can build on that API.

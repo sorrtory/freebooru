@@ -34,6 +34,7 @@ This defines storage backends. Storage is also the built-in multivalue tag
 | `name` | string |      yes | —       | Non-empty and globally unique           | Storage tag value       | Implemented     |
 | `type` | enum   |      yes | —       | `local` for MVP                         | Storage implementation  | Implemented     |
 | `path` | path   |      yes | —       | Absolute after expanding `$HOME` or `~` | Local storage directory | Implemented     |
+| `comment` | string | no | empty | Non-blank when present | Human explanation shown by frontends | Implemented |
 
 Assigning a storage value copies a file there. Removing it deletes that copy.
 Removing the last storage value deletes the indexed file. Multi-storage uploads
@@ -50,6 +51,7 @@ one collection and each collection has one SQLite database.
 | ---------- | ------ | -------: | -------------------------------------------------------- | ----------------------------------------------------------------------- | -------------------------------- | --------------- |
 | `name`     | string |      yes | —                                                        | Non-empty and globally unique                                           | Collection name                  | Implemented     |
 | `location` | path   |       no | `$HOME/.local/share/freebooru/collections/<name>.sqlite` | Absolute after expansion                                                | SQLite database path             | Implemented     |
+| `comment`  | string |       no | empty                                                    | Non-blank when present                                                  | Human explanation                | Implemented     |
 | `tags`     | object |      yes | —                                                        | Contains `require` and/or `import`; must reference at least one storage | Tags available in the collection | Implemented     |
 
 ### Collection tags
@@ -77,6 +79,7 @@ YAML documents separated by `---`.
 | ---------- | ------ | ------------------------: | ------- | -------------------------------------------------- | -------------------------------------------- | --------------- |
 | `name`     | string |                       yes | —       | Non-empty and globally unique; cannot be `storage` | Tag name                                     | Implemented     |
 | `type`     | enum   |                       yes | —       | See tag types below                                | Tag value type                               | Implemented     |
+| `comment`  | string |                        no | empty   | Non-blank when present                             | Human explanation shown by frontends         | Implemented     |
 | `groups`   | list   |                        no | empty   | No duplicates inside one tag                       | Implicit groups containing this tag          | Implemented     |
 | `values`   | list   | for `value`, `multivalue` | —       | Entries contain unique canonical `val` fields      | Allowed predefined values                    | Implemented     |
 | `suggest`  | list   |                        no | empty   | See tag relationships                              | Tags recommended with this tag                | Implemented     |
@@ -102,6 +105,7 @@ Predefined value fields:
 | --------- | ------ | -------: | ------- | ----------------------------------------------- | ----------------------------------- |
 | `val`     | string |      yes | —       | Unique with every alias and `val` in the tag    | Canonical value stored in SQLite    |
 | `aliases` | list   |       no | empty   | Valid names; case-insensitively unique per tag  | Alternative accepted input spellings |
+| `comment` | string |       no | empty   | Non-blank when present                          | Human explanation for this value     |
 
 Each `values` entry contains the canonical `val`, optional `aliases`, and may
 contain its own `suggest`, `demand`, and `conflict` lists. Aliases follow the
@@ -162,6 +166,7 @@ TODO: add relationship targets by group and collection tag overrides.
 - Invalid domain configs are reported without stopping the application, but an
   invalid definition cannot be used and a collection with an invalid dependency
   cannot be opened.
-- Core-owned file properties such as SHA-256, byte size, and import timestamps
-  are database metadata, not assignable YAML tags. See
+- Core-owned file properties are not assignable YAML tags, but are searchable
+  as the reserved system tags `sha256`, `filesize`, `filetype`, `imported_at`,
+  `updated_at`, and `last_interaction_at`. See
   [configuration best practices](./config-best_practise.md#core-metadata-is-not-ordinary-tag-configuration).

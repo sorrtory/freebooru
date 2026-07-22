@@ -18,6 +18,7 @@ const (
 type TagConfig struct {
 	Name     string            `yaml:"name"`
 	Type     TagType           `yaml:"type"`
+	Comment  string            `yaml:"comment,omitempty"`
 	Groups   []string          `yaml:"groups,omitempty"`
 	Values   []PredefinedValue `yaml:"values,omitempty"`
 	Suggest  []Relationship    `yaml:"suggest,omitempty"`
@@ -28,6 +29,7 @@ type TagConfig struct {
 // PredefinedValue declares one allowed value and rules activated by it.
 type PredefinedValue struct {
 	Val      string         `yaml:"val"`
+	Comment  string         `yaml:"comment,omitempty"`
 	Aliases  []string       `yaml:"aliases,omitempty"`
 	Suggest  []Relationship `yaml:"suggest,omitempty"`
 	Demand   []Relationship `yaml:"demand,omitempty"`

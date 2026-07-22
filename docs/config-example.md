@@ -25,6 +25,7 @@ $HOME/.config/freebooru/storage.yaml
 - name: default
   type: local
   path: $HOME/.local/share/freebooru/storage/default
+  comment: Default local content storage
 - name: archive
   type: local
   path: /mnt/archive/freebooru
@@ -48,6 +49,7 @@ $HOME/.config/freebooru/collections/main.yaml
 ```yaml
 name: main
 location: $HOME/.local/share/freebooru/collections/main.sqlite
+comment: Default FreeBooru collection
 tags:
     require:
         - storage: default
@@ -77,6 +79,7 @@ $HOME/.config/freebooru/tags/content.yaml
 ```yaml
 name: character
 type: multivalue
+comment: Characters depicted in or represented by the file
 groups: [content]
 suggest:
     - tag: artist
@@ -109,6 +112,7 @@ values:
             reason: cirno is not human
     - val: reimu
     - val: konata_izumi
+      comment: Konata Izumi from Lucky Star
       aliases: [konata, izumi_konata, 泉こなた, коната, коната_изуми]
       demand:
           - tag: universe

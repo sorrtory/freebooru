@@ -10,17 +10,19 @@ type StorageConfig []StorageProvider
 
 // StorageProvider defines one file storage backend.
 type StorageProvider struct {
-	Name string `yaml:"name"`
-	Type string `yaml:"type"`
-	Path string `yaml:"path"`
+	Name    string `yaml:"name"`
+	Type    string `yaml:"type"`
+	Path    string `yaml:"path"`
+	Comment string `yaml:"comment,omitempty"`
 }
 
 // DefaultStorageConfig builds the local storage selected by application defaults.
 func DefaultStorageConfig(app AppConfig) StorageConfig {
 	return StorageConfig{{
-		Name: app.DefaultStorageName,
-		Type: "local",
-		Path: app.DefaultStoragePath,
+		Name:    app.DefaultStorageName,
+		Type:    "local",
+		Path:    app.DefaultStoragePath,
+		Comment: "Default local content storage",
 	}}
 }
 
@@ -38,5 +40,5 @@ func VerifyStorageProvider(provider StorageProvider) error {
 	if _, err := ExpandPath(provider.Path); err != nil {
 		return fmt.Errorf("path: %w", err)
 	}
-	return nil
+	return verifyComment(provider.Comment)
 }

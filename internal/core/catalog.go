@@ -49,7 +49,15 @@ func (c *Core) ListCollectionStorages(collectionName string) ([]config.StoragePr
 
 // ListCollectionTags returns tags available to one collection, including storage.
 func (c *Core) ListCollectionTags(collectionName string) ([]config.TagConfig, error) {
-	return c.SearchCollectionTags(collectionName, "")
+	tags, err := c.SearchCollectionTags(collectionName, "")
+	if err != nil {
+		return nil, err
+	}
+	tags = append(tags, config.SystemTags()...)
+	sort.Slice(tags, func(i, j int) bool {
+		return normalizeStateName(tags[i].Name) < normalizeStateName(tags[j].Name)
+	})
+	return tags, nil
 }
 
 // StorageConfigSource returns the global storage configuration path.

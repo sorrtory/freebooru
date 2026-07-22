@@ -71,6 +71,9 @@ func resolveTerm(
 	catalog *config.Catalog,
 	available availability,
 ) (ResolvedTerm, error) {
+	if tag, ok := config.SystemTag(term.Tag); ok {
+		return resolveKnownTerm(term, tag, available)
+	}
 	if _, ok := available.tags[normalize(term.Tag)]; !ok {
 		return ResolvedTerm{}, fmt.Errorf("tag %q is not imported by the collection", term.Tag)
 	}
@@ -78,6 +81,14 @@ func resolveTerm(
 	if !ok {
 		return ResolvedTerm{}, fmt.Errorf("tag %q does not exist", term.Tag)
 	}
+	return resolveKnownTerm(term, tag, available)
+}
+
+func resolveKnownTerm(
+	term Term,
+	tag config.TagConfig,
+	available availability,
+) (ResolvedTerm, error) {
 	resolved := ResolvedTerm{Tag: tag.Name, Type: tag.Type, Operator: term.Operator}
 	switch term.Operator {
 	case Present:

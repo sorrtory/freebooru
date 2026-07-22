@@ -60,6 +60,9 @@ func TestImportPersistsContentAndTypedState(t *testing.T) {
 	if len(file.Sources) != 1 || file.Sources[0].Path != source || file.Sources[0].Filename != "browser-name.txt" {
 		t.Fatalf("persisted sources = %#v", file.Sources)
 	}
+	if file.MIMEType != "text/plain; charset=utf-8" {
+		t.Fatalf("persisted MIME type = %q", file.MIMEType)
+	}
 	duplicate, err := app.Import(t.Context(), ImportRequest{
 		SourcePath: source,
 		Tags:       map[string]any{"rating": "safe"},

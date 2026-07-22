@@ -27,7 +27,7 @@ const selectedField = computed(() => props.fields.find((field) => field.name ===
     <TagField v-if="selectedField && !assigned.has(selectedField.name)" :field="selectedField" @apply="emit('apply', selectedField.name, $event); selectedName = ''" />
     <div class="catalog-list" aria-label="Available tags">
       <button v-for="field in available" :key="field.name" type="button" :aria-pressed="selectedName === field.name" @click="selectedName = field.name">
-        <span><strong>{{ field.name }}</strong><small>{{ field.type }}</small></span>
+        <span><strong>{{ field.name }}</strong><small>{{ field.type }}</small><small v-if="field.comment">{{ field.comment }}</small></span>
         <b>{{ field.required ? 'required' : 'optional' }}</b>
       </button>
       <p v-if="!available.length" class="empty-state">No matching unassigned tags.</p>

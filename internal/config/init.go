@@ -77,13 +77,15 @@ func ensureDefaultTags(root string) error {
 	files := map[string][]TagConfig{
 		"character.yaml": {
 			{
-				Name:   "character",
-				Type:   TagTypeMultivalue,
-				Groups: []string{"character"},
+				Name:    "character",
+				Type:    TagTypeMultivalue,
+				Comment: "Characters depicted in or represented by the file",
+				Groups:  []string{"character"},
 				Values: []PredefinedValue{
 					{Val: "original_character"},
 					{
-						Val: "konata_izumi",
+						Val:     "konata_izumi",
+						Comment: "Konata Izumi from Lucky Star",
 						Aliases: []string{
 							"konata",
 							"izumi_konata",
@@ -101,13 +103,17 @@ func ensureDefaultTags(root string) error {
 			},
 		},
 		"creator.yaml": {
-			{Name: "artist", Type: TagTypeText, Groups: []string{"creator"}},
+			{
+				Name: "artist", Type: TagTypeText,
+				Comment: "Creator of the work", Groups: []string{"creator"},
+			},
 		},
 		"general.yaml": {
 			{
-				Name:   "rating",
-				Type:   TagTypeValue,
-				Groups: []string{"general"},
+				Name:    "rating",
+				Type:    TagTypeValue,
+				Comment: "Content safety rating",
+				Groups:  []string{"general"},
 				Values: []PredefinedValue{
 					{Val: "safe"},
 					{Val: "sensitive"},
@@ -118,17 +124,20 @@ func ensureDefaultTags(root string) error {
 			{Name: "description", Type: TagTypeText, Groups: []string{"general"}},
 		},
 		"metadata.yaml": {
-			{Name: "source", Type: TagTypeText, Groups: []string{"metadata"}},
+			{
+				Name: "source", Type: TagTypeText,
+				Comment: "Original source URL or reference", Groups: []string{"metadata"},
+			},
 		},
 		"universe.yaml": {
 			{
-				Name:   "universe",
-				Type:   TagTypeMultivalue,
-				Groups: []string{"universe"},
+				Name:    "universe",
+				Type:    TagTypeMultivalue,
+				Comment: "Universes associated with the file",
+				Groups:  []string{"universe"},
 				Values: []PredefinedValue{
 					{Val: "irl"},
 					{Val: "lucky_star"},
-					{Val: "original"},
 				},
 			},
 		},

@@ -73,6 +73,9 @@ func searchClause(term SearchTerm) (string, []any, error) {
 	if term.Tag == "storage" {
 		return storageSearchClause(term)
 	}
+	if isSystemSearchTag(term.Tag) {
+		return systemSearchClause(term)
+	}
 	switch term.Operator {
 	case SearchPresent:
 		if term.Type != "bool" {
@@ -88,6 +91,62 @@ func searchClause(term SearchTerm) (string, []any, error) {
 		return orderedSearchClause(term)
 	default:
 		return "", nil, fmt.Errorf("search operator %q is unsupported", term.Operator)
+	}
+}
+
+func isSystemSearchTag(name string) bool {
+	switch name {
+	case "sha256", "filesize", "filetype", "imported_at", "updated_at", "last_interaction_at":
+		return true
+	default:
+		return false
+	}
+}
+
+func systemSearchClause(term SearchTerm) (string, []any, error) {
+	column := map[string]string{
+		"sha256":              "f.sha256",
+		"filesize":            "f.size_bytes",
+		"filetype":            "f.mime_type",
+		"imported_at":         "f.imported_at",
+		"updated_at":          "f.updated_at",
+		"last_interaction_at": "f.last_interaction_at",
+	}[term.Tag]
+	if term.Operator == SearchAbsent {
+		return "0", nil, nil
+	}
+	comparison, err := comparisonSQL(term.Operator)
+	if term.Operator == SearchEqual {
+		comparison = "="
+		err = nil
+	}
+	if err != nil {
+		return "", nil, fmt.Errorf("system tag %q does not support search operator %q", term.Tag, term.Operator)
+	}
+	switch term.Type {
+	case "int":
+		value, ok := term.Value.(int64)
+		if !ok {
+			return "", nil, fmt.Errorf("system tag %q expects int64", term.Tag)
+		}
+		return column + " " + comparison + " ?", []any{value}, nil
+	case "text":
+		if term.Operator != SearchEqual {
+			return "", nil, fmt.Errorf("system tag %q supports equality only", term.Tag)
+		}
+		value, ok := term.Value.(string)
+		if !ok {
+			return "", nil, fmt.Errorf("system tag %q expects string", term.Tag)
+		}
+		return column + " = ?", []any{value}, nil
+	case "datetime":
+		value, ok := term.Value.(string)
+		if !ok {
+			return "", nil, fmt.Errorf("system tag %q expects datetime string", term.Tag)
+		}
+		return "julianday(" + column + ") " + comparison + " julianday(?)", []any{value}, nil
+	default:
+		return "", nil, fmt.Errorf("system tag %q has unsupported type %q", term.Tag, term.Type)
 	}
 }
 

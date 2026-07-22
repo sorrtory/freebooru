@@ -28,7 +28,9 @@ export type TagValue = boolean | number | string | string[]
 export interface ImportField {
   name: string
   type: TagType
+  comment: string
   values: string[]
+  value_comments: Record<string, string>
   required: boolean
 }
 
@@ -37,7 +39,7 @@ export interface ImportSchema {
   fields: ImportField[]
 }
 
-export interface Assignment extends Omit<ImportField, 'values'> {
+export interface Assignment extends Omit<ImportField, 'values' | 'value_comments'> {
   value: TagValue
 }
 
@@ -205,7 +207,7 @@ function isImportSchema(value: unknown): value is ImportSchema {
 }
 
 function isImportField(value: unknown): value is ImportField {
-  return isRecord(value) && typeof value.name === 'string' && isTagType(value.type) && Array.isArray(value.values) && value.values.every((item) => typeof item === 'string') && typeof value.required === 'boolean'
+  return isRecord(value) && typeof value.name === 'string' && isTagType(value.type) && typeof value.comment === 'string' && Array.isArray(value.values) && value.values.every((item) => typeof item === 'string') && isStringRecord(value.value_comments) && typeof value.required === 'boolean'
 }
 
 function isImportDraft(value: unknown): value is ImportDraft {
@@ -213,7 +215,11 @@ function isImportDraft(value: unknown): value is ImportDraft {
 }
 
 function isAssignment(value: unknown): value is Assignment {
-  return isRecord(value) && typeof value.name === 'string' && isTagType(value.type) && typeof value.required === 'boolean' && isTagValue(value.value)
+  return isRecord(value) && typeof value.name === 'string' && isTagType(value.type) && typeof value.comment === 'string' && typeof value.required === 'boolean' && isTagValue(value.value)
+}
+
+function isStringRecord(value: unknown): value is Record<string, string> {
+  return isRecord(value) && Object.values(value).every((item) => typeof item === 'string')
 }
 
 function isRelationship(value: unknown): value is Relationship {

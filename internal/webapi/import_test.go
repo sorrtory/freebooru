@@ -107,7 +107,8 @@ func TestImportSchema(t *testing.T) {
 	if schema.Collection != "Main" || len(schema.Fields) != 4 {
 		t.Fatalf("schema = %#v", schema)
 	}
-	if schema.Fields[0].Name != "flag" || schema.Fields[0].Values == nil {
+	if schema.Fields[0].Name != "flag" || schema.Fields[0].Comment != "Required marker" ||
+		schema.Fields[0].Values == nil {
 		t.Fatalf("first field = %#v, want flag with empty values array", schema.Fields[0])
 	}
 }
@@ -248,7 +249,7 @@ func TestImportRoutesRejectInvalidRequests(t *testing.T) {
 
 func testImportFields() []core.ImportField {
 	return []core.ImportField{
-		{Name: "flag", Type: config.TagTypeBool, Required: true},
+		{Name: "flag", Type: config.TagTypeBool, Comment: "Required marker", Required: true},
 		{Name: "labels", Type: config.TagTypeMultivalue, Values: []string{"first", "second"}},
 		{Name: "score", Type: config.TagTypeInt},
 		{Name: "storage", Type: config.TagTypeMultivalue, Values: []string{"default"}, Required: true},

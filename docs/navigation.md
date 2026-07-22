@@ -149,6 +149,7 @@ freebooru/
 │   │   ├── storage_mutation_test.go   Storage ordering, rollback, and deletion tests
 │   │   ├── search.go                  Validated collection search workflow and defaults
 │   │   ├── search_test.go             Search resolution, pagination, and lifecycle tests
+│   │   ├── file_relationship.go       Parent/child relationship workflows
 │   │   ├── session.go                 Core-owned validated collection lifecycle
 │   │   ├── session_test.go            Session ownership, close, and cancellation tests
 │   │   ├── hints.go                   Collection tag and persisted value completion APIs
@@ -167,6 +168,8 @@ freebooru/
 │   │   ├── repository_storage.go     Logical storage assignment mutations
 │   │   ├── repository_search.go      Snapshot-consistent paginated file search
 │   │   ├── repository_search_test.go Typed matching, ordering, and pagination tests
+│   │   ├── repository_relationship.go Parent/child relationship persistence and cycle checks
+│   │   ├── repository_relationship_test.go Relationship branching, ordering, and validation tests
 │   │   ├── search_sql.go             Parameterized typed search SQL compilation
 │   │   ├── search_sql_test.go        SQL parameterization and boundary tests
 │   │   ├── repository_transaction.go Private write transaction helpers
@@ -174,7 +177,8 @@ freebooru/
 │   │   ├── schema.go                 Schema initialization and version checks
 │   │   └── migrations/
 │   │       ├── 001_initial.sql        Initial schema-migrations table
-│   │       └── 002_collection_state.sql Persisted file, tag, and storage state
+│   │       ├── 002_collection_state.sql Persisted file, tag, and storage state
+│   │       └── 003_file_metadata_relationships.sql MIME, interaction timestamps, and file relationships
 │   │
 │   ├── evaluator/
 │   │   ├── evaluator.go               Relationship evaluation and result API
@@ -202,6 +206,7 @@ freebooru/
 │       ├── storage.go                Storage config and validation
 │       ├── collections.go            Collection config and tag references
 │       ├── tags.go                   Tag, predefined-value, and relationship models
+│       ├── system_tags.go            Read-only tag-shaped file metadata definitions
 │       ├── tag_validate.go           Tag-local schema validation
 │       ├── tag_validate_test.go      Tag schema and relationship YAML tests
 │       ├── tag_value.go              Typed tag-value validation

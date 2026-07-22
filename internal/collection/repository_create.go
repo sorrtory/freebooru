@@ -59,11 +59,16 @@ func (d *Database) CreateFile(ctx context.Context, input NewFile) (FileRecord, e
 }
 
 func insertFile(ctx context.Context, tx *sql.Tx, input NewFile) (int64, error) {
+	mimeType := input.MIMEType
+	if mimeType == "" {
+		mimeType = "application/octet-stream"
+	}
 	result, err := tx.ExecContext(
 		ctx,
-		"INSERT INTO file (sha256, size_bytes) VALUES (?, ?)",
+		"INSERT INTO file (sha256, size_bytes, mime_type) VALUES (?, ?, ?)",
 		input.SHA256,
 		input.SizeBytes,
+		mimeType,
 	)
 	if err != nil {
 		if errors.Is(err, sqlite3.CONSTRAINT_UNIQUE) {

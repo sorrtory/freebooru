@@ -23,6 +23,9 @@ func TestResolveCanonicalizesAndTypesEverySupportedOperand(t *testing.T) {
 		"rating:SFW",
 		"labels:TWO",
 		"storage:DEFAULT",
+		"filesize>=512",
+		"filetype:image/png",
+		"imported_at>2026-07-22T10:30:00Z",
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -45,6 +48,12 @@ func TestResolveCanonicalizesAndTypesEverySupportedOperand(t *testing.T) {
 		{Tag: "rating", Type: config.TagTypeValue, Operator: Equal, Value: "safe"},
 		{Tag: "labels", Type: config.TagTypeMultivalue, Operator: Equal, Value: "second"},
 		{Tag: "storage", Type: config.TagTypeMultivalue, Operator: Equal, Value: "default"},
+		{Tag: "filesize", Type: config.TagTypeInt, Operator: GreaterEqual, Value: int64(512)},
+		{Tag: "filetype", Type: config.TagTypeText, Operator: Equal, Value: "image/png"},
+		{
+			Tag: "imported_at", Type: config.TagTypeDatetime, Operator: Greater,
+			Value: "2026-07-22T10:30:00Z",
+		},
 	}
 	if !reflect.DeepEqual(resolved.Terms, want) {
 		t.Fatalf("Resolve() terms = %#v, want %#v", resolved.Terms, want)

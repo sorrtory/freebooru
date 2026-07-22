@@ -18,15 +18,17 @@ var (
 
 // FileRecord is one persisted collection file and all of its assignments.
 type FileRecord struct {
-	ID         int64
-	SHA256     string
-	SizeBytes  int64
-	ImportedAt string
-	CreatedAt  string
-	UpdatedAt  string
-	Sources    []SourceRecord
-	Tags       []TagRecord
-	Storages   []string
+	ID                int64
+	SHA256            string
+	SizeBytes         int64
+	MIMEType          string
+	ImportedAt        string
+	CreatedAt         string
+	UpdatedAt         string
+	LastInteractionAt string
+	Sources           []SourceRecord
+	Tags              []TagRecord
+	Storages          []string
 }
 
 // SourceRecord describes one source path observed during import.
@@ -60,6 +62,7 @@ type TagChange struct {
 type NewFile struct {
 	SHA256         string
 	SizeBytes      int64
+	MIMEType       string
 	SourcePath     string
 	SourceFilename string
 	Tags           []TagRecord
@@ -94,16 +97,19 @@ func loadFile(ctx context.Context, reader databaseReader, sha256 string) (FileRe
 	var file FileRecord
 	if err := reader.QueryRowContext(
 		ctx,
-		`SELECT file_id, sha256, size_bytes, imported_at, created_at, updated_at
+		`SELECT file_id, sha256, size_bytes, mime_type, imported_at, created_at,
+		        updated_at, last_interaction_at
 		 FROM file WHERE sha256 = ?`,
 		sha256,
 	).Scan(
 		&file.ID,
 		&file.SHA256,
 		&file.SizeBytes,
+		&file.MIMEType,
 		&file.ImportedAt,
 		&file.CreatedAt,
 		&file.UpdatedAt,
+		&file.LastInteractionAt,
 	); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return FileRecord{}, fmt.Errorf("%w: %s", ErrFileNotFound, sha256)

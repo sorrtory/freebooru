@@ -29,10 +29,11 @@ func TestCatalogAndFileListCommands(t *testing.T) {
 	if output := executeCLI(t, []string{"storage", "list"}); output != "default\n" {
 		t.Fatalf("storage list output = %q", output)
 	}
-	if output := executeCLI(t, []string{"tag", "list"}); output != "reviewed\nstorage\n" {
+	wantTags := "filesize\nfiletype\nimported_at\nlast_interaction_at\nreviewed\nsha256\nstorage\nupdated_at\n"
+	if output := executeCLI(t, []string{"tag", "list"}); output != wantTags {
 		t.Fatalf("tag list output = %q", output)
 	}
-	if output := executeCLI(t, []string{"collection", "main", "tag", "list"}); output != "reviewed\nstorage\n" {
+	if output := executeCLI(t, []string{"collection", "main", "tag", "list"}); output != wantTags {
 		t.Fatalf("explicit tag list output = %q", output)
 	}
 

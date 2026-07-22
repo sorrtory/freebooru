@@ -723,17 +723,17 @@ Acceptance:
 
 ### Starter catalog follow-up
 
-- [ ] Add optional `comment` to tag, predefined value, storage, and collection
+- [x] Add optional `comment` to tag, predefined value, storage, and collection
   configuration and expose it through catalog/UI response models.
-- [ ] Expose core-owned SHA-256, file size, file type/MIME, import time, record
+- [x] Expose core-owned SHA-256, file size, file type/MIME, import time, record
   update time, and last-interaction time as read-only searchable system tags.
-- [ ] Define which actions update last-interaction time so passive background
+- [x] Define which actions update last-interaction time so passive background
   reads do not silently change it.
-- [ ] Detect file type from content during import; do not trust only the source
+- [x] Detect file type from content during import; do not trust only the source
   filename extension.
-- [ ] Specify and migrate a first-class file relationship table with parent,
+- [x] Specify and migrate a first-class file relationship table with parent,
   child, relationship kind, optional comment, and optional display order.
-- [ ] Reject parent/child cycles and distinguish variants from ordered pools.
+- [x] Reject parent/child cycles and distinguish variants from ordered pools.
 
 Acceptance:
 

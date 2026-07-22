@@ -16,9 +16,11 @@ erDiagram
         integer file_id PK
         text sha256 UK
         integer size_bytes
+        text mime_type
         datetime imported_at
         datetime created_at
         datetime updated_at
+        datetime last_interaction_at
     }
 
     FILE_SOURCE {
@@ -54,10 +56,22 @@ erDiagram
         datetime created_at
     }
 
+    FILE_RELATIONSHIP {
+        integer child_file_id PK,FK
+        integer parent_file_id FK
+        text kind
+        text comment
+        integer display_order
+        datetime created_at
+        datetime updated_at
+    }
+
     FILE ||--o{ FILE_SOURCE : observed_as
     FILE ||--o{ FILE_TAG : has
     FILE_TAG ||--o{ FILE_TAG_VALUE : contains
     FILE ||--|{ FILE_STORAGE : stored_in
+    FILE ||--o{ FILE_RELATIONSHIP : parent_of
+    FILE ||--o| FILE_RELATIONSHIP : child_in
 ```
 
 The SQL migration must use the singular table names shown in this diagram.
@@ -66,6 +80,11 @@ The SQL migration must use the singular table names shown in this diagram.
 
 - `FILE.sha256` is the authoritative lowercase SHA-256 content identifier.
   `file_id` is an internal join key.
+- `FILE.mime_type` is detected from the imported bytes, not trusted from the
+  filename extension. SHA-256, byte size, MIME type, and file timestamps are
+  exposed as read-only system tags for search without duplicating `FILE_TAG`.
+- `last_interaction_at` changes on explicit tag, storage, and relationship
+  mutations. Passive reads and searches do not change it.
 - `FILE_SOURCE` records where imported bytes were observed. Source files are
   not storage copies and may no longer exist after import.
 - One `FILE_TAG` row represents one assigned tag. `(file_id, tag_name)` is
@@ -83,6 +102,10 @@ The SQL migration must use the singular table names shown in this diagram.
   and paths are not copied into the database.
 - The built-in `storage` tag is synthesized from `FILE_STORAGE` when building
   evaluator state. It is not duplicated in `FILE_TAG`.
+- `FILE_RELATIONSHIP` gives each child at most one parent. Its kind is
+  `variant`, `alternate`, or `derived`; optional non-negative `display_order`
+  orders siblings. Core rejects self-parenting and all direct or transitive
+  cycles. Deleting either file cascades the relationship.
 
 Foreign keys use cascading deletion for child rows. The migration must add
 checks that make typed value columns unambiguous, plus indexes for tag/value

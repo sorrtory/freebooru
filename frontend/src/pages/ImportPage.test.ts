@@ -6,8 +6,8 @@ import ImportPage from './ImportPage.vue'
 const schema = {
   collection: 'main',
   fields: [
-    { name: 'rating', type: 'value', values: ['safe', 'questionable'], required: true },
-    { name: 'featured', type: 'bool', values: [], required: false },
+    { name: 'rating', type: 'value', comment: 'Content safety rating', values: ['safe', 'questionable'], value_comments: { safe: 'Safe content' }, required: true },
+    { name: 'featured', type: 'bool', comment: '', values: [], value_comments: {}, required: false },
   ],
 }
 const emptyDraft = {
@@ -41,7 +41,7 @@ describe('ImportPage', () => {
   })
 
   it('applies a typed tag and renders the canonical assignment', async () => {
-    const applied = { ...emptyDraft, assignments: [{ name: 'rating', type: 'value', value: 'safe', required: true }], missing_required: [], complete: true }
+    const applied = { ...emptyDraft, assignments: [{ name: 'rating', type: 'value', comment: 'Content safety rating', value: 'safe', required: true }], missing_required: [], complete: true }
     const request = vi.fn().mockResolvedValueOnce(json(schema)).mockResolvedValueOnce(json(emptyDraft)).mockResolvedValueOnce(json(applied))
     vi.stubGlobal('fetch', request)
     const wrapper = mount(ImportPage, { props: { collection: 'main' }, global: { stubs: { RouterLink: true } } })
@@ -56,7 +56,7 @@ describe('ImportPage', () => {
   })
 
   it('submits the selected file after Core marks the draft complete', async () => {
-    const applied = { ...emptyDraft, assignments: [{ name: 'rating', type: 'value', value: 'safe', required: true }], missing_required: [], complete: true }
+    const applied = { ...emptyDraft, assignments: [{ name: 'rating', type: 'value', comment: 'Content safety rating', value: 'safe', required: true }], missing_required: [], complete: true }
     const result = { sha256: 'abcdef1234567890', size_bytes: 4, storages: ['default'], record_created: true, created_copies: ['default'] }
     const request = vi.fn().mockResolvedValueOnce(json(schema)).mockResolvedValueOnce(json(applied)).mockResolvedValueOnce(new Response(JSON.stringify(result), { status: 201 }))
     vi.stubGlobal('fetch', request)

@@ -4,6 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
+	"net/http"
+	"os"
 	"path/filepath"
 
 	"github.com/sorrtory/freebooru/internal/collection"
@@ -38,6 +41,10 @@ func (c *Core) Import(ctx context.Context, request ImportRequest) (result Import
 		return ImportResult{}, errors.Join(err, cleanupStoredCopies(copies))
 	}
 	first := copies[0].file
+	mimeType, err := detectFileType(first.ContentPath)
+	if err != nil {
+		return ImportResult{}, errors.Join(err, cleanupStoredCopies(copies))
+	}
 	sourceFilename := filepath.Base(sourcePath)
 	if request.SourceFilename != "" {
 		sourceFilename = filepath.Base(request.SourceFilename)
@@ -45,6 +52,7 @@ func (c *Core) Import(ctx context.Context, request ImportRequest) (result Import
 	record, err := session.database.CreateFile(ctx, collection.NewFile{
 		SHA256:         first.SHA256,
 		SizeBytes:      first.SizeBytes,
+		MIMEType:       mimeType,
 		SourcePath:     sourcePath,
 		SourceFilename: sourceFilename,
 		Tags:           importTagRecords(c.catalog, prepared.values),
@@ -73,4 +81,20 @@ func (c *Core) Import(ctx context.Context, request ImportRequest) (result Import
 		}
 	}
 	return result, nil
+}
+
+func detectFileType(path string) (mimeType string, err error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return "", fmt.Errorf("open import source for file type detection %q: %w", path, err)
+	}
+	defer func() {
+		err = errors.Join(err, file.Close())
+	}()
+	header := make([]byte, 512)
+	count, readErr := io.ReadFull(file, header)
+	if readErr != nil && !errors.Is(readErr, io.ErrUnexpectedEOF) && !errors.Is(readErr, io.EOF) {
+		return "", fmt.Errorf("read import source for file type detection %q: %w", path, readErr)
+	}
+	return http.DetectContentType(header[:count]), nil
 }

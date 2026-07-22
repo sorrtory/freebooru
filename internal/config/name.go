@@ -2,8 +2,16 @@ package config
 
 import (
 	"fmt"
+	"strings"
 	"unicode"
 )
+
+func verifyComment(comment string) error {
+	if comment != "" && strings.TrimSpace(comment) == "" {
+		return fmt.Errorf("comment must not be blank")
+	}
+	return nil
+}
 
 func verifyName(field, value string) error {
 	if value == "" {

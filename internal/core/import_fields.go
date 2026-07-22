@@ -9,10 +9,12 @@ import (
 
 // ImportField describes one assignment accepted by a collection import.
 type ImportField struct {
-	Name     string
-	Type     config.TagType
-	Values   []string
-	Required bool
+	Name          string
+	Type          config.TagType
+	Comment       string
+	Values        []string
+	ValueComments map[string]string
+	Required      bool
 }
 
 // ImportFields returns a deterministic, side-effect-free import form schema.
@@ -52,14 +54,20 @@ func (c *Core) importFields(collectionName string) ([]ImportField, error) {
 			return nil, fmt.Errorf("tag %q is unavailable", reference.Tag)
 		}
 		values := make([]string, 0, len(tag.Values))
+		valueComments := make(map[string]string)
 		for _, value := range tag.Values {
 			values = append(values, value.Val)
+			if value.Comment != "" {
+				valueComments[value.Val] = value.Comment
+			}
 		}
 		fields = append(fields, ImportField{
-			Name:     tag.Name,
-			Type:     tag.Type,
-			Values:   values,
-			Required: isRequired,
+			Name:          tag.Name,
+			Type:          tag.Type,
+			Comment:       tag.Comment,
+			Values:        values,
+			ValueComments: valueComments,
+			Required:      isRequired,
 		})
 	}
 	if len(storageValues) > 0 {

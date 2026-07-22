@@ -7,13 +7,16 @@ import (
 	"fmt"
 )
 
-const currentSchemaVersion = 2
+const currentSchemaVersion = 3
 
 //go:embed migrations/001_initial.sql
 var initialMigration string
 
 //go:embed migrations/002_collection_state.sql
 var collectionStateMigration string
+
+//go:embed migrations/003_file_metadata_relationships.sql
+var fileMetadataRelationshipsMigration string
 
 // Initialize applies supported collection database migrations.
 func (d *Database) Initialize(ctx context.Context) error {
@@ -41,6 +44,11 @@ func (d *Database) Initialize(ctx context.Context) error {
 	if version < 2 {
 		if _, err := tx.ExecContext(ctx, collectionStateMigration); err != nil {
 			return fmt.Errorf("apply collection schema migration 2: %w", err)
+		}
+	}
+	if version < 3 {
+		if _, err := tx.ExecContext(ctx, fileMetadataRelationshipsMigration); err != nil {
+			return fmt.Errorf("apply collection schema migration 3: %w", err)
 		}
 	}
 	if err := tx.Commit(); err != nil {

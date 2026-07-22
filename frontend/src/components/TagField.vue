@@ -63,12 +63,13 @@ function submit() {
       <label :for="`tag-${field.name}`">{{ field.name }}</label>
       <span>{{ field.type }}{{ field.required ? ' / required' : '' }}</span>
     </div>
+    <p v-if="field.comment" class="field-comment">{{ field.comment }}</p>
     <label v-if="field.type === 'bool'" class="boolean-control" :for="`tag-${field.name}`">
       <input :id="`tag-${field.name}`" type="checkbox" :checked="Boolean(localValue)" @change="updateBoolean">
       Assign this tag
     </label>
     <select v-else-if="field.type === 'value' || field.type === 'multivalue'" :id="`tag-${field.name}`" :multiple="field.type === 'multivalue'" :value="field.type === 'multivalue' ? selectedValues : localValue" @change="updateSelect">
-      <option v-for="option in field.values" :key="option" :value="option">{{ option }}</option>
+      <option v-for="option in field.values" :key="option" :value="option" :title="field.value_comments[option]">{{ option }}</option>
     </select>
     <input v-else-if="field.type === 'int'" :id="`tag-${field.name}`" type="number" step="1" inputmode="numeric" :value="localValue" @input="updateNumber">
     <input v-else :id="`tag-${field.name}`" :type="field.type === 'datetime' ? 'datetime-local' : field.type === 'date' ? 'date' : 'text'" :value="localValue" @input="updateText">
@@ -84,6 +85,7 @@ function submit() {
 <style scoped>
 .tag-editor { display: grid; gap: .75rem; padding: 1rem; border: 1px solid var(--line-strong); border-radius: .35rem; background: var(--panel-raised); }
 .field-heading { display: flex; align-items: baseline; justify-content: space-between; gap: .75rem; }
+.field-comment { margin: 0; color: var(--muted); }
 .field-heading label { font-weight: 700; overflow-wrap: anywhere; }
 .field-heading span { color: var(--muted); font: .68rem var(--mono); letter-spacing: .06em; text-transform: uppercase; }
 input:not([type='checkbox']), select { width: 100%; min-height: 2.75rem; padding: .65rem .75rem; border: 1px solid var(--line-strong); border-radius: .25rem; color: var(--text); background: #111411; }

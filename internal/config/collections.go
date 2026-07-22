@@ -9,6 +9,7 @@ import (
 type CollectionConfig struct {
 	Name     string               `yaml:"name"`
 	Location string               `yaml:"location,omitempty"`
+	Comment  string               `yaml:"comment,omitempty"`
 	Tags     CollectionTagImports `yaml:"tags"`
 }
 
@@ -39,6 +40,7 @@ func DefaultCollectionConfig(app AppConfig) CollectionConfig {
 // StarterCollectionConfig adds the starter tag groups created by init.
 func StarterCollectionConfig(app AppConfig) CollectionConfig {
 	collection := DefaultCollectionConfig(app)
+	collection.Comment = "Default FreeBooru collection"
 	collection.Tags.Import = []TagReference{
 		{Group: "creator"},
 		{Group: "universe"},
@@ -65,6 +67,9 @@ func VerifyCollectionConfig(collection CollectionConfig) error {
 	}
 	if _, err := CollectionLocation(collection); err != nil {
 		return fmt.Errorf("location: %w", err)
+	}
+	if err := verifyComment(collection.Comment); err != nil {
+		return err
 	}
 	if len(collection.Tags.Require) == 0 && len(collection.Tags.Import) == 0 {
 		return fmt.Errorf("tags must contain require or import")

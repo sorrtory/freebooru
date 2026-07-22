@@ -74,6 +74,24 @@ func TestDatabaseSearchMatchesTypedANDTerms(t *testing.T) {
 			want:  []string{"a", "c"},
 		},
 		{
+			name:  "system filesize",
+			terms: []SearchTerm{{Tag: "filesize", Type: "int", Operator: SearchGreaterEqual, Value: int64(20)}},
+			want:  []string{"b", "c"},
+		},
+		{
+			name:  "system filetype",
+			terms: []SearchTerm{{Tag: "filetype", Type: "text", Operator: SearchEqual, Value: "image/png"}},
+			want:  []string{"a", "c"},
+		},
+		{
+			name: "system imported time",
+			terms: []SearchTerm{{
+				Tag: "imported_at", Type: "datetime", Operator: SearchGreater,
+				Value: "2026-01-01T12:00:00Z",
+			}},
+			want: []string{"a", "b"},
+		},
+		{
 			name: "AND combination",
 			terms: []SearchTerm{
 				{Tag: "reviewed", Type: "bool", Operator: SearchPresent},
@@ -173,9 +191,14 @@ func createSearchFile(
 	if reviewed {
 		tags = append(tags, TagRecord{Name: "reviewed", Type: "bool"})
 	}
+	mimeType := "image/png"
+	if hashCharacter == "b" {
+		mimeType = "text/plain"
+	}
 	_, err := database.CreateFile(t.Context(), NewFile{
 		SHA256:         strings.Repeat(hashCharacter, 64),
 		SizeBytes:      score,
+		MIMEType:       mimeType,
 		SourcePath:     "/imports/" + hashCharacter,
 		SourceFilename: hashCharacter,
 		Tags:           tags,

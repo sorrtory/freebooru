@@ -36,14 +36,14 @@ remove_on_upload: false
 
 ## Storage
 
-MVP provider: `{name, type: local, path}`. `name` becomes a value of the built-in
+MVP provider: `{name, type: local, path, comment?}`. `name` becomes a value of the built-in
 multivalue tag `storage`. Assigning/removing values copies/deletes physical
 copies. Removing the last value deletes the indexed file. Multi-storage failure
 rolls back new copies and the DB record and preserves the upload source.
 
 ## Collection
 
-Fields: `name` required, `location` optional, `tags` required. Default location:
+Fields: `name` required, `location` and `comment` optional, `tags` required. Default location:
 `$HOME/.local/share/freebooru/collections/<name>.sqlite`.
 
 `tags.require` and `tags.import` contain objects with exactly one of `tag`,
@@ -53,8 +53,15 @@ unopenable without disabling unrelated collections.
 
 ## Tags
 
-Fields: `name`, `type`, optional `groups`, and conditional `values`. `storage`
-is reserved. Groups are implicit and many-to-many; group/tag names may collide.
+Fields: `name`, `type`, optional `comment`, optional `groups`, and conditional
+`values`. Each predefined value may also have `comment`. `storage` and the
+system metadata names are reserved. Comments must be non-blank when present and
+do not affect validation. Groups are implicit and many-to-many; group/tag names
+may collide.
+
+Reserved read-only system tags are `sha256`, `filesize`, `filetype`,
+`imported_at`, `updated_at`, and `last_interaction_at`. They resolve directly to
+authoritative `file` columns for search and are never accepted as assignments.
 
 - `bool`: presence=true, absence=false.
 - `text`: case-sensitive string.

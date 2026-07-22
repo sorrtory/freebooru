@@ -25,10 +25,12 @@ const (
 
 // ImportFieldResponse describes one typed control in the import workspace.
 type ImportFieldResponse struct {
-	Name     string   `json:"name"`
-	Type     string   `json:"type"`
-	Values   []string `json:"values"`
-	Required bool     `json:"required"`
+	Name          string            `json:"name"`
+	Type          string            `json:"type"`
+	Comment       string            `json:"comment"`
+	Values        []string          `json:"values"`
+	ValueComments map[string]string `json:"value_comments"`
+	Required      bool              `json:"required"`
 }
 
 // ImportSchemaResponse describes every assignment accepted by a collection.
@@ -41,6 +43,7 @@ type ImportSchemaResponse struct {
 type AssignmentResponse struct {
 	Name     string `json:"name"`
 	Type     string `json:"type"`
+	Comment  string `json:"comment"`
 	Value    any    `json:"value"`
 	Required bool   `json:"required"`
 }
@@ -390,6 +393,7 @@ func importDraftResponse(draft core.ImportDraft, fields []core.ImportField) Impo
 		assignments = append(assignments, AssignmentResponse{
 			Name:     field.Name,
 			Type:     string(field.Type),
+			Comment:  field.Comment,
 			Value:    value,
 			Required: field.Required,
 		})
@@ -418,13 +422,23 @@ func importFieldResponses(fields []core.ImportField) []ImportFieldResponse {
 	responses := make([]ImportFieldResponse, 0, len(fields))
 	for _, field := range fields {
 		responses = append(responses, ImportFieldResponse{
-			Name:     field.Name,
-			Type:     string(field.Type),
-			Values:   append([]string{}, field.Values...),
-			Required: field.Required,
+			Name:          field.Name,
+			Type:          string(field.Type),
+			Comment:       field.Comment,
+			Values:        append([]string{}, field.Values...),
+			ValueComments: cloneStringMap(field.ValueComments),
+			Required:      field.Required,
 		})
 	}
 	return responses
+}
+
+func cloneStringMap(values map[string]string) map[string]string {
+	cloned := make(map[string]string, len(values))
+	for key, value := range values {
+		cloned[key] = value
+	}
+	return cloned
 }
 
 func relationshipResponses(edges []config.Edge) []RelationshipResponse {

@@ -9,7 +9,7 @@ const emit = defineEmits<{ apply: [name: string, value: TagValue]; remove: [name
 const editing = shallowRef('')
 
 function fieldFor(assignment: Assignment, fields: ImportField[]): ImportField {
-  return fields.find((field) => field.name === assignment.name) ?? { ...assignment, values: [] }
+  return fields.find((field) => field.name === assignment.name) ?? { ...assignment, values: [], value_comments: {} }
 }
 </script>
 

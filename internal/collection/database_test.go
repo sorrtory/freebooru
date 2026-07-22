@@ -105,8 +105,8 @@ func TestDatabaseUpgradesSchemaOne(t *testing.T) {
 	if err != nil {
 		t.Fatalf("schemaVersion() error = %v", err)
 	}
-	if version != 2 {
-		t.Fatalf("schemaVersion() = %d, want 2", version)
+	if version != currentSchemaVersion {
+		t.Fatalf("schemaVersion() = %d, want %d", version, currentSchemaVersion)
 	}
 	for _, table := range []string{
 		"file",
@@ -114,6 +114,7 @@ func TestDatabaseUpgradesSchemaOne(t *testing.T) {
 		"file_tag",
 		"file_tag_value",
 		"file_storage",
+		"file_relationship",
 	} {
 		if !tableExists(t, database.db, table) {
 			t.Errorf("table %q does not exist", table)

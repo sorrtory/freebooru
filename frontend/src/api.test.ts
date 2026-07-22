@@ -115,7 +115,7 @@ describe('getStatus', () => {
 
 describe('import workspace API', () => {
   it('loads the explicit collection schema', async () => {
-    const body = { collection: 'Main Archive', fields: [{ name: 'rating', type: 'value', values: ['safe'], required: true }] }
+    const body = { collection: 'Main Archive', fields: [{ name: 'rating', type: 'value', comment: 'Safety rating', values: ['safe'], value_comments: { safe: 'Safe content' }, required: true }] }
     const request = vi.fn<typeof fetch>().mockResolvedValue(new Response(JSON.stringify(body), { status: 200 }))
 
     await expect(getImportSchema('Main Archive', request)).resolves.toEqual(body)
@@ -123,7 +123,7 @@ describe('import workspace API', () => {
   })
 
   it('evaluates typed assignments', async () => {
-    const body = { collection: 'main', assignments: [{ name: 'pages', type: 'int', value: 3, required: false }], missing_required: [], missing_demands: [], active_conflicts: [], suggestions: [], complete: true }
+    const body = { collection: 'main', assignments: [{ name: 'pages', type: 'int', comment: '', value: 3, required: false }], missing_required: [], missing_demands: [], active_conflicts: [], suggestions: [], complete: true }
     const request = vi.fn<typeof fetch>().mockResolvedValue(new Response(JSON.stringify(body), { status: 200 }))
 
     await expect(evaluateImportDraft('main', { pages: 3 }, undefined, request)).resolves.toEqual(body)

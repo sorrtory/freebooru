@@ -125,7 +125,13 @@ freebooru-cli search '!blocked' rating:safe labels:portrait
 freebooru-cli search 'score>=10'
 freebooru-cli search 'published>=2026-01-01'
 freebooru-cli search 'captured<2026-07-23T12:00:00Z'
+freebooru-cli search 'filetype:image/png' 'filesize>=1048576'
+freebooru-cli search 'imported_at>=2026-01-01T00:00:00Z'
 ```
+
+`sha256`, `filesize`, `filetype`, `imported_at`, `updated_at`, and
+`last_interaction_at` are read-only system tags backed by file metadata. They
+use equality and ordered comparison syntax where their types allow it.
 
 Storage uses the tag command surface. Adding a value copies content; removing
 one deletes that copy. Removing the last value also deletes the indexed file:

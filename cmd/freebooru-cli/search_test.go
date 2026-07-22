@@ -45,6 +45,15 @@ func TestSearchCommandsReturnPersistedMatches(t *testing.T) {
 	if output := executeCLI(t, []string{"search", "category:SFW"}); output != matchedHash+"\n" {
 		t.Fatalf("alias search output = %q", output)
 	}
+	if output := executeCLI(t, []string{"search", "sha256:" + matchedHash}); output != matchedHash+"\n" {
+		t.Fatalf("SHA-256 system search output = %q", output)
+	}
+	if output := executeCLI(t, []string{"search", fmt.Sprintf("filesize:%d", len(matched))}); output != matchedHash+"\n" {
+		t.Fatalf("filesize system search output = %q", output)
+	}
+	if output := executeCLI(t, []string{"search", "filetype:text/plain; charset=utf-8", "reviewed"}); output != matchedHash+"\n" {
+		t.Fatalf("filetype system search output = %q", output)
+	}
 	if output := executeCLI(t, []string{"tag", matchedHash, "get"}); !strings.Contains(output, "category:safe\n") {
 		t.Fatalf("canonical tag output = %q", output)
 	}

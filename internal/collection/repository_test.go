@@ -37,6 +37,47 @@ func TestDatabaseCreateAndLoadFile(t *testing.T) {
 	}
 }
 
+func TestExplicitMutationTouchesInteractionButReadDoesNot(t *testing.T) {
+	database := openInitializedTestDatabase(t)
+	hash := strings.Repeat("9", 64)
+	if _, err := database.CreateFile(t.Context(), NewFile{
+		SHA256: hash, SizeBytes: 1, SourcePath: "/imports/touch",
+		SourceFilename: "touch", Storages: []string{"default"},
+	}); err != nil {
+		t.Fatalf("CreateFile() error = %v", err)
+	}
+	const old = "2000-01-01 00:00:00"
+	if _, err := database.db.ExecContext(
+		t.Context(),
+		"UPDATE file SET updated_at = ?, last_interaction_at = ? WHERE sha256 = ?",
+		old,
+		old,
+		hash,
+	); err != nil {
+		t.Fatalf("set old interaction time: %v", err)
+	}
+	if _, err := database.File(t.Context(), hash); err != nil {
+		t.Fatalf("passive File() error = %v", err)
+	}
+	passive, err := database.File(t.Context(), hash)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if passive.LastInteractionAt != old {
+		t.Fatalf("passive read changed interaction time to %q", passive.LastInteractionAt)
+	}
+	if _, err := database.AddTag(t.Context(), hash, TagRecord{Name: "reviewed", Type: "bool"}); err != nil {
+		t.Fatalf("AddTag() error = %v", err)
+	}
+	mutated, err := database.File(t.Context(), hash)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if mutated.LastInteractionAt == old || mutated.UpdatedAt == old {
+		t.Fatalf("mutation timestamps = %#v", mutated)
+	}
+}
+
 func TestDatabaseCreateFileRollsBackSourceFailure(t *testing.T) {
 	database := openInitializedTestDatabase(t)
 	hash := strings.Repeat("b", 64)

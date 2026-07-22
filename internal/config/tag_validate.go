@@ -11,11 +11,14 @@ func VerifyTagConfig(tag TagConfig) error {
 	if err := verifyName("name", tag.Name); err != nil {
 		return err
 	}
-	if strings.EqualFold(tag.Name, "storage") {
+	if isReservedTagName(tag.Name) {
 		return fmt.Errorf("name %q is reserved", tag.Name)
 	}
 	if !validTagType(tag.Type) {
 		return fmt.Errorf("type %q is not supported", tag.Type)
+	}
+	if err := verifyComment(tag.Comment); err != nil {
+		return err
 	}
 	if err := verifyUniqueNames("groups", tag.Groups); err != nil {
 		return err
@@ -24,6 +27,14 @@ func VerifyTagConfig(tag TagConfig) error {
 		return err
 	}
 	return verifyRelationships(tag)
+}
+
+func isReservedTagName(name string) bool {
+	if normalizeName(name) == "storage" {
+		return true
+	}
+	_, reserved := SystemTag(name)
+	return reserved
 }
 
 func validTagType(tagType TagType) bool {
@@ -57,6 +68,9 @@ func verifyValues(tag TagConfig) error {
 		}
 		if err := registerValueIdentity(identities, value.Val); err != nil {
 			return fmt.Errorf("values[%d].val: %w", index, err)
+		}
+		if err := verifyComment(value.Comment); err != nil {
+			return fmt.Errorf("values[%d]: %w", index, err)
 		}
 		for aliasIndex, alias := range value.Aliases {
 			if err := verifyName("alias", alias); err != nil {

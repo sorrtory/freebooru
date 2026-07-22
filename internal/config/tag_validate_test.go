@@ -33,6 +33,8 @@ func TestVerifyTagConfigRejectsInvalidLocalRules(t *testing.T) {
 		want string
 	}{
 		{name: "reserved", tag: TagConfig{Name: "Storage", Type: TagTypeBool}, want: "reserved"},
+		{name: "system reserved", tag: TagConfig{Name: "filetype", Type: TagTypeText}, want: "reserved"},
+		{name: "blank comment", tag: TagConfig{Name: "artist", Type: TagTypeText, Comment: "  "}, want: "comment"},
 		{name: "type", tag: TagConfig{Name: "artist", Type: "number"}, want: "not supported"},
 		{name: "missing values", tag: TagConfig{Name: "rating", Type: TagTypeValue}, want: "values are required"},
 		{
@@ -93,6 +95,15 @@ func TestVerifyTagConfigRejectsInvalidLocalRules(t *testing.T) {
 				Values: []PredefinedValue{{Val: "cirno", Aliases: []string{"ice fairy"}}},
 			},
 			want: "invalid character",
+		},
+		{
+			name: "blank value comment",
+			tag: TagConfig{
+				Name:   "character",
+				Type:   TagTypeValue,
+				Values: []PredefinedValue{{Val: "cirno", Comment: "\t"}},
+			},
+			want: "comment",
 		},
 		{
 			name: "missing relationship target",
