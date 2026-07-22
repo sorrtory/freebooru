@@ -400,6 +400,10 @@ Rules:
 The initial UI imports one file at a time. Batch upload and progress/resume are
 separate follow-up contracts.
 
+The interactive draft, three-area tagging workspace, relationship
+visualization, and side-effect-free evaluation workflow are specified in
+[gui-import.ai.md](./gui-import.ai.md).
+
 ## Error contract
 
 New library endpoints use one structured envelope:
@@ -449,6 +453,7 @@ HTML fallback.
 | file content | storage paths are internal | add streamed content-opening workflow |
 | import schema | `Core.ImportFields` | expose required/type/value DTOs |
 | upload/import | path-based `Core.Import` | explicit source filename and temp-upload adapter |
+| import draft evaluation | evaluator exists internally | add side-effect-free canonical draft/evaluation workflow |
 | tag completion | `SearchCollectionTags` | bounded DTO mapping |
 | allowed values | `AllowedValues` | structured reason DTO mapping |
 | tag mutation | `SetTag`/`RemoveTag` | conditional revision check in transaction |
@@ -514,6 +519,9 @@ viewed without exposing storage paths.
 
 ### Phase 4: one-file import
 
+- [ ] Implement the interaction and responsive behavior in
+  [gui-import.ai.md](./gui-import.ai.md).
+- [ ] Add side-effect-free Core and HTTP import-draft evaluation.
 - [ ] Extend Core import metadata for the original display filename.
 - [ ] Add import schema and streaming multipart endpoint with limits/cleanup.
 - [ ] Map duplicate and validation errors.

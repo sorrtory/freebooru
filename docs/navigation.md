@@ -229,6 +229,7 @@ freebooru/
     ├── navigation.md                 This file map
     ├── cli.md                        Human CLI reference
     ├── gui.md                        Human web and Wails setup notes
+    ├── gui-import.ai.md              Typed three-area import workspace UX contract
     ├── http-server.md                Human HTTP server reference
     ├── config-example.md             Human configuration examples
     ├── config-spec.md                Human configuration field reference
