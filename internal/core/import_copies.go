@@ -20,6 +20,27 @@ func storeImportCopies(
 	sourcePath string,
 	providers []config.StorageProvider,
 ) ([]storedCopy, error) {
+	return storeImportCopiesWith(ctx, sourcePath, providers, func(
+		ctx context.Context,
+		backend *contentstorage.Local,
+		path string,
+	) (contentstorage.StoredFile, error) {
+		return backend.Store(ctx, path)
+	})
+}
+
+type storeContent func(
+	context.Context,
+	*contentstorage.Local,
+	string,
+) (contentstorage.StoredFile, error)
+
+func storeImportCopiesWith(
+	ctx context.Context,
+	sourcePath string,
+	providers []config.StorageProvider,
+	store storeContent,
+) ([]storedCopy, error) {
 	copies := make([]storedCopy, 0, len(providers))
 	destinations := make(map[string]string, len(providers))
 	copySource := sourcePath
@@ -32,7 +53,7 @@ func storeImportCopies(
 		if err != nil {
 			return copies, fmt.Errorf("create storage %q backend: %w", provider.Name, err)
 		}
-		stored, err := backend.Store(ctx, copySource)
+		stored, err := store(ctx, backend, copySource)
 		if err != nil {
 			return copies, fmt.Errorf("store content in %q: %w", provider.Name, err)
 		}

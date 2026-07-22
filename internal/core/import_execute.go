@@ -47,6 +47,13 @@ func (c *Core) Import(ctx context.Context, request ImportRequest) (result Import
 		Storages:       storageNamesFromProviders(prepared.storages),
 	})
 	if err != nil {
+		// A concurrent importer may commit after this operation created the
+		// shared content path. The uniqueness loser cannot safely delete that
+		// path because the winner may already reference it. An unreferenced copy
+		// is permitted safe garbage; a referenced missing copy is not.
+		if errors.Is(err, collection.ErrDuplicateFile) {
+			return ImportResult{}, err
+		}
 		return ImportResult{}, errors.Join(err, cleanupStoredCopies(copies))
 	}
 	result = ImportResult{

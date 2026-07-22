@@ -122,6 +122,9 @@ A process crash may leave staged or finalized content that is not referenced by
 SQLite. Such content is safe garbage: normal operations ignore it, and automatic
 orphan cleanup is outside the MVP. A crash must not cause source deletion before
 a successful import commit or commit a row for a copy that was not finalized.
+Likewise, a concurrent duplicate-import loser does not delete finalized content:
+the winning transaction may already reference that path. Any resulting orphan is
+handled by the same safe-garbage policy.
 
 ## Encryption boundary
 

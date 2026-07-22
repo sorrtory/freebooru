@@ -7,6 +7,8 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"strings"
+	"sync"
 	"testing"
 
 	"github.com/sorrtory/freebooru/internal/collection"
@@ -108,6 +110,16 @@ func TestImportRollsBackNewCopyAfterDatabaseFailure(t *testing.T) {
 	if err := os.WriteFile(source, contents, 0o600); err != nil {
 		t.Fatal(err)
 	}
+	database.onCreateFile = func(input collection.NewFile) {
+		root, err := config.ExpandPath(app.config.DefaultStoragePath)
+		if err != nil {
+			t.Errorf("expand storage path: %v", err)
+			return
+		}
+		if _, err := os.Stat(filepath.Join(root, input.SHA256[:2], input.SHA256)); err != nil {
+			t.Errorf("physical copy was not finalized before SQL mutation: %v", err)
+		}
+	}
 	_, err := app.Import(t.Context(), ImportRequest{
 		SourcePath: source,
 		Tags:       map[string]any{"rating": "safe"},
@@ -126,6 +138,191 @@ func TestImportRollsBackNewCopyAfterDatabaseFailure(t *testing.T) {
 	}
 	if _, statErr := os.Stat(source); statErr != nil {
 		t.Fatalf("source changed after rollback: %v", statErr)
+	}
+}
+
+func TestImportPreservesSourceModifiedAfterCommit(t *testing.T) {
+	app := newImportTestCore(t)
+	app.config.RemoveOnUpload = true
+	database := &fakeDatabase{}
+	app.open = func(context.Context, string) (CollectionDatabase, error) {
+		return database, nil
+	}
+	source := filepath.Join(t.TempDir(), "modified.txt")
+	original := []byte("original import bytes")
+	modified := []byte("modified during import")
+	if err := os.WriteFile(source, original, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	database.onCreateFile = func(collection.NewFile) {
+		if err := os.WriteFile(source, modified, 0o600); err != nil {
+			t.Errorf("modify source: %v", err)
+		}
+	}
+	result, err := app.Import(t.Context(), ImportRequest{
+		SourcePath: source,
+		Tags:       map[string]any{"rating": "safe"},
+	})
+	if err == nil || !strings.Contains(err.Error(), "source changed after import") {
+		t.Fatalf("Import() error = %v, want changed source error", err)
+	}
+	if database.created == nil || result.SHA256 == "" {
+		t.Fatalf("committed import = %#v, result = %#v", database.created, result)
+	}
+	got, readErr := os.ReadFile(source)
+	if readErr != nil {
+		t.Fatalf("read preserved source: %v", readErr)
+	}
+	if string(got) != string(modified) {
+		t.Fatalf("source = %q, want modified bytes", got)
+	}
+	root, expandErr := config.ExpandPath(app.config.DefaultStoragePath)
+	if expandErr != nil {
+		t.Fatal(expandErr)
+	}
+	stored, readErr := os.ReadFile(filepath.Join(root, result.SHA256[:2], result.SHA256))
+	if readErr != nil {
+		t.Fatalf("read committed copy: %v", readErr)
+	}
+	if string(stored) != string(original) {
+		t.Fatalf("stored copy = %q, want original bytes", stored)
+	}
+}
+
+func TestConcurrentDuplicateImportsKeepWinningCopy(t *testing.T) {
+	first := newRealImportTestCore(t)
+	second, err := New(testLogger(), first.paths, func(
+		ctx context.Context,
+		path string,
+	) (CollectionDatabase, error) {
+		return collection.Open(ctx, path)
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := second.LoadConfig(t.Context()); err != nil {
+		t.Fatal(err)
+	}
+	if diagnostics := second.CheckConfig(t.Context()); diagnostics.HasErrors() {
+		t.Fatalf("second CheckConfig() diagnostics = %#v", diagnostics)
+	}
+	source := filepath.Join(t.TempDir(), "concurrent.txt")
+	contents := []byte("identical concurrent import")
+	if err := os.WriteFile(source, contents, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	type outcome struct {
+		result ImportResult
+		err    error
+	}
+	start := make(chan struct{})
+	outcomes := make(chan outcome, 2)
+	var group sync.WaitGroup
+	for _, app := range []*Core{first, second} {
+		group.Go(func() {
+			<-start
+			result, err := app.Import(t.Context(), ImportRequest{
+				SourcePath: source,
+				Tags:       map[string]any{"rating": "safe"},
+			})
+			outcomes <- outcome{result: result, err: err}
+		})
+	}
+	close(start)
+	group.Wait()
+	close(outcomes)
+	successes := 0
+	duplicates := 0
+	var hash string
+	for found := range outcomes {
+		switch {
+		case found.err == nil:
+			successes++
+			hash = found.result.SHA256
+		case errors.Is(found.err, collection.ErrDuplicateFile):
+			duplicates++
+		default:
+			t.Fatalf("concurrent Import() error = %v", found.err)
+		}
+	}
+	if successes != 1 || duplicates != 1 {
+		t.Fatalf("outcomes: successes = %d, duplicates = %d", successes, duplicates)
+	}
+	database := openDefaultCollectionDatabase(t, first)
+	if _, err := database.File(t.Context(), hash); err != nil {
+		t.Fatalf("winning database row: %v", err)
+	}
+	root, err := config.ExpandPath(first.config.DefaultStoragePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(filepath.Join(root, hash[:2], hash)); err != nil {
+		t.Fatalf("winning physical copy: %v", err)
+	}
+}
+
+func TestRestartIgnoresStageAndAdoptsValidFinalizedOrphan(t *testing.T) {
+	first := newRealImportTestCore(t)
+	root, err := config.ExpandPath(first.config.DefaultStoragePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(root, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	stage := filepath.Join(root, ".freebooru-stage-orphan")
+	if err := os.WriteFile(stage, []byte("unfinished"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	contents := []byte("finalized orphan")
+	hashBytes := sha256.Sum256(contents)
+	hash := hex.EncodeToString(hashBytes[:])
+	finalized := filepath.Join(root, hash[:2], hash)
+	if err := os.MkdirAll(filepath.Dir(finalized), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(finalized, contents, 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	restarted, err := New(testLogger(), first.paths, func(
+		ctx context.Context,
+		path string,
+	) (CollectionDatabase, error) {
+		return collection.Open(ctx, path)
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := restarted.LoadConfig(t.Context()); err != nil {
+		t.Fatal(err)
+	}
+	if diagnostics := restarted.CheckConfig(t.Context()); diagnostics.HasErrors() {
+		t.Fatalf("CheckConfig() diagnostics = %#v", diagnostics)
+	}
+	source := filepath.Join(t.TempDir(), "source")
+	if err := os.WriteFile(source, contents, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	result, err := restarted.Import(t.Context(), ImportRequest{
+		SourcePath: source,
+		Tags:       map[string]any{"rating": "safe"},
+	})
+	if err != nil {
+		t.Fatalf("Import() after restart error = %v", err)
+	}
+	if result.SHA256 != hash || len(result.CreatedCopies) != 0 {
+		t.Fatalf("Import() = %#v, want adopted finalized orphan", result)
+	}
+	if _, err := os.Stat(stage); err != nil {
+		t.Fatalf("stage was not ignored: %v", err)
+	}
+	if _, err := os.Stat(finalized); err != nil {
+		t.Fatalf("finalized orphan disappeared: %v", err)
+	}
+	database := openDefaultCollectionDatabase(t, restarted)
+	if _, err := database.File(t.Context(), hash); err != nil {
+		t.Fatalf("adopted database row: %v", err)
 	}
 }
 

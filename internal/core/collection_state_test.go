@@ -1,10 +1,13 @@
 package core
 
 import (
+	"context"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/sorrtory/freebooru/internal/collection"
+	"github.com/sorrtory/freebooru/internal/evaluator"
 )
 
 func TestPersistedFileStateLoadsTypedAssignments(t *testing.T) {
@@ -36,6 +39,65 @@ func TestPersistedFileStateLoadsTypedAssignments(t *testing.T) {
 		if !assigned || !reflect.DeepEqual(got, want) {
 			t.Errorf("Value(%q) = %#v, %t, want %#v, true", name, got, assigned, want)
 		}
+	}
+}
+
+func TestPersistedFileStateEvaluatesEveryRelationshipKind(t *testing.T) {
+	app := newImportTestCore(t)
+	references, ok := app.catalog.CollectionReferences("main")
+	if !ok {
+		t.Fatal("main collection references are unavailable")
+	}
+	rating := "safe"
+	state, err := persistedFileState(collection.FileRecord{
+		SHA256: strings.Repeat("a", 64),
+		Tags: []collection.TagRecord{
+			{Name: "reviewed", Type: "bool"},
+			{Name: "rating", Type: "value", TextValue: &rating},
+			{Name: "trigger", Type: "bool"},
+		},
+		Storages: []string{"default"},
+	}, app.catalog, newCollectionAvailability(references))
+	if err != nil {
+		t.Fatalf("persistedFileState() error = %v", err)
+	}
+	checker, err := evaluator.New(app.catalog, app.graph)
+	if err != nil {
+		t.Fatal(err)
+	}
+	result := checker.ValidateFile(state)
+	if len(result.MissingDemands) != 1 ||
+		result.MissingDemands[0].Reason != "triggered files need a title" {
+		t.Fatalf("missing demands = %#v", result.MissingDemands)
+	}
+	if len(result.ActiveConflicts) != 1 ||
+		result.ActiveConflicts[0].Reason != "trigger conflicts with reviewed" {
+		t.Fatalf("active conflicts = %#v", result.ActiveConflicts)
+	}
+	if len(result.Suggestions) != 1 ||
+		result.Suggestions[0].Reason != "a score would help" {
+		t.Fatalf("suggestions = %#v", result.Suggestions)
+	}
+}
+
+func TestOpenCollectionRejectsMissingRequiredPersistedTag(t *testing.T) {
+	app := newImportTestCore(t)
+	database := &fakeDatabase{files: []collection.FileRecord{{
+		SHA256: strings.Repeat("b", 64),
+		Tags:   []collection.TagRecord{{Name: "reviewed", Type: "bool"}},
+		Storages: []string{
+			"default",
+		},
+	}}}
+	app.open = func(context.Context, string) (CollectionDatabase, error) {
+		return database, nil
+	}
+	err := app.OpenCollection(t.Context(), "main")
+	if err == nil || !strings.Contains(err.Error(), "required tag \"rating\"") {
+		t.Fatalf("OpenCollection() error = %v", err)
+	}
+	if !database.closed {
+		t.Fatal("invalid persisted collection database was not closed")
 	}
 }
 

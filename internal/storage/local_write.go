@@ -87,7 +87,10 @@ func (s *Local) Store(ctx context.Context, sourcePath string) (result StoredFile
 	if err := os.MkdirAll(filepath.Dir(destination), 0o755); err != nil {
 		return StoredFile{}, fmt.Errorf("create content shard: %w", err)
 	}
-	if err := os.Rename(stagedPath, destination); err != nil {
+	// Link publishes without replacing an existing content path. The staged
+	// name is removed by the deferred cleanup, leaving one ordinary link at the
+	// destination while concurrent publishers can distinguish who created it.
+	if err := os.Link(stagedPath, destination); err != nil {
 		verifyErr := verifyStoredContent(ctx, destination, hash, size)
 		if verifyErr == nil {
 			return stored, nil

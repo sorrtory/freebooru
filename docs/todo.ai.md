@@ -650,16 +650,16 @@ Acceptance:
 
 - [x] Test simultaneous GUI-like and CLI-like database connections.
 - [x] Test busy-timeout behavior and transaction contention.
-- [ ] Test source modification during import.
-- [ ] Test cancellation during hashing, each copy, and SQL mutation.
-- [ ] Test multi-storage failure after each copy.
-- [ ] Test SQL failure after physical copies are finalized.
-- [ ] Test duplicate concurrent imports of identical content.
-- [ ] Test restart handling of orphaned staged/finalized copies under the Phase
+- [x] Test source modification during import.
+- [x] Test cancellation during hashing, each copy, and SQL mutation.
+- [x] Test multi-storage failure after each copy.
+- [x] Test SQL failure after physical copies are finalized.
+- [x] Test duplicate concurrent imports of identical content.
+- [x] Test restart handling of orphaned staged/finalized copies under the Phase
   13 crash policy.
-- [ ] Test removing one of several copies and the final copy.
-- [ ] Test required tags and every relationship against persisted state.
-- [ ] Run race tests where supported.
+- [x] Test removing one of several copies and the final copy.
+- [x] Test required tags and every relationship against persisted state.
+- [x] Run race tests where supported.
 
 Acceptance:
 

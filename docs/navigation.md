@@ -75,12 +75,13 @@ freebooru/
 │   │   ├── file.go                   Validated collection file lookup workflow
 │   │   ├── file_test.go              File lookup and database lifecycle tests
 │   │   ├── collection_state.go       Persisted state conversion and integrity checks
-│   │   ├── collection_state_test.go  Persisted type conversion tests
+│   │   ├── collection_state_test.go  Persisted types, requirements, and relationship tests
 │   │   ├── core_test.go              Workflow and database lifecycle tests
 │   │   ├── import.go                  Import request preparation and validation
 │   │   ├── import_execute.go          Physical and SQLite import transaction workflow
 │   │   ├── import_execute_test.go     Import persistence and rollback tests
 │   │   ├── import_copies.go           Multi-storage copy and rollback coordination
+│   │   ├── import_copies_test.go      Per-copy failure and cancellation cleanup tests
 │   │   ├── import_record.go           Typed import-to-database conversion
 │   │   ├── import_source.go           Verified remove-on-upload handling
 │   │   ├── import_test.go             Import defaults and validation tests

@@ -24,6 +24,7 @@ type fakeDatabase struct {
 	files                    []collection.FileRecord
 	createErr                error
 	created                  *collection.NewFile
+	onCreateFile             func(collection.NewFile)
 	addedTag                 *collection.TagRecord
 	setTag                   *collection.TagRecord
 	removedTag               string
@@ -78,6 +79,9 @@ func (d *fakeDatabase) CreateFile(
 ) (collection.FileRecord, error) {
 	inputCopy := input
 	d.created = &inputCopy
+	if d.onCreateFile != nil {
+		d.onCreateFile(inputCopy)
+	}
 	if d.createErr != nil {
 		return collection.FileRecord{}, d.createErr
 	}
