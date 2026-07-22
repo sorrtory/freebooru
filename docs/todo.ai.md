@@ -480,7 +480,7 @@ Keep SQL and row conversion inside `internal/collection`.
 - [x] Record the initial source observation without making it part of content
   identity or changing an existing record on duplicate import.
 - [x] Load one file with every typed tag and storage assignment.
-- [ ] Stream every persisted assignment for collection-open integrity checks
+- [x] Stream every persisted assignment for collection-open integrity checks
   without loading the complete collection into memory.
 - [x] Add, replace, and remove typed tag values transactionally.
 - [x] Add and remove logical storage assignments transactionally.

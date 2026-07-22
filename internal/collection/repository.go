@@ -82,8 +82,17 @@ func (e *DuplicateFileError) Unwrap() error {
 
 // File loads one file and every persisted source, tag, and storage assignment.
 func (d *Database) File(ctx context.Context, sha256 string) (FileRecord, error) {
+	return loadFile(ctx, d.db, sha256)
+}
+
+type databaseReader interface {
+	QueryContext(context.Context, string, ...any) (*sql.Rows, error)
+	QueryRowContext(context.Context, string, ...any) *sql.Row
+}
+
+func loadFile(ctx context.Context, reader databaseReader, sha256 string) (FileRecord, error) {
 	var file FileRecord
-	if err := d.db.QueryRowContext(
+	if err := reader.QueryRowContext(
 		ctx,
 		`SELECT file_id, sha256, size_bytes, imported_at, created_at, updated_at
 		 FROM file WHERE sha256 = ?`,
@@ -101,20 +110,20 @@ func (d *Database) File(ctx context.Context, sha256 string) (FileRecord, error) 
 		}
 		return FileRecord{}, fmt.Errorf("query file %q: %w", sha256, err)
 	}
-	if err := d.loadSources(ctx, &file); err != nil {
+	if err := loadSources(ctx, reader, &file); err != nil {
 		return FileRecord{}, err
 	}
-	if err := d.loadTags(ctx, &file); err != nil {
+	if err := loadTags(ctx, reader, &file); err != nil {
 		return FileRecord{}, err
 	}
-	if err := d.loadStorages(ctx, &file); err != nil {
+	if err := loadStorages(ctx, reader, &file); err != nil {
 		return FileRecord{}, err
 	}
 	return file, nil
 }
 
-func (d *Database) loadSources(ctx context.Context, file *FileRecord) (err error) {
-	rows, err := d.db.QueryContext(
+func loadSources(ctx context.Context, reader databaseReader, file *FileRecord) (err error) {
+	rows, err := reader.QueryContext(
 		ctx,
 		`SELECT source_path, filename, observed_at FROM file_source
 		 WHERE file_id = ? ORDER BY observed_at, file_source_id`,
@@ -139,8 +148,8 @@ func (d *Database) loadSources(ctx context.Context, file *FileRecord) (err error
 	return nil
 }
 
-func (d *Database) loadTags(ctx context.Context, file *FileRecord) (err error) {
-	rows, err := d.db.QueryContext(
+func loadTags(ctx context.Context, reader databaseReader, file *FileRecord) (err error) {
+	rows, err := reader.QueryContext(
 		ctx,
 		`SELECT tag.file_tag_id, tag.tag_name, tag.tag_type,
 		        tag.text_value, tag.integer_value, value.value
@@ -189,8 +198,8 @@ func (d *Database) loadTags(ctx context.Context, file *FileRecord) (err error) {
 	return nil
 }
 
-func (d *Database) loadStorages(ctx context.Context, file *FileRecord) (err error) {
-	rows, err := d.db.QueryContext(
+func loadStorages(ctx context.Context, reader databaseReader, file *FileRecord) (err error) {
+	rows, err := reader.QueryContext(
 		ctx,
 		`SELECT storage_name FROM file_storage
 		 WHERE file_id = ? ORDER BY storage_name`,
