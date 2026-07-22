@@ -38,6 +38,8 @@ type Application interface {
 	Search(context.Context, core.FileSearchRequest) ([]collection.FileRecord, error)
 	GetFile(context.Context, string, string) (collection.FileRecord, error)
 	OpenFileContent(context.Context, string, string) (core.FileContent, error)
+	SetTag(context.Context, core.TagMutationRequest) (core.TagMutationResult, error)
+	RemoveTag(context.Context, core.TagRemovalRequest) (core.TagMutationResult, error)
 }
 
 // DiagnosticResponse is one configuration problem exposed to the frontend.

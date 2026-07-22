@@ -111,7 +111,7 @@ func handleCollectionRequest(response http.ResponseWriter, request *http.Request
 		handleCollectionInfo(response, request, app, parts[0])
 		return
 	}
-	if len(parts) >= 2 && len(parts) <= 4 && parts[1] == "files" {
+	if len(parts) >= 2 && len(parts) <= 5 && parts[1] == "files" {
 		handleFiles(response, request, app, parts[0], parts)
 		return
 	}

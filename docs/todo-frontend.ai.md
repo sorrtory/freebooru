@@ -344,10 +344,10 @@ in presentation components.
 
 - [ ] Complete file detail, ETag/revision, assignment mutation, relationship
   error, and storage confirmation contracts.
-- [ ] Implement preview, metadata, assignment list, and edit modes.
-- [ ] Reuse and refine the typed `TagField` controls from Import.
-- [ ] Implement accessible `ValueCombobox` for value and multivalue tags.
-- [ ] Preserve originating search/all-files navigation state.
+- [x] Implement preview, metadata, assignment list, and edit modes.
+- [x] Reuse and refine the typed `TagField` controls from Import.
+- [x] Implement accessible `ValueCombobox` for value and multivalue tags.
+- [x] Preserve originating search/all-files navigation state.
 - [ ] Test every tag type, demands, conflicts, stale revisions, and last-copy
   storage removal.
 - [ ] Commit this phase independently.

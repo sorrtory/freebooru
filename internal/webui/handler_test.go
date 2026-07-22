@@ -62,6 +62,12 @@ func (staticApplication) GetFile(context.Context, string, string) (collection.Fi
 func (staticApplication) OpenFileContent(context.Context, string, string) (core.FileContent, error) {
 	return core.FileContent{}, nil
 }
+func (staticApplication) SetTag(context.Context, core.TagMutationRequest) (core.TagMutationResult, error) {
+	return core.TagMutationResult{}, nil
+}
+func (staticApplication) RemoveTag(context.Context, core.TagRemovalRequest) (core.TagMutationResult, error) {
+	return core.TagMutationResult{}, nil
+}
 
 func TestHandlerServesAssetsAndSPAFallback(t *testing.T) {
 	assets := fstest.MapFS{

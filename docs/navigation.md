@@ -57,6 +57,7 @@ freebooru/
 │       │   ├── CollectionsPage.vue   Collection chooser and creation flow
 │       │   ├── CollectionOverviewPage.vue Collection landing actions and summary
 │       │   ├── FilesPage.vue         Collection-wide file browser
+│       │   ├── FileDetailPage.vue    Preview, metadata, and typed tag editing
 │       │   ├── SearchPage.vue        URL-backed tag search
 │       │   ├── ImportPage.vue        Responsive three-area import workspace
 │       │   └── ImportPage.test.ts    Canonical draft workspace interaction tests
@@ -67,6 +68,7 @@ freebooru/
 │       │   ├── ThemeMenu.test.ts     Theme application and persistence test
 │       │   ├── FileCard.vue          Compact safe file thumbnail and summary
 │       │   ├── FileResults.vue       Shared browse/search grid and pagination
+│       │   ├── ValueCombobox.vue     Searchable value and multivalue control
 │       │   ├── AssignedTags.vue      Required and canonical assigned tag cards
 │       │   ├── ImportGuidance.vue    Demand and recommendation cards
 │       │   ├── TagCatalog.vue        Searchable unassigned-tag catalog

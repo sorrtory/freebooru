@@ -46,7 +46,6 @@ describe('ImportPage', () => {
     vi.stubGlobal('fetch', request)
     const wrapper = mount(ImportPage, { props: { collection: 'main' }, global: { stubs: { RouterLink: true } } })
     await flushPromises()
-    await wrapper.get('form select').setValue('safe')
     await wrapper.get('form').trigger('submit')
     await flushPromises()
 

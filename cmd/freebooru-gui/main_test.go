@@ -59,6 +59,12 @@ func (fakeApplication) GetFile(context.Context, string, string) (collection.File
 func (fakeApplication) OpenFileContent(context.Context, string, string) (core.FileContent, error) {
 	return core.FileContent{}, nil
 }
+func (fakeApplication) SetTag(context.Context, core.TagMutationRequest) (core.TagMutationResult, error) {
+	return core.TagMutationResult{}, nil
+}
+func (fakeApplication) RemoveTag(context.Context, core.TagRemovalRequest) (core.TagMutationResult, error) {
+	return core.TagMutationResult{}, nil
+}
 
 func TestAPIMiddlewareRoutesOnlyAPIRequests(t *testing.T) {
 	api, err := webapi.New(webapi.ModeDesktop, fakeApplication{})

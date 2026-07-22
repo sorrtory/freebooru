@@ -49,6 +49,12 @@ func (f *fakeApplication) GetFile(_ context.Context, collectionName, _ string) (
 func (f *fakeApplication) OpenFileContent(context.Context, string, string) (core.FileContent, error) {
 	return core.FileContent{}, f.collectionErr
 }
+func (f *fakeApplication) SetTag(context.Context, core.TagMutationRequest) (core.TagMutationResult, error) {
+	return core.TagMutationResult{}, f.collectionErr
+}
+func (f *fakeApplication) RemoveTag(context.Context, core.TagRemovalRequest) (core.TagMutationResult, error) {
+	return core.TagMutationResult{}, f.collectionErr
+}
 
 func (f *fakeApplication) ListCollections() ([]config.CollectionConfig, error) {
 	return f.collections, f.collectionErr

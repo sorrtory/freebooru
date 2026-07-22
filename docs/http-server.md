@@ -111,6 +111,8 @@ GET  /api/v1/collections/{collection}/files?term=rating:safe&limit=24&offset=0
 GET  /api/v1/collections/{collection}/files/{sha256}
 GET  /api/v1/collections/{collection}/files/{sha256}/content
 HEAD /api/v1/collections/{collection}/files/{sha256}/content
+PUT  /api/v1/collections/{collection}/files/{sha256}/tags/{tag}
+DELETE /api/v1/collections/{collection}/files/{sha256}/tags/{tag}
 ```
 
 An omitted `term` browses the collection newest-first. Repeated `term`
@@ -119,6 +121,9 @@ records and expose an offset plus `has_more`; file JSON never exposes storage
 or source paths. Content responses support byte ranges. Active media types are
 limited to a small image, audio, video, PDF, and plain-text allowlist; other
 types are downloaded as attachments and all responses disable MIME sniffing.
+Tag replacement accepts `{"value": ...}` and delegates typed validation and
+relationship enforcement to Core. Both mutation methods return the refreshed
+safe file DTO; invalid proposed states are rejected without persistence.
 
 All import calls name their collection explicitly and behave identically over
 the standalone server and the Wails asset server:

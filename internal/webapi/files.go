@@ -3,6 +3,7 @@ package webapi
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"mime"
 	"net/http"
@@ -11,6 +12,7 @@ import (
 	"time"
 
 	"github.com/sorrtory/freebooru/internal/collection"
+	"github.com/sorrtory/freebooru/internal/config"
 	"github.com/sorrtory/freebooru/internal/core"
 )
 
@@ -68,7 +70,66 @@ func handleFiles(response http.ResponseWriter, request *http.Request, app Applic
 		handleFileContent(response, request, app, collectionName, hash)
 		return
 	}
+	if len(parts) == 5 && parts[3] == "tags" && parts[4] != "" {
+		handleFileTag(response, request, app, collectionName, hash, parts[4])
+		return
+	}
 	writeAPIError(response, http.StatusNotFound, "route.not_found", "API endpoint not found")
+}
+
+type fileTagRequest struct {
+	Value json.RawMessage `json:"value"`
+}
+
+func handleFileTag(response http.ResponseWriter, request *http.Request, app Application, collectionName, hash, tagName string) {
+	if request.Method != http.MethodPut && request.Method != http.MethodDelete {
+		response.Header().Set("Allow", http.MethodPut+", "+http.MethodDelete)
+		writeAPIError(response, http.StatusMethodNotAllowed, "method.not_allowed", "Method not allowed")
+		return
+	}
+	if request.Method == http.MethodPut {
+		var body fileTagRequest
+		decoder := json.NewDecoder(http.MaxBytesReader(response, request.Body, 1<<20))
+		if err := decoder.Decode(&body); err != nil || len(body.Value) == 0 {
+			writeAPIError(response, http.StatusBadRequest, "request.invalid", "A typed tag value is required")
+			return
+		}
+		fields, err := app.ImportFields(collectionName)
+		if err != nil {
+			writeAPIError(response, http.StatusBadRequest, "tag.invalid", "Tag is unavailable")
+			return
+		}
+		var tagType config.TagType
+		for _, field := range fields {
+			if field.Name == tagName {
+				tagType = field.Type
+				break
+			}
+		}
+		if tagType == "" {
+			writeAPIError(response, http.StatusBadRequest, "tag.invalid", "Tag is unavailable")
+			return
+		}
+		value, err := decodeAssignmentValue(tagType, body.Value)
+		if err != nil {
+			writeAPIError(response, http.StatusBadRequest, "request.invalid", "Tag value is invalid")
+			return
+		}
+		if _, err := app.SetTag(request.Context(), core.TagMutationRequest{Collection: collectionName, SHA256: hash, Tag: tagName, Value: value}); err != nil {
+			writeAPIError(response, http.StatusConflict, "tag.invalid", err.Error())
+			return
+		}
+	} else if _, err := app.RemoveTag(request.Context(), core.TagRemovalRequest{Collection: collectionName, SHA256: hash, Tag: tagName}); err != nil {
+		writeAPIError(response, http.StatusConflict, "tag.invalid", err.Error())
+		return
+	}
+	file, err := app.GetFile(request.Context(), collectionName, hash)
+	if err != nil {
+		writeAPIError(response, http.StatusNotFound, "file.not_found", "File is unavailable")
+		return
+	}
+	response.Header().Set("ETag", fileETag(file))
+	writeJSON(response, http.StatusOK, fileResponseFromRecord(collectionName, file, true))
 }
 
 func handleFileSearch(response http.ResponseWriter, request *http.Request, app Application, collectionName string) {

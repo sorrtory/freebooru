@@ -226,6 +226,20 @@ export async function getFile(collection: string, sha256: string, signal?: Abort
   return requestJSON(`/api/v1/collections/${encodeURIComponent(collection)}/files/${encodeURIComponent(sha256)}`, { signal }, isFileRecord, 'file', request)
 }
 
+export async function setFileTag(collection: string, sha256: string, tag: string, value: TagValue, request: typeof fetch = fetch): Promise<FileRecord> {
+  return requestJSON(fileTagURL(collection, sha256, tag), {
+    method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ value }),
+  }, isFileRecord, 'file', request)
+}
+
+export async function removeFileTag(collection: string, sha256: string, tag: string, request: typeof fetch = fetch): Promise<FileRecord> {
+  return requestJSON(fileTagURL(collection, sha256, tag), { method: 'DELETE' }, isFileRecord, 'file', request)
+}
+
+function fileTagURL(collection: string, sha256: string, tag: string) {
+  return `/api/v1/collections/${encodeURIComponent(collection)}/files/${encodeURIComponent(sha256)}/tags/${encodeURIComponent(tag)}`
+}
+
 export async function evaluateImportDraft(
   collection: string,
   assignments: Record<string, TagValue>,
