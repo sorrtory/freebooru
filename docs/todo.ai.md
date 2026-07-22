@@ -473,12 +473,12 @@ Acceptance:
 
 Keep SQL and row conversion inside `internal/collection`.
 
-- [ ] Define persisted file, source, typed tag, and storage models.
+- [x] Define persisted file, source, typed tag, and storage models.
 - [ ] Add context-aware transaction helpers without exposing `*sql.Tx`.
-- [ ] Insert a new file by SHA-256 and return a typed duplicate error when its
+- [x] Insert a new file by SHA-256 and return a typed duplicate error when its
   content identity already exists.
 - [ ] Record source observations without overwriting earlier paths.
-- [ ] Load one file with every typed tag and storage assignment.
+- [x] Load one file with every typed tag and storage assignment.
 - [ ] Stream every persisted assignment for collection-open integrity checks
   without loading the complete collection into memory.
 - [ ] Add, replace, and remove typed tag values transactionally.
