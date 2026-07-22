@@ -235,6 +235,7 @@ freebooru/
     ├── config-best_practise.md       Naming and configuration conventions
     ├── collection-db.md              Collection SQLite schema and encryption boundary
     ├── dependencies.md               Selected libraries and tools
+    ├── core.ai.md                    Shared Core and explicit collection-call contract
     ├── config.ai.md                  Implementation-facing config contract
     ├── mvp.ai.md                     MVP goal and completion criteria
     ├── release.ai.md                 MVP criteria, evidence, and release command

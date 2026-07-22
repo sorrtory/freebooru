@@ -64,6 +64,9 @@ not create a process-global HTTP session.
 Every collection API request includes the collection name. Core may open a
 database for the duration of an operation and close it afterward. The API must
 not call `Core.OpenCollection` and retain that session across requests.
+This follows the shared [Core contract](./core.ai.md): web and Wails callers
+pass an explicit collection on every collection-scoped Core call and never
+depend on the empty-name default.
 
 This rule is required because:
 
