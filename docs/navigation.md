@@ -103,7 +103,9 @@ freebooru/
 │   │
 │   ├── search/
 │   │   ├── query.go                    Strict frontend-independent AND query parser
-│   │   └── query_test.go               Supported and rejected query syntax tests
+│   │   ├── query_test.go               Supported and rejected query syntax tests
+│   │   ├── resolve.go                  Collection-aware typed query resolution
+│   │   └── resolve_test.go             Type, canonicalization, and availability tests
 │   │
 │   ├── storage/
 │   │   ├── local.go                    Local content paths and streamed inspection
