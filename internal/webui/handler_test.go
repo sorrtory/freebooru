@@ -1,0 +1,96 @@
+package webui
+
+import (
+	"io"
+	"io/fs"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
+	"testing/fstest"
+
+	"github.com/sorrtory/freebooru/internal/webapi"
+)
+
+func TestHandlerServesAssetsAndSPAFallback(t *testing.T) {
+	assets := fstest.MapFS{
+		"index.html":    &fstest.MapFile{Data: []byte("<main>FreeBooru</main>")},
+		"assets/app.js": &fstest.MapFile{Data: []byte("console.log('hello')")},
+	}
+	handler := NewHandler(http.NotFoundHandler(), assets)
+
+	for _, requestPath := range []string{"/", "/collection/main"} {
+		response := httptest.NewRecorder()
+		handler.ServeHTTP(response, httptest.NewRequest(http.MethodGet, requestPath, nil))
+		if response.Code != http.StatusOK {
+			t.Fatalf("GET %s status = %d, want %d", requestPath, response.Code, http.StatusOK)
+		}
+		if response.Body.String() != "<main>FreeBooru</main>" {
+			t.Fatalf("GET %s body = %q", requestPath, response.Body.String())
+		}
+	}
+
+	response := httptest.NewRecorder()
+	handler.ServeHTTP(response, httptest.NewRequest(http.MethodGet, "/assets/app.js", nil))
+	if response.Code != http.StatusOK || response.Body.String() != "console.log('hello')" {
+		t.Fatalf("asset response = %d %q", response.Code, response.Body.String())
+	}
+}
+
+func TestHandlerNeverFallsBackForAPI(t *testing.T) {
+	assets := fstest.MapFS{"index.html": &fstest.MapFile{Data: []byte("index")}}
+	handler := NewHandler(http.NotFoundHandler(), assets)
+	response := httptest.NewRecorder()
+
+	handler.ServeHTTP(response, httptest.NewRequest(http.MethodGet, "/api/missing", nil))
+
+	if response.Code != http.StatusNotFound {
+		t.Fatalf("status = %d, want %d", response.Code, http.StatusNotFound)
+	}
+	if response.Body.String() == "index" {
+		t.Fatal("API response used SPA fallback")
+	}
+}
+
+func TestEmbeddedAssetsAreRootedAtDist(t *testing.T) {
+	assets, err := Assets()
+	if err != nil {
+		t.Fatalf("get embedded assets: %v", err)
+	}
+	if _, err := fs.Stat(assets, "index.html"); err != nil {
+		t.Fatalf("stat embedded index: %v", err)
+	}
+}
+
+func TestHTTPServerServesHelloAndApplication(t *testing.T) {
+	assets := fstest.MapFS{"index.html": &fstest.MapFile{Data: []byte("FreeBooru app")}}
+	server := httptest.NewServer(NewHandler(webapi.New(webapi.ModeServer), assets))
+	t.Cleanup(server.Close)
+
+	for _, test := range []struct {
+		path string
+		want string
+	}{
+		{path: "/", want: "FreeBooru app"},
+		{path: "/api/v1/hello", want: `{"message":"Hello FreeBooru","mode":"server"}`},
+	} {
+		response, err := server.Client().Get(server.URL + test.path)
+		if err != nil {
+			t.Fatalf("GET %s: %v", test.path, err)
+		}
+		body, readErr := io.ReadAll(response.Body)
+		closeErr := response.Body.Close()
+		if readErr != nil {
+			t.Fatalf("read GET %s: %v", test.path, readErr)
+		}
+		if closeErr != nil {
+			t.Fatalf("close GET %s: %v", test.path, closeErr)
+		}
+		if response.StatusCode != http.StatusOK {
+			t.Fatalf("GET %s status = %d", test.path, response.StatusCode)
+		}
+		if !strings.Contains(string(body), test.want) {
+			t.Fatalf("GET %s body = %q, want %q", test.path, body, test.want)
+		}
+	}
+}

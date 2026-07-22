@@ -1,7 +1,8 @@
 # FreeBooru
 
 FreeBooru is a booru-style tagging software with support for multiple file storage backends (praise the rclone).
-It is written with tauri and designed to be run as a desktop application.
+Its Vue frontend runs as both a Wails desktop application and a web application
+served by the FreeBooru HTTP server.
 
 ## What does it do?
 

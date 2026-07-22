@@ -40,6 +40,21 @@ freebooru/
 ├── go.sum                            Dependency checksums
 ├── .golangci.yml                     Linter and formatter configuration
 ├── .gitignore                        Ignored files
+├── frontend/                         Shared Vue 3 and TypeScript application
+│   ├── package.json                  Frontend dependencies and commands
+│   ├── package-lock.json             Reproducible frontend dependency lock
+│   ├── vite.config.ts                Build output, test environment, and API proxy
+│   ├── tsconfig.json                 Browser TypeScript configuration
+│   ├── tsconfig.node.json            Vite TypeScript configuration
+│   ├── index.html                    Vue application document
+│   └── src/
+│       ├── main.ts                   Vue application entry point
+│       ├── App.vue                   Hello connection screen
+│       ├── App.test.ts               Hello screen success and retry tests
+│       ├── api.ts                    Typed frontend HTTP client
+│       ├── api.test.ts               HTTP client contract tests
+│       ├── style.css                 Global theme and reset
+│       └── vite-env.d.ts             Vite browser declarations
 ├── .vscode/
 │   └── settings.json                 Repository editor settings
 │
@@ -64,11 +79,21 @@ freebooru/
 │   │   ├── config.go                 `config check` and diagnostic rendering
 │   │   └── config_test.go            Diagnostic rendering tests
 │   ├── freebooru-server/
-│   │   └── main.go                   Server startup; HTTP server is not implemented
+│   │   └── main.go                   HTTP lifecycle and shared web handler wiring
 │   └── freebooru-gui/
-│       └── main.go                   GUI placeholder
+│       ├── main.go                   Wails assets and internal API wiring
+│       ├── main_test.go              Desktop API middleware routing test
+│       └── wails.json                Wails build and Vue development configuration
 │
 ├── internal/
+│   ├── webapi/
+│   │   ├── handler.go               Shared versioned JSON API
+│   │   └── handler_test.go          Hello and API error contract tests
+│   ├── webui/
+│   │   ├── assets.go                Embedded Vue production bundle
+│   │   ├── handler.go               Static asset and SPA fallback handler
+│   │   ├── handler_test.go          Asset, fallback, and TCP integration tests
+│   │   └── dist/                    Committed Vite production output
 │   ├── bootstrap/
 │   │   ├── bootstrap.go              Resolve defaults and construct Core
 │   │   └── bootstrap_test.go         Bootstrap integration tests
@@ -200,6 +225,8 @@ freebooru/
 └── docs/
     ├── navigation.md                 This file map
     ├── cli.md                        Human CLI reference
+    ├── gui.md                        Human web and Wails setup notes
+    ├── http-server.md                Human HTTP server reference
     ├── config-example.md             Human configuration examples
     ├── config-spec.md                Human configuration field reference
     ├── config-best_practise.md       Naming and configuration conventions
@@ -209,5 +236,6 @@ freebooru/
     ├── mvp.ai.md                     MVP goal and completion criteria
     ├── release.ai.md                 MVP criteria, evidence, and release command
     ├── todo.ai.md                    Ordered implementation checklist
+    ├── todo-gui.ai.md                Hello web and Wails implementation checklist
     └── user-story.excalidraw         Editable user-flow diagram
 ```

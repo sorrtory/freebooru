@@ -6,9 +6,6 @@
 - goccy/go-yaml 
 - ncruces/go-sqlite3, selected to support a future Adiantum VFS encryption mode
 
-## Skills
-
-- [cc-skills](https://github.com/samber/cc-skills-golang)
 
 ### Code quality
 
@@ -19,3 +16,14 @@
 ### go tool
 
 - task
+
+## GUI
+
+- Vue.js
+- Wails v2
+
+## Skills
+
+- [cc-skills](https://github.com/samber/cc-skills-golang)
+- [am-will/codex-skills](https://github.com/am-will/codex-skills) - frontend best practices
+- [serkodev/vue-skills](https://github.com/serkodev/vue-skills) - vue best practices

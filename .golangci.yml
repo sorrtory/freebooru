@@ -1,5 +1,9 @@
 version: "2"
 
+run:
+  build-tags:
+    - webkit2_41
+
 linters:
   default: standard
   enable:

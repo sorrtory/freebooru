@@ -4,7 +4,7 @@ version: '3'
 
 tasks:
   default:
-    desc: Print a greeting message
+    desc: Run all project checks
     cmds:
       - task: check
   
@@ -27,11 +27,63 @@ tasks:
   test:
     desc: Run tests
     cmds:
-      - go test ./...
+      - go test -tags webkit2_41 ./...
+
+  frontend:install:
+    desc: Install locked frontend dependencies
+    dir: frontend
+    cmds:
+      - npm ci --include=dev
+
+  frontend:dev:
+    desc: Run the Vue development server
+    dir: frontend
+    cmds:
+      - npm run dev
+
+  frontend:test:
+    desc: Run frontend tests
+    dir: frontend
+    cmds:
+      - npm test
+
+  frontend:build:
+    desc: Type-check and build the Vue application
+    dir: frontend
+    cmds:
+      - npm run build
+
+  server:dev:
+    desc: Build the frontend and run the HTTP server
+    deps: [frontend:build]
+    cmds:
+      - go run ./cmd/freebooru-server/
+
+  server:build:
+    desc: Build the HTTP server with embedded frontend assets
+    deps: [frontend:build]
+    cmds:
+      - go build -o build/bin/freebooru-server ./cmd/freebooru-server/
+
+  gui:dev:
+    desc: Run the Wails desktop application on Linux
+    dir: cmd/freebooru-gui
+    env:
+      FREEBOORU_API_TARGET: http://127.0.0.1:34115
+    cmds:
+      - go tool wails dev -devserver 127.0.0.1:34115 -tags webkit2_41
+
+  gui:build:
+    desc: Build the Wails desktop application on Linux
+    dir: cmd/freebooru-gui
+    cmds:
+      - go tool wails build -tags webkit2_41
 
   check:
     desc: Run code quality checks
     cmds:
+      - task: frontend:test
+      - task: frontend:build
       - task: format
       - task: lint
       - task: test
@@ -40,7 +92,7 @@ tasks:
     desc: Run the complete MVP release gate
     cmds:
       - task: check
-      - go test -race ./...
+      - go test -race -tags webkit2_41 ./...
       - go test ./cmd/freebooru-cli -run '^TestMVPCleanHomeWorkflow$' -count=1
       - go mod verify
 
