@@ -241,5 +241,6 @@ freebooru/
     ├── todo.ai.md                    Ordered implementation checklist
     ├── todo-gui.ai.md                Hello web and Wails implementation checklist
     ├── todo-gui-core.ai.md           Core readiness GUI implementation checklist
+    ├── todo-gui-library.ai.md        Collection, search, content, import, and tag UI contract
     └── user-story.excalidraw         Editable user-flow diagram
 ```
