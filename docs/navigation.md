@@ -68,7 +68,8 @@ freebooru/
 │       ├── app.go                    Application config, defaults, loading, validation
 │       ├── storage.go                Storage config and validation
 │       ├── collections.go            Collection config and tag references
-│       ├── tags.go                   Tag config; full tag model is pending
+│       ├── tags.go                   Tag, predefined-value, and relationship models
+│       ├── tag_validate.go           Tag-local schema validation
 │       ├── paths.go                  Standard FreeBooru config paths
 │       ├── path.go                   $HOME/~ expansion and absolute-path validation
 │       ├── path_test.go              Path expansion tests

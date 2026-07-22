@@ -269,15 +269,17 @@ Acceptance:
 
 ## Phase 8: full tags and groups
 
-- [ ] Implement `bool`, `text`, `int`, `date`, `datetime`, `value`, and
+- [x] Implement config definitions for `bool`, `text`, `int`, `date`,
+  `datetime`, `value`, and
   `multivalue` definitions.
 - [ ] Enforce `0..9223372036854775807` for integers.
 - [ ] Strictly parse `YYYY-MM-DD` dates.
 - [ ] Strictly parse RFC 3339 datetimes.
-- [ ] Enforce unique normalized predefined values.
-- [ ] Model `groups: [...]` as implicit many-to-many navigation indexes.
+- [x] Enforce unique normalized predefined values within each tag.
+- [ ] Model `groups: [...]` as implicit many-to-many navigation indexes. The
+  field and tag-local uniqueness rules are implemented; catalog indexes remain.
 - [ ] Allow tag/group name collisions because references are explicitly typed.
-- [ ] Reserve the built-in `storage` tag name.
+- [x] Reserve the built-in `storage` tag name.
 - [ ] Expose storage providers as values of the built-in multivalue tag.
 - [ ] Add table-driven tests for every type and boundary.
 

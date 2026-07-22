@@ -64,7 +64,7 @@ func TestCheckYAMLDirLoadsNestedMultipleDocuments(t *testing.T) {
 	if err := os.MkdirAll(nested, 0o755); err != nil {
 		t.Fatal(err)
 	}
-	content := "name: cirno\ntype: multivalue\n---\nname: reimu\n"
+	content := "name: cirno\ntype: bool\n---\nname: reimu\n"
 	if err := os.WriteFile(filepath.Join(nested, "characters.yaml"), []byte(content), 0o600); err != nil {
 		t.Fatal(err)
 	}

@@ -66,13 +66,13 @@ YAML documents separated by `---`.
 
 | Field      | Type   |                  Required | Default | Rules                                              | Description                                  | Status          |
 | ---------- | ------ | ------------------------: | ------- | -------------------------------------------------- | -------------------------------------------- | --------------- |
-| `name`     | string |                       yes | —       | Non-empty and globally unique; cannot be `storage` | Tag name                                     | Not implemented |
-| `type`     | enum   |                       yes | —       | See tag types below                                | Tag value type                               | Not implemented |
-| `groups`   | list   |                        no | empty   | No duplicates inside one tag                       | Implicit groups containing this tag          | Not implemented |
-| `values`   | list   | for `value`, `multivalue` | —       | Entries contain unique `val` fields                | Allowed predefined values                    | Not implemented |
-| `suggest`  | list   |                        no | empty   | See tag relationships                              | Tags recommended with this tag                | Not implemented |
-| `demand`   | list   |                        no | empty   | See tag relationships                              | Tags required with this tag                   | Not implemented |
-| `conflict` | list   |                        no | empty   | See tag relationships                              | Tags forbidden together with this tag         | Not implemented |
+| `name`     | string |                       yes | —       | Non-empty and globally unique; cannot be `storage` | Tag name                                     | Implemented     |
+| `type`     | enum   |                       yes | —       | See tag types below                                | Tag value type                               | Implemented     |
+| `groups`   | list   |                        no | empty   | No duplicates inside one tag                       | Implicit groups containing this tag          | Parsed; index pending |
+| `values`   | list   | for `value`, `multivalue` | —       | Entries contain unique `val` fields                | Allowed predefined values                    | Implemented     |
+| `suggest`  | list   |                        no | empty   | See tag relationships                              | Tags recommended with this tag                | Parsed; graph pending |
+| `demand`   | list   |                        no | empty   | See tag relationships                              | Tags required with this tag                   | Parsed; graph pending |
+| `conflict` | list   |                        no | empty   | See tag relationships                              | Tags forbidden together with this tag         | Parsed; graph pending |
 
 Groups are created implicitly. A tag may belong to several groups. Tag and
 group names may be equal because references identify their category.
