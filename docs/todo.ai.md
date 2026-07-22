@@ -172,16 +172,16 @@ Acceptance:
 
 ## Phase 5: complete application initialization
 
-- [ ] Inject the collection opener into `Core` through manual constructor
+- [x] Inject the collection opener into `Core` through manual constructor
   injection.
-- [ ] After config provisioning succeeds, have `Core.Init` open the default
+- [x] After config provisioning succeeds, have `Core.Init` open the default
   collection database and initialize its schema.
-- [ ] Do not retain the database connection after the CLI initialization command
+- [x] Do not retain the database connection after the CLI initialization command
   finishes.
-- [ ] Ensure every opened handle is closed on success and failure.
-- [ ] Report which config, storage directory, collection config, and database
-  were initialized without claiming existing resources were recreated.
-- [ ] Test empty initialization, repeated initialization, config conflicts,
+- [x] Ensure every opened handle is closed on success and failure.
+- [x] Print the documented success message only after configuration, storage,
+  collection, and database initialization all succeed.
+- [x] Test empty initialization, repeated initialization, config conflicts,
   database failure, and recovery after a partial run.
 
 Acceptance:

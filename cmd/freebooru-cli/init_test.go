@@ -30,6 +30,7 @@ func TestInitCommand(t *testing.T) {
 		filepath.Join(configDir, "freebooru.yaml"),
 		filepath.Join(configDir, "storage.yaml"),
 		filepath.Join(configDir, "collections", "main.yaml"),
+		filepath.Join(home, ".local", "share", "freebooru", "collections", "main.sqlite"),
 	} {
 		if _, err := os.Stat(path); err != nil {
 			t.Errorf("expected %q: %v", path, err)

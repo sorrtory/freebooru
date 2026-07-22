@@ -2,8 +2,10 @@
 package bootstrap
 
 import (
+	"context"
 	"log/slog"
 
+	"github.com/sorrtory/freebooru/internal/collection"
 	"github.com/sorrtory/freebooru/internal/config"
 	"github.com/sorrtory/freebooru/internal/core"
 )
@@ -14,5 +16,7 @@ func NewCore(logger *slog.Logger) (*core.Core, error) {
 	if err != nil {
 		return nil, err
 	}
-	return core.New(logger, paths)
+	return core.New(logger, paths, func(ctx context.Context, path string) (core.CollectionDatabase, error) {
+		return collection.Open(ctx, path)
+	})
 }
