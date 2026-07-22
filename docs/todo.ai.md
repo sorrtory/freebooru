@@ -511,7 +511,7 @@ Acceptance:
 - [x] Delete copies idempotently and remove empty shard directories when
   practical.
 - [x] Keep source deletion outside the storage backend.
-- [ ] Test empty and large files, duplicates, corruption, permissions,
+- [x] Test empty and large files, duplicates, corruption, permissions,
   cancellation, and cleanup.
 
 Acceptance:
