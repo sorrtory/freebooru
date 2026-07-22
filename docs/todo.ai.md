@@ -318,8 +318,8 @@ Acceptance:
 ## Phase 10: predicate compilation and graph checking
 
 - [ ] Compile relationship predicates once during catalog construction.
-- [ ] Validate target availability in every collection that imports the source.
-- [ ] Do not auto-import relationship targets.
+- [x] Validate target availability in every collection that imports the source.
+- [x] Do not auto-import relationship targets.
 - [ ] Implement presence matching when no predicate is provided.
 - [ ] Implement typed `is`, including boolean absence for `is: false`.
 - [ ] Implement multivalue `has` and value/multivalue `not`.
@@ -331,10 +331,11 @@ Acceptance:
 - [ ] Validate referenced predefined values.
 - [ ] Reject invalid ranges and regular expressions.
 - [ ] Allow `suggest` cycles and `demand` cycles.
-- [ ] Reject self-demand and self-conflict.
+- [x] Reject self-demand and self-conflict.
 - [ ] Reject the same source condition demanding and conflicting with the same
   target condition.
-- [ ] Report all graph diagnostics with both source and target context.
+- [x] Report graph target and self-reference diagnostics with source and target
+  context. Predicate and contradiction diagnostics remain.
 
 Acceptance:
 

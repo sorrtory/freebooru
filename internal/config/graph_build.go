@@ -93,6 +93,7 @@ func (g *Graph) addEdge(edge Edge) {
 	targetKey := normalizeName(edge.TargetTag)
 	g.outgoing[sourceKey] = append(g.outgoing[sourceKey], edge)
 	g.incoming[targetKey] = append(g.incoming[targetKey], edge)
+	g.edges = append(g.edges, edge)
 }
 
 func predicateFromRelationship(relationship Relationship) Predicate {

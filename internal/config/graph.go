@@ -51,4 +51,5 @@ type Edge struct {
 type Graph struct {
 	outgoing map[string][]Edge
 	incoming map[string][]Edge
+	edges    []Edge
 }

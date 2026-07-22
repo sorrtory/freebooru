@@ -244,6 +244,7 @@ func writeCatalogFixture(t *testing.T) Paths {
 	}
 	writeTestFile(t, paths.Storage, "- name: default\n  type: local\n  path: /tmp/storage\n")
 	writeTestFile(t, filepath.Join(paths.Tags, "artist.yaml"), "name: artist\ntype: text\ngroups: [content]\n")
+	writeTestFile(t, filepath.Join(paths.Tags, "reviewed.yaml"), "name: reviewed\ntype: bool\ngroups: [workflow]\n")
 	writeTestFile(
 		t,
 		filepath.Join(paths.Tags, "rating.yaml"),

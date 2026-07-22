@@ -74,6 +74,7 @@ freebooru/
 │       ├── tag_value_test.go         Tag type and boundary tests
 │       ├── graph.go                  Directed relationship graph types
 │       ├── graph_build.go            Deterministic forward/reverse graph indexes
+│       ├── graph_check.go            Cross-file relationship validation
 │       ├── graph_query.go            Relationship and backlink queries
 │       ├── paths.go                  Standard FreeBooru config paths
 │       ├── path.go                   $HOME/~ expansion and absolute-path validation
