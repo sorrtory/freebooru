@@ -1,8 +1,14 @@
 package config
 
 import (
+	"errors"
 	"fmt"
+	"io/fs"
+	"os"
+	"path/filepath"
 	"strings"
+
+	"github.com/goccy/go-yaml"
 )
 
 // CollectionConfig defines one collection and its available tags.
@@ -11,6 +17,70 @@ type CollectionConfig struct {
 	Location string               `yaml:"location,omitempty"`
 	Comment  string               `yaml:"comment,omitempty"`
 	Tags     CollectionTagImports `yaml:"tags"`
+}
+
+// StarterCollectionConfigForName builds a new collection using starter groups.
+func StarterCollectionConfigForName(app AppConfig, name string) CollectionConfig {
+	collection := StarterCollectionConfig(app)
+	collection.Name = name
+	collection.Location = "$HOME/.local/share/freebooru/collections/" + name + ".sqlite"
+	collection.Comment = "FreeBooru collection"
+	return collection
+}
+
+// CreateStarterCollection atomically creates one non-overwriting collection YAML.
+func CreateStarterCollection(paths Paths, app AppConfig, name string) (CollectionConfig, error) {
+	collection := StarterCollectionConfigForName(app, name)
+	return CreateCollectionConfig(paths, collection)
+}
+
+// CreateCollectionConfig atomically publishes one validated non-overwriting YAML.
+func CreateCollectionConfig(paths Paths, collection CollectionConfig) (CollectionConfig, error) {
+	name := collection.Name
+	if err := VerifyCollectionConfig(collection); err != nil {
+		return CollectionConfig{}, err
+	}
+	data, err := yaml.Marshal(collection)
+	if err != nil {
+		return CollectionConfig{}, fmt.Errorf("marshal collection %q: %w", name, err)
+	}
+	if err := os.MkdirAll(paths.Collections, 0o755); err != nil {
+		return CollectionConfig{}, fmt.Errorf("create collections directory: %w", err)
+	}
+	target := filepath.Join(paths.Collections, name+".yaml")
+	if _, err := os.Stat(target); err == nil {
+		return CollectionConfig{}, fmt.Errorf("collection %q already exists", name)
+	} else if !errors.Is(err, fs.ErrNotExist) {
+		return CollectionConfig{}, fmt.Errorf("stat collection %q: %w", name, err)
+	}
+	temporary, err := os.CreateTemp(paths.Collections, ".freebooru-collection-*")
+	if err != nil {
+		return CollectionConfig{}, fmt.Errorf("create temporary collection %q: %w", name, err)
+	}
+	temporaryName := temporary.Name()
+	defer func() { _ = os.Remove(temporaryName) }()
+	if err := temporary.Chmod(0o600); err != nil {
+		_ = temporary.Close()
+		return CollectionConfig{}, fmt.Errorf("protect temporary collection %q: %w", name, err)
+	}
+	if _, err := temporary.Write(data); err != nil {
+		_ = temporary.Close()
+		return CollectionConfig{}, fmt.Errorf("write temporary collection %q: %w", name, err)
+	}
+	if err := temporary.Sync(); err != nil {
+		_ = temporary.Close()
+		return CollectionConfig{}, fmt.Errorf("sync temporary collection %q: %w", name, err)
+	}
+	if err := temporary.Close(); err != nil {
+		return CollectionConfig{}, fmt.Errorf("close temporary collection %q: %w", name, err)
+	}
+	if err := os.Link(temporaryName, target); err != nil {
+		if errors.Is(err, fs.ErrExist) {
+			return CollectionConfig{}, fmt.Errorf("collection %q already exists", name)
+		}
+		return CollectionConfig{}, fmt.Errorf("publish collection %q: %w", name, err)
+	}
+	return collection, nil
 }
 
 // CollectionTagImports separates required and optional tag references.

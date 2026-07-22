@@ -107,6 +107,10 @@ type errorResponse struct {
 func handleCollectionRequest(response http.ResponseWriter, request *http.Request, app Application) {
 	path := strings.TrimPrefix(request.URL.Path, "/api/v1/collections/")
 	parts := strings.Split(path, "/")
+	if len(parts) == 1 && parts[0] != "" {
+		handleCollectionInfo(response, request, app, parts[0])
+		return
+	}
 	if len(parts) < 2 || len(parts) > 3 || parts[0] == "" || parts[1] != "imports" {
 		writeAPIError(response, http.StatusNotFound, "route.not_found", "API endpoint not found")
 		return

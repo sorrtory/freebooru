@@ -44,6 +44,15 @@ func (staticApplication) Import(context.Context, core.ImportRequest) (core.Impor
 	return core.ImportResult{}, nil
 }
 
+func (staticApplication) ListCollections() ([]config.CollectionConfig, error) { return nil, nil }
+func (staticApplication) DescribeCollection(context.Context, string) (core.CollectionInfo, error) {
+	return core.CollectionInfo{}, nil
+}
+
+func (staticApplication) CreateCollection(context.Context, string) (core.CollectionInfo, error) {
+	return core.CollectionInfo{}, nil
+}
+
 func TestHandlerServesAssetsAndSPAFallback(t *testing.T) {
 	assets := fstest.MapFS{
 		"index.html":    &fstest.MapFile{Data: []byte("<main>FreeBooru</main>")},

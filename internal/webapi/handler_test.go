@@ -28,6 +28,23 @@ type fakeApplication struct {
 	importRequest    core.ImportRequest
 	importResult     core.ImportResult
 	executeImportErr error
+	collections      []config.CollectionConfig
+	collectionInfo   core.CollectionInfo
+	collectionErr    error
+}
+
+func (f *fakeApplication) ListCollections() ([]config.CollectionConfig, error) {
+	return f.collections, f.collectionErr
+}
+
+func (f *fakeApplication) DescribeCollection(_ context.Context, name string) (core.CollectionInfo, error) {
+	f.collection = name
+	return f.collectionInfo, f.collectionErr
+}
+
+func (f *fakeApplication) CreateCollection(_ context.Context, name string) (core.CollectionInfo, error) {
+	f.collection = name
+	return f.collectionInfo, f.collectionErr
 }
 
 func (f *fakeApplication) Import(_ context.Context, request core.ImportRequest) (core.ImportResult, error) {

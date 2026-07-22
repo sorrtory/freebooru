@@ -175,7 +175,8 @@ The collection switcher is a searchable combobox, not a native `<select>`.
 `Add collection…` opens a focused page or small dialog. The minimal form asks
 for a valid unique collection name and shows the resulting identifier before
 submission. The initial backend operation should create a usable collection
-from FreeBooru's starter/system tag catalog and default storage, write config
+from the current default collection's validated imports and storage references,
+including available system tags, write config
 atomically, validate/reload it, and return the collection summary. It must not
 leave a partial YAML file or database after failure.
 
@@ -317,15 +318,15 @@ in presentation components.
 
 ### Phase 2: collections
 
-- [ ] Define Core collection list/info/create request and result types.
-- [ ] Define atomic starter-backed collection creation and rollback behavior.
-- [ ] Add collection list, create, and detail HTTP endpoints.
-- [ ] Implement searchable `CollectionSwitcher` with final `Add collection…`
+- [x] Define Core collection list/info/create request and result types.
+- [x] Define atomic default-backed collection creation and rollback behavior.
+- [x] Add collection list, create, and detail HTTP endpoints.
+- [x] Implement searchable `CollectionSwitcher` with final `Add collection…`
   row and complete keyboard behavior.
-- [ ] Implement collection chooser, creation flow, and overview page.
-- [ ] Prove every request passes the route collection explicitly.
-- [ ] Test duplicate/invalid creation, unavailable config, and stale routes.
-- [ ] Commit this phase independently.
+- [x] Implement collection chooser, creation flow, and overview page.
+- [x] Prove every request passes the route collection explicitly.
+- [x] Test duplicate/invalid creation, unavailable config, and stale routes.
+- [x] Commit this phase independently.
 
 ### Phase 3: all files and search
 

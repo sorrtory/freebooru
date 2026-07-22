@@ -54,6 +54,7 @@ freebooru/
 │       ├── router.ts                 Status and explicit-collection import routes
 │       ├── pages/
 │       │   ├── StatusPage.vue        Runtime and configuration readiness screen
+│       │   ├── CollectionsPage.vue   Collection chooser and creation flow
 │       │   ├── CollectionOverviewPage.vue Collection landing actions and summary
 │       │   ├── FilesPage.vue         Collection-wide file browser
 │       │   ├── SearchPage.vue        URL-backed tag search
@@ -61,6 +62,7 @@ freebooru/
 │       │   └── ImportPage.test.ts    Canonical draft workspace interaction tests
 │       ├── components/
 │       │   ├── AppShell.vue          Responsive collection navigation shell
+│       │   ├── CollectionSwitcher.vue Searchable explicit collection switcher
 │       │   ├── ThemeMenu.vue         System/light/dark preference menu
 │       │   ├── ThemeMenu.test.ts     Theme application and persistence test
 │       │   ├── AssignedTags.vue      Required and canonical assigned tag cards
@@ -69,6 +71,7 @@ freebooru/
 │       │   └── TagField.vue          FreeBooru type-aware assignment editor
 │       ├── StatusDiagnostics.vue     Configuration diagnostic list
 │       ├── useApplicationStatus.ts   Status loading and retry state
+│       ├── useCollections.ts         Cached collection list and creation state
 │       ├── useTheme.ts               System-aware persisted theme state
 │       ├── useImportDraft.ts         Canonical draft evaluation state and cancellation
 │       ├── api.ts                    Typed status and import HTTP client
@@ -114,7 +117,11 @@ freebooru/
 ├── internal/
 │   ├── webapi/
 │   │   ├── handler.go               Shared hello and Core status JSON API
-│   │   └── handler_test.go          API status, reload, and error contract tests
+│   │   ├── handler_test.go          API status, reload, and error contract tests
+│   │   ├── collections.go           Collection list, creation, and safe summary API
+│   │   ├── collections_test.go      Collection HTTP contract tests
+│   │   ├── import.go                Import schema, evaluation, and upload API
+│   │   └── import_test.go           Import HTTP contract tests
 │   ├── webui/
 │   │   ├── assets.go                Embedded Vue production bundle
 │   │   ├── handler.go               Static asset and SPA fallback handler
@@ -133,6 +140,7 @@ freebooru/
 │   │   ├── import_fields_test.go      Required/optional field schema tests
 │   │   ├── core.go                   Shared init, config snapshot, search, and open workflows
 │   │   ├── catalog.go                Frontend-neutral catalog lists and source lookup
+│   │   ├── catalog_create_test.go    Collection creation and summary integration test
 │   │   ├── file_list.go              Persisted file/storage assignment listing
 │   │   ├── file.go                   Validated collection file lookup workflow
 │   │   ├── file_test.go              File lookup and database lifecycle tests
@@ -212,6 +220,7 @@ freebooru/
 │       ├── app.go                    Application config, defaults, loading, validation
 │       ├── storage.go                Storage config and validation
 │       ├── collections.go            Collection config and tag references
+│       ├── collections_test.go       Atomic collection creation tests
 │       ├── tags.go                   Tag, predefined-value, and relationship models
 │       ├── system_tags.go            Read-only tag-shaped file metadata definitions
 │       ├── tag_validate.go           Tag-local schema validation

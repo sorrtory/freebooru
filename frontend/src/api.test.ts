@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { evaluateImportDraft, getHello, getImportSchema, getStatus, importFile } from './api'
+import { createCollection, evaluateImportDraft, getCollection, getCollections, getHello, getImportSchema, getStatus, importFile } from './api'
 
 describe('getHello', () => {
   it('accepts the server hello response', async () => {
@@ -148,5 +148,25 @@ describe('import workspace API', () => {
     expect((form.get('file') as File).name).toBe('image.png')
     expect(form.get('assignments')).toBe(JSON.stringify({ score: 7 }))
     expect((init?.headers as Record<string, string>)['Content-Type']).toBeUndefined()
+  })
+})
+
+describe('collection API', () => {
+  it('lists and describes collections', async () => {
+    const list = { default_collection: 'main', collections: [{ name: 'main', is_default: true }] }
+    const info = { name: 'main', comment: '', is_default: true, tag_count: 5, required_count: 1, storages: ['default'], file_count: 2, total_size_bytes: 40 }
+    const request = vi.fn<typeof fetch>().mockResolvedValueOnce(new Response(JSON.stringify(list), { status: 200 })).mockResolvedValueOnce(new Response(JSON.stringify(info), { status: 200 }))
+
+    await expect(getCollections(request)).resolves.toEqual(list)
+    await expect(getCollection('main', request)).resolves.toEqual(info)
+    expect(request).toHaveBeenNthCalledWith(2, '/api/v1/collections/main', expect.anything())
+  })
+
+  it('creates a named collection', async () => {
+    const info = { name: 'art', comment: '', is_default: false, tag_count: 5, required_count: 1, storages: ['default'], file_count: 0, total_size_bytes: 0 }
+    const request = vi.fn<typeof fetch>().mockResolvedValue(new Response(JSON.stringify(info), { status: 201 }))
+
+    await expect(createCollection('art', request)).resolves.toEqual(info)
+    expect(request).toHaveBeenCalledWith('/api/v1/collections', expect.objectContaining({ method: 'POST', body: JSON.stringify({ name: 'art' }) }))
   })
 })

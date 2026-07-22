@@ -31,6 +31,9 @@ type Application interface {
 	ImportFields(string) ([]core.ImportField, error)
 	EvaluateImportDraft(context.Context, core.ImportDraftRequest) (core.ImportDraft, error)
 	Import(context.Context, core.ImportRequest) (core.ImportResult, error)
+	ListCollections() ([]config.CollectionConfig, error)
+	DescribeCollection(context.Context, string) (core.CollectionInfo, error)
+	CreateCollection(context.Context, string) (core.CollectionInfo, error)
 }
 
 // DiagnosticResponse is one configuration problem exposed to the frontend.
@@ -88,6 +91,9 @@ func New(mode Mode, app Application) (http.Handler, error) {
 	})
 	mux.HandleFunc("/api/v1/collections/", func(response http.ResponseWriter, request *http.Request) {
 		handleCollectionRequest(response, request, app)
+	})
+	mux.HandleFunc("/api/v1/collections", func(response http.ResponseWriter, request *http.Request) {
+		handleCollections(response, request, app)
 	})
 	mux.HandleFunc("/api/", func(response http.ResponseWriter, _ *http.Request) {
 		writeJSON(response, http.StatusNotFound, map[string]string{"error": "API endpoint not found"})

@@ -41,6 +41,15 @@ func (fakeApplication) Import(context.Context, core.ImportRequest) (core.ImportR
 	return core.ImportResult{}, nil
 }
 
+func (fakeApplication) ListCollections() ([]config.CollectionConfig, error) { return nil, nil }
+func (fakeApplication) DescribeCollection(context.Context, string) (core.CollectionInfo, error) {
+	return core.CollectionInfo{}, nil
+}
+
+func (fakeApplication) CreateCollection(context.Context, string) (core.CollectionInfo, error) {
+	return core.CollectionInfo{}, nil
+}
+
 func TestAPIMiddlewareRoutesOnlyAPIRequests(t *testing.T) {
 	api, err := webapi.New(webapi.ModeDesktop, fakeApplication{})
 	if err != nil {

@@ -22,6 +22,25 @@ export interface ApplicationStatus {
   diagnostics: Diagnostic[]
 }
 
+export interface CollectionSummary {
+  name: string
+  is_default: boolean
+}
+
+export interface CollectionsResponse {
+  default_collection: string
+  collections: CollectionSummary[]
+}
+
+export interface CollectionInfo extends CollectionSummary {
+  comment: string
+  tag_count: number
+  required_count: number
+  storages: string[]
+  file_count: number
+  total_size_bytes: number
+}
+
 export type TagType = 'bool' | 'text' | 'int' | 'date' | 'datetime' | 'value' | 'multivalue'
 export type TagValue = boolean | number | string | string[]
 
@@ -144,6 +163,20 @@ export async function getImportSchema(
   return body
 }
 
+export async function getCollections(request: typeof fetch = fetch): Promise<CollectionsResponse> {
+  return requestJSON('/api/v1/collections', {}, isCollectionsResponse, 'collections', request)
+}
+
+export async function getCollection(collection: string, request: typeof fetch = fetch): Promise<CollectionInfo> {
+  return requestJSON(`/api/v1/collections/${encodeURIComponent(collection)}`, {}, isCollectionInfo, 'collection', request)
+}
+
+export async function createCollection(name: string, request: typeof fetch = fetch): Promise<CollectionInfo> {
+  return requestJSON('/api/v1/collections', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name }),
+  }, isCollectionInfo, 'collection', request)
+}
+
 export async function evaluateImportDraft(
   collection: string,
   assignments: Record<string, TagValue>,
@@ -183,6 +216,20 @@ export async function importFile(
 
 function importURL(collection: string, action: 'schema' | 'evaluate') {
   return `/api/v1/collections/${encodeURIComponent(collection)}/imports/${action}`
+}
+
+async function requestJSON<T>(
+  url: string,
+  init: RequestInit,
+  validate: (value: unknown) => value is T,
+  label: string,
+  request: typeof fetch,
+): Promise<T> {
+  const response = await request(url, { ...init, headers: { Accept: 'application/json', ...init.headers } })
+  if (!response.ok) throw apiError(await errorBody(response), response.status)
+  const body: unknown = await response.json()
+  if (!validate(body)) throw new Error(`FreeBooru returned invalid ${label} data`)
+  return body
 }
 
 async function errorBody(response: Response): Promise<ErrorResponse> {
@@ -240,6 +287,18 @@ function isTagType(value: unknown): value is TagType {
 
 function isImportResult(value: unknown): value is ImportResult {
   return isRecord(value) && typeof value.sha256 === 'string' && typeof value.size_bytes === 'number' && Array.isArray(value.storages) && value.storages.every((item) => typeof item === 'string') && typeof value.record_created === 'boolean' && Array.isArray(value.created_copies) && value.created_copies.every((item) => typeof item === 'string')
+}
+
+function isCollectionsResponse(value: unknown): value is CollectionsResponse {
+  return isRecord(value) && typeof value.default_collection === 'string' && Array.isArray(value.collections) && value.collections.every(isCollectionSummary)
+}
+
+function isCollectionSummary(value: unknown): value is CollectionSummary {
+  return isRecord(value) && typeof value.name === 'string' && typeof value.is_default === 'boolean'
+}
+
+function isCollectionInfo(value: unknown): value is CollectionInfo {
+  return isRecord(value) && isCollectionSummary(value) && typeof value.comment === 'string' && typeof value.tag_count === 'number' && typeof value.required_count === 'number' && Array.isArray(value.storages) && value.storages.every((item) => typeof item === 'string') && typeof value.file_count === 'number' && typeof value.total_size_bytes === 'number'
 }
 
 function isApplicationStatus(value: unknown): value is ApplicationStatus {

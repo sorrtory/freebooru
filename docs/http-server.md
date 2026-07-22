@@ -92,6 +92,18 @@ load fails, it logs a warning and remains accessible on the default port
 
 ## Import workspace
 
+Collection navigation and creation use:
+
+```http
+GET  /api/v1/collections
+POST /api/v1/collections
+GET  /api/v1/collections/{collection}
+```
+
+Creation atomically publishes a new collection configuration cloned from the
+current default collection's validated tag/storage imports. Collection JSON
+contains safe counts and names, never local configuration or database paths.
+
 All import calls name their collection explicitly and behave identically over
 the standalone server and the Wails asset server:
 
