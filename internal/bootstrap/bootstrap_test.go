@@ -53,7 +53,7 @@ func TestCoreForInitAndDomainCheck(t *testing.T) {
 	if err := app.LoadConfig(context.Background()); err != nil {
 		t.Fatalf("LoadConfig() after init error = %v", err)
 	}
-	if err := app.CheckConfig(context.Background()); err != nil {
-		t.Fatalf("CheckConfig() error = %v", err)
+	if diagnostics := app.CheckConfig(context.Background()); diagnostics.HasErrors() {
+		t.Fatalf("CheckConfig() diagnostics = %#v", diagnostics)
 	}
 }

@@ -194,17 +194,18 @@ Acceptance:
 
 Prepare for a catalog that can support both checking and editing.
 
-- [ ] Replace plain joined errors with structured diagnostics.
-- [ ] Include severity, code, message, file, YAML document, and field path when
+- [x] Replace plain joined errors with structured diagnostics.
+- [x] Include severity, code, message, file, YAML document, and field path when
   available.
-- [ ] Distinguish decoding, local validation, duplicate, reference, and graph
-  diagnostics.
-- [ ] Preserve all discoverable errors instead of returning after the first
+- [x] Establish stable diagnostic code categories. Decoding and local
+  validation are emitted now; duplicate, reference, and graph codes are emitted
+  by their catalog and graph phases.
+- [x] Preserve all discoverable errors instead of returning after the first
   domain error.
-- [ ] Keep invalid domain configuration non-fatal to application startup.
-- [ ] Keep missing or invalid `freebooru.yaml` fatal to normal operation.
-- [ ] Give diagnostics stable codes suitable for GUI filtering and tests.
-- [ ] Keep rendering outside `config`; CLI and GUI choose their presentation.
+- [x] Keep invalid domain configuration non-fatal to application startup.
+- [x] Keep missing or invalid `freebooru.yaml` fatal to normal operation.
+- [x] Give diagnostics stable codes suitable for GUI filtering and tests.
+- [x] Keep rendering outside `config`; CLI and GUI choose their presentation.
 
 Acceptance:
 

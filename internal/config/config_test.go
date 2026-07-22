@@ -68,9 +68,9 @@ func TestCheckYAMLDirLoadsNestedMultipleDocuments(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(nested, "characters.yaml"), []byte(content), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	err := checkYAMLDir(root, VerifyTagConfig)
-	if err == nil || !strings.Contains(err.Error(), "document 2") {
-		t.Fatalf("checkYAMLDir() error = %v, want document 2 error", err)
+	diagnostics := checkYAMLDir(root, "tag", true, VerifyTagConfig)
+	if len(diagnostics) != 1 || diagnostics[0].Document != 2 || diagnostics[0].Code != "tag.invalid" {
+		t.Fatalf("checkYAMLDir() diagnostics = %#v, want tag.invalid in document 2", diagnostics)
 	}
 }
 
@@ -94,15 +94,24 @@ func TestCheckDomainAggregatesBrokenConfigs(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(paths.Collections, "main.yaml"), []byte("name: main\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	err = CheckDomain(paths)
-	if err == nil {
-		t.Fatal("CheckDomain() succeeded, want errors")
+	diagnostics := CheckDomain(paths)
+	if !diagnostics.HasErrors() {
+		t.Fatal("CheckDomain() has no errors, want errors")
 	}
-	for _, want := range []string{"path is required", "parse YAML", "tags must contain"} {
-		if !strings.Contains(err.Error(), want) {
-			t.Errorf("CheckDomain() error = %q, want %q", err, want)
+	for _, want := range []string{"storage.invalid", "yaml.decode", "collection.invalid"} {
+		if !diagnosticsContainCode(diagnostics, want) {
+			t.Errorf("CheckDomain() diagnostics = %#v, want code %q", diagnostics, want)
 		}
 	}
+}
+
+func diagnosticsContainCode(diagnostics Diagnostics, want string) bool {
+	for _, diagnostic := range diagnostics {
+		if diagnostic.Code == want {
+			return true
+		}
+	}
+	return false
 }
 
 func TestDefaultConfigsRoundTrip(t *testing.T) {

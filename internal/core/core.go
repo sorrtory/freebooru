@@ -48,8 +48,8 @@ func (c *Core) LoadConfig(context.Context) error {
 	return nil
 }
 
-// CheckConfig validates domain configuration.
-func (c *Core) CheckConfig(context.Context) error {
+// CheckConfig returns all discoverable domain configuration diagnostics.
+func (c *Core) CheckConfig(context.Context) config.Diagnostics {
 	return config.CheckDomain(c.paths)
 }
 

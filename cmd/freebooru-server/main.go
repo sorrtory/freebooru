@@ -22,8 +22,16 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := app.CheckConfig(context.Background()); err != nil {
-		logger.Warn("configuration check failed", "error", err)
+	for _, diagnostic := range app.CheckConfig(context.Background()) {
+		logger.Warn(
+			"configuration problem",
+			"severity", diagnostic.Severity,
+			"code", diagnostic.Code,
+			"file", diagnostic.File,
+			"document", diagnostic.Document,
+			"field", diagnostic.Field,
+			"message", diagnostic.Message,
+		)
 	}
 
 	// TODO: start the HTTP server with app. Domain configuration diagnostics
