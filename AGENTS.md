@@ -42,13 +42,13 @@ See [Configuration Specification](docs/config-spec.md) for details.
 
 We use `golangci-lint` for linting and formatting.
 We also use `task` as a task runner.
-It is useful to run `go tool task check` to verify the code quality.
+It is required to run `go tool task check` to verify the code quality.
 
 ## Contributing
 
 - First of all, [docs](./docs/) should be the source of truth. If you want to change something or add new features, please update the docs first, then the code.
     - if you need to make a contract or a spec, generate a new file with ai. Don't mess up human and machine-readable docs. The human-readable docs should be in `.md` files, the machine-readable docs should be in `.ai.md` files.
-- On making new code changes, please run `go tool task check` to verify the code quality.
+- On making new code changes, always run `go tool task check` to verify the code quality.
     - Go-installed tools may not be on an agent shell's `PATH`. Check
       `$(go env GOBIN)` and `$(go env GOPATH)/bin` before reporting a tool as
       missing.

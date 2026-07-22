@@ -73,21 +73,21 @@ Acceptance:
 Replace the current config-only initializer with a reusable provisioning
 operation. It creates missing resources but never edits existing YAML.
 
-- [ ] Add a config operation that creates required config/data directories.
-- [ ] Create `freebooru.yaml` first when it is absent.
-- [ ] Load and strictly verify `freebooru.yaml` before deriving other defaults.
-- [ ] Create `storage.yaml` only when it is absent.
-- [ ] Create the default collection YAML only when it is absent.
-- [ ] Create the tags directory when absent.
-- [ ] Create the configured default storage directory when absent.
-- [ ] Create the configured collections data directory when absent.
-- [ ] Never overwrite, merge, append to, or reformat an existing YAML file.
-- [ ] If existing `storage.yaml` lacks the configured default storage, return an
+- [x] Add a config operation that creates required config/data directories.
+- [x] Create `freebooru.yaml` first when it is absent.
+- [x] Load and strictly verify `freebooru.yaml` before deriving other defaults.
+- [x] Create `storage.yaml` only when it is absent.
+- [x] Create the default collection YAML only when it is absent.
+- [x] Create the tags directory when absent.
+- [x] Create the configured default storage directory when absent.
+- [x] Create the configured collections data directory when absent.
+- [x] Never overwrite, merge, append to, or reformat an existing YAML file.
+- [x] If existing `storage.yaml` lacks the configured default storage, return an
   actionable conflict error.
-- [ ] If an existing default collection conflicts with its derived name or
+- [x] If an existing default collection conflicts with its derived name or
   location, return an actionable conflict error.
-- [ ] Make retries safe after partial filesystem creation.
-- [ ] Wrap every error with the resource and operation that failed.
+- [x] Make retries safe after partial filesystem creation.
+- [x] Wrap every error with the resource and operation that failed.
 
 Provisioning policy:
 

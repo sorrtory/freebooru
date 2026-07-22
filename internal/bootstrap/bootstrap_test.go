@@ -38,6 +38,7 @@ func TestLoadConfigRequiresValidAppConfig(t *testing.T) {
 func TestCoreForInitAndDomainCheck(t *testing.T) {
 	dir := t.TempDir()
 	t.Setenv("XDG_CONFIG_HOME", dir)
+	t.Setenv("HOME", t.TempDir())
 	app, err := NewCore(testLogger())
 	if err != nil {
 		t.Fatalf("NewCore() error = %v", err)

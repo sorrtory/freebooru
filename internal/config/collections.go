@@ -41,8 +41,8 @@ func CollectionLocation(collection CollectionConfig) (string, error) {
 }
 
 func VerifyCollectionConfig(collection CollectionConfig) error {
-	if strings.TrimSpace(collection.Name) == "" {
-		return fmt.Errorf("name is required")
+	if err := verifyName("name", collection.Name); err != nil {
+		return err
 	}
 	if _, err := CollectionLocation(collection); err != nil {
 		return fmt.Errorf("location: %w", err)
@@ -70,6 +70,9 @@ func VerifyTagReference(ref TagReference) error {
 	for _, value := range []string{ref.Tag, ref.Group, ref.Storage} {
 		if strings.TrimSpace(value) != "" {
 			count++
+			if err := verifyName("reference name", value); err != nil {
+				return err
+			}
 		}
 	}
 	if count != 1 {

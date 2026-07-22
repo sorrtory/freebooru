@@ -29,11 +29,11 @@ func VerifyAppConfig(cfg AppConfig) error {
 	if cfg.Lang != "en" && cfg.Lang != "ru" {
 		return fmt.Errorf("lang must be en or ru")
 	}
-	if strings.TrimSpace(cfg.DefaultCollection) == "" {
-		return fmt.Errorf("default_collection is required")
+	if err := verifyName("default_collection", cfg.DefaultCollection); err != nil {
+		return err
 	}
-	if strings.TrimSpace(cfg.DefaultStorageName) == "" {
-		return fmt.Errorf("default_storage_name is required")
+	if err := verifyName("default_storage_name", cfg.DefaultStorageName); err != nil {
+		return err
 	}
 	if strings.TrimSpace(cfg.DefaultStoragePath) == "" {
 		return fmt.Errorf("default_storage_path is required")

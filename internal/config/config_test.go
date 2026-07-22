@@ -190,7 +190,9 @@ func TestCollectionLocationUsesDefault(t *testing.T) {
 }
 
 func TestInitCreatesLayoutWithoutOverwriting(t *testing.T) {
-	paths, err := PathsFromDir(t.TempDir())
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	paths, err := PathsFromDir(filepath.Join(home, "config"))
 	if err != nil {
 		t.Fatal(err)
 	}
