@@ -7,6 +7,38 @@ import (
 	"github.com/sorrtory/freebooru/internal/collection"
 )
 
+func TestPersistedFileStateLoadsTypedAssignments(t *testing.T) {
+	app := newImportTestCore(t)
+	references, ok := app.catalog.CollectionReferences("main")
+	if !ok {
+		t.Fatal("main collection references are unavailable")
+	}
+	rating := "safe"
+	score := int64(7)
+	state, err := persistedFileState(collection.FileRecord{
+		Tags: []collection.TagRecord{
+			{Name: "reviewed", Type: "bool"},
+			{Name: "rating", Type: "value", TextValue: &rating},
+			{Name: "score", Type: "int", IntegerValue: &score},
+		},
+		Storages: []string{"default"},
+	}, app.catalog, newCollectionAvailability(references))
+	if err != nil {
+		t.Fatalf("persistedFileState() error = %v", err)
+	}
+	for name, want := range map[string]any{
+		"reviewed": true,
+		"rating":   "safe",
+		"score":    int64(7),
+		"storage":  []string{"default"},
+	} {
+		got, assigned := state.Value(name)
+		if !assigned || !reflect.DeepEqual(got, want) {
+			t.Errorf("Value(%q) = %#v, %t, want %#v, true", name, got, assigned, want)
+		}
+	}
+}
+
 func TestPersistedTagValuePreservesTypes(t *testing.T) {
 	text := "example"
 	number := int64(12)

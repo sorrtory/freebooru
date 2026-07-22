@@ -553,7 +553,7 @@ Acceptance:
 
 ## Phase 18: persisted tag and storage mutation
 
-- [ ] Load persisted files into `FileState`.
+- [x] Load persisted files into `FileState`.
 - [ ] Implement add/set/remove for every tag type.
 - [ ] Canonicalize tag and predefined-value names.
 - [ ] Treat boolean false as removal.

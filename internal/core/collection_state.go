@@ -69,13 +69,9 @@ func validateCollectionRecord(
 	checker *evaluator.Evaluator,
 	availability collectionAvailability,
 ) error {
-	values, err := persistedValues(file, catalog, availability)
+	state, err := persistedFileState(file, catalog, availability)
 	if err != nil {
 		return err
-	}
-	state, err := evaluator.NewFileState(catalog, values)
-	if err != nil {
-		return fmt.Errorf("reconstruct tag state: %w", err)
 	}
 	if err := verifyRequiredState(state, file.Storages, availability.required); err != nil {
 		return err
@@ -89,6 +85,22 @@ func validateCollectionRecord(
 		)
 	}
 	return nil
+}
+
+func persistedFileState(
+	file collection.FileRecord,
+	catalog *config.Catalog,
+	availability collectionAvailability,
+) (evaluator.FileState, error) {
+	values, err := persistedValues(file, catalog, availability)
+	if err != nil {
+		return evaluator.FileState{}, err
+	}
+	state, err := evaluator.NewFileState(catalog, values)
+	if err != nil {
+		return evaluator.FileState{}, fmt.Errorf("reconstruct tag state: %w", err)
+	}
+	return state, nil
 }
 
 func persistedValues(
