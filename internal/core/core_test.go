@@ -20,6 +20,7 @@ type fakeDatabase struct {
 	closeErr                 error
 	initialized              bool
 	closed                   bool
+	closeCalls               int
 	files                    []collection.FileRecord
 	createErr                error
 	created                  *collection.NewFile
@@ -46,6 +47,7 @@ func (d *fakeDatabase) Initialize(context.Context) error {
 
 func (d *fakeDatabase) Close() error {
 	d.closed = true
+	d.closeCalls++
 	return d.closeErr
 }
 
@@ -304,18 +306,23 @@ func TestOpenCollectionRejectsInvalidAndOpensIndependentValidCollection(t *testi
 	if !diagnostics.HasErrors() {
 		t.Fatal("CheckConfig() diagnostics has no errors")
 	}
-	if _, err := app.OpenCollection(t.Context(), "broken"); err == nil {
+	if err := app.OpenCollection(t.Context(), "broken"); err == nil {
 		t.Fatal("OpenCollection(broken) error = nil")
 	}
 	if openCalls != 0 {
 		t.Fatalf("opener called %d times for invalid collection", openCalls)
 	}
-	opened, err := app.OpenCollection(t.Context(), "MAIN")
-	if err != nil {
+	if err := app.OpenCollection(t.Context(), "MAIN"); err != nil {
 		t.Fatalf("OpenCollection(MAIN) error = %v", err)
 	}
-	if opened != database || !database.initialized || openCalls != 1 {
-		t.Fatalf("opened=%#v initialized=%t calls=%d", opened, database.initialized, openCalls)
+	if !database.initialized || openCalls != 1 {
+		t.Fatalf("initialized=%t calls=%d", database.initialized, openCalls)
+	}
+	if name, ok := app.OpenCollectionName(); !ok || name != "main" {
+		t.Fatalf("OpenCollectionName() = %q, %t", name, ok)
+	}
+	if err := app.CloseCollection(); err != nil {
+		t.Fatal(err)
 	}
 }
 
@@ -334,7 +341,7 @@ func TestOpenCollectionClosesAfterInitializeFailure(t *testing.T) {
 	if diagnostics := app.CheckConfig(t.Context()); diagnostics.HasErrors() {
 		t.Fatalf("CheckConfig() diagnostics = %#v", diagnostics)
 	}
-	if _, err := app.OpenCollection(t.Context(), "main"); err == nil {
+	if err := app.OpenCollection(t.Context(), "main"); err == nil {
 		t.Fatal("OpenCollection(main) error = nil")
 	}
 	if !database.closed {
@@ -362,7 +369,7 @@ func TestOpenCollectionRejectsIncompatiblePersistedState(t *testing.T) {
 	if diagnostics := app.CheckConfig(t.Context()); diagnostics.HasErrors() {
 		t.Fatalf("CheckConfig() diagnostics = %#v", diagnostics)
 	}
-	_, err = app.OpenCollection(t.Context(), "main")
+	err = app.OpenCollection(t.Context(), "main")
 	if err == nil || !strings.Contains(err.Error(), hash) ||
 		!strings.Contains(err.Error(), "not imported") {
 		t.Fatalf("OpenCollection() error = %v, want incompatible file context", err)
@@ -389,7 +396,7 @@ func TestOpenCollectionRejectsMissingRequiredPersistedStorage(t *testing.T) {
 	if diagnostics := app.CheckConfig(t.Context()); diagnostics.HasErrors() {
 		t.Fatalf("CheckConfig() diagnostics = %#v", diagnostics)
 	}
-	_, err = app.OpenCollection(t.Context(), "main")
+	err = app.OpenCollection(t.Context(), "main")
 	if err == nil || !strings.Contains(err.Error(), "required storage") {
 		t.Fatalf("OpenCollection() error = %v, want required storage error", err)
 	}

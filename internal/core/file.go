@@ -17,7 +17,7 @@ func (c *Core) GetFile(
 	if collectionName == "" {
 		collectionName = c.config.DefaultCollection
 	}
-	database, err := c.OpenCollection(ctx, collectionName)
+	database, err := c.openCollectionDatabase(ctx, collectionName)
 	if err != nil {
 		return collection.FileRecord{}, err
 	}

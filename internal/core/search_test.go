@@ -135,7 +135,7 @@ tags:
 	if diagnostics := app.CheckConfig(t.Context()); diagnostics.HasErrors() {
 		t.Fatalf("CheckConfig() diagnostics = %#v", diagnostics)
 	}
-	database, err := app.OpenCollection(t.Context(), "main")
+	database, err := app.openCollectionDatabase(t.Context(), "main")
 	if err != nil {
 		t.Fatal(err)
 	}

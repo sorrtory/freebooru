@@ -152,7 +152,7 @@ func (c *Core) applyTagMutation(
 	assignment preparedTagAssignment,
 	kind tagMutationKind,
 ) (result TagMutationResult, err error) {
-	database, err := c.OpenCollection(ctx, collectionName)
+	database, err := c.openCollectionDatabase(ctx, collectionName)
 	if err != nil {
 		return TagMutationResult{}, err
 	}

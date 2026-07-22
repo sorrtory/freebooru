@@ -28,7 +28,7 @@ func (c *Core) Import(ctx context.Context, request ImportRequest) (result Import
 	if err != nil {
 		return ImportResult{}, fmt.Errorf("resolve import source %q: %w", request.SourcePath, err)
 	}
-	database, err := c.OpenCollection(ctx, prepared.collection.Name)
+	database, err := c.openCollectionDatabase(ctx, prepared.collection.Name)
 	if err != nil {
 		return ImportResult{}, err
 	}

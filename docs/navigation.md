@@ -77,6 +77,8 @@ freebooru/
 │   │   ├── storage_mutation_test.go   Storage ordering, rollback, and deletion tests
 │   │   ├── search.go                  Validated collection search workflow and defaults
 │   │   ├── search_test.go             Search resolution, pagination, and lifecycle tests
+│   │   ├── session.go                 Core-owned validated collection lifecycle
+│   │   ├── session_test.go            Session ownership, close, and cancellation tests
 │   │   └── integration_test.go       Multi-domain config integration fixture
 │   │
 │   ├── collection/

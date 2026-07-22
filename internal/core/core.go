@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"sync"
 
 	"github.com/sorrtory/freebooru/internal/collection"
 	"github.com/sorrtory/freebooru/internal/config"
@@ -37,6 +38,9 @@ type Core struct {
 	open    CollectionOpener
 	catalog *config.Catalog
 	graph   *config.Graph
+
+	sessionMu sync.Mutex
+	session   *collectionSession
 }
 
 // New creates a Core with explicit dependencies.
@@ -78,9 +82,8 @@ func (c *Core) SearchTags(prefix string) ([]config.TagConfig, error) {
 	return c.catalog.SearchTags(prefix), nil
 }
 
-// OpenCollection opens and initializes one usable catalog collection. Invalid
-// collections are absent from the catalog and cannot be opened.
-func (c *Core) OpenCollection(ctx context.Context, name string) (CollectionDatabase, error) {
+// openCollectionDatabase opens and validates one usable catalog collection.
+func (c *Core) openCollectionDatabase(ctx context.Context, name string) (CollectionDatabase, error) {
 	if c.catalog == nil {
 		return nil, fmt.Errorf("configuration has not been checked")
 	}

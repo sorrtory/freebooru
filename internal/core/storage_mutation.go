@@ -40,7 +40,7 @@ func (c *Core) AddStorage(
 	if err != nil {
 		return StorageMutationResult{}, err
 	}
-	database, err := c.OpenCollection(ctx, collectionName)
+	database, err := c.openCollectionDatabase(ctx, collectionName)
 	if err != nil {
 		return StorageMutationResult{}, err
 	}
@@ -98,7 +98,7 @@ func (c *Core) RemoveStorage(
 	if err != nil {
 		return StorageMutationResult{}, err
 	}
-	database, err := c.OpenCollection(ctx, collectionName)
+	database, err := c.openCollectionDatabase(ctx, collectionName)
 	if err != nil {
 		return StorageMutationResult{}, err
 	}

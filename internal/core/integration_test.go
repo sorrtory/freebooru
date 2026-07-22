@@ -54,15 +54,14 @@ func TestConfigIntegrationKeepsIndependentCollectionsUsable(t *testing.T) {
 		}
 	}
 	for _, name := range []string{"main", "archive"} {
-		database, err := app.OpenCollection(t.Context(), name)
-		if err != nil {
+		if err := app.OpenCollection(t.Context(), name); err != nil {
 			t.Fatalf("OpenCollection(%s) error = %v", name, err)
 		}
-		if err := database.Close(); err != nil {
-			t.Fatalf("Close(%s) error = %v", name, err)
+		if err := app.CloseCollection(); err != nil {
+			t.Fatalf("CloseCollection(%s) error = %v", name, err)
 		}
 	}
-	if _, err := app.OpenCollection(t.Context(), "broken"); err == nil {
+	if err := app.OpenCollection(t.Context(), "broken"); err == nil {
 		t.Fatal("OpenCollection(broken) error = nil")
 	}
 	if len(opened) != 2 {

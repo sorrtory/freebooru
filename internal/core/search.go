@@ -46,7 +46,7 @@ func (c *Core) Search(
 	if err != nil {
 		return nil, err
 	}
-	database, err := c.OpenCollection(ctx, collectionName)
+	database, err := c.openCollectionDatabase(ctx, collectionName)
 	if err != nil {
 		return nil, err
 	}
