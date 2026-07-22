@@ -72,6 +72,9 @@ freebooru/
 │   │   ├── tag_assignment_test.go     Tag preparation and persistence-shape tests
 │   │   ├── tag_mutation.go            Validated persisted tag set/remove workflows
 │   │   ├── tag_mutation_test.go       Tag mutation and required-state tests
+│   │   ├── storage_assignment.go      Local storage resolution and assignment helpers
+│   │   ├── storage_mutation.go        Physical/logical storage mutation workflows
+│   │   ├── storage_mutation_test.go   Storage ordering, rollback, and deletion tests
 │   │   └── integration_test.go       Multi-domain config integration fixture
 │   │
 │   ├── collection/

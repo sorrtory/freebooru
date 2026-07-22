@@ -16,16 +16,24 @@ import (
 )
 
 type fakeDatabase struct {
-	initializeErr error
-	closeErr      error
-	initialized   bool
-	closed        bool
-	files         []collection.FileRecord
-	createErr     error
-	created       *collection.NewFile
-	addedTag      *collection.TagRecord
-	setTag        *collection.TagRecord
-	removedTag    string
+	initializeErr            error
+	closeErr                 error
+	initialized              bool
+	closed                   bool
+	files                    []collection.FileRecord
+	createErr                error
+	created                  *collection.NewFile
+	addedTag                 *collection.TagRecord
+	setTag                   *collection.TagRecord
+	removedTag               string
+	addedStorage             string
+	removedStorage           string
+	removeStorageDeletesFile bool
+	addStorageErr            error
+	addStorageNoChange       bool
+	onAddStorage             func()
+	removeStorageErr         error
+	onRemoveStorage          func()
 }
 
 func (d *fakeDatabase) Initialize(context.Context) error {
@@ -102,6 +110,42 @@ func (d *fakeDatabase) RemoveTag(
 ) (collection.TagChange, error) {
 	d.removedTag = name
 	return collection.TagChange{Changed: true}, nil
+}
+
+func (d *fakeDatabase) AddStorage(
+	_ context.Context,
+	_ string,
+	name string,
+) (collection.StorageChange, error) {
+	d.addedStorage = name
+	if d.onAddStorage != nil {
+		d.onAddStorage()
+	}
+	if d.addStorageErr != nil {
+		return collection.StorageChange{}, d.addStorageErr
+	}
+	if d.addStorageNoChange {
+		return collection.StorageChange{}, nil
+	}
+	return collection.StorageChange{Changed: true}, nil
+}
+
+func (d *fakeDatabase) RemoveStorage(
+	_ context.Context,
+	_ string,
+	name string,
+) (collection.StorageChange, error) {
+	d.removedStorage = name
+	if d.onRemoveStorage != nil {
+		d.onRemoveStorage()
+	}
+	if d.removeStorageErr != nil {
+		return collection.StorageChange{}, d.removeStorageErr
+	}
+	return collection.StorageChange{
+		Changed:     true,
+		FileDeleted: d.removeStorageDeletesFile,
+	}, nil
 }
 
 func TestInitInitializesAndClosesDefaultCollection(t *testing.T) {

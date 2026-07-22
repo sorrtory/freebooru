@@ -20,6 +20,8 @@ type CollectionDatabase interface {
 	AddTag(context.Context, string, collection.TagRecord) (collection.TagChange, error)
 	SetTag(context.Context, string, collection.TagRecord) (collection.TagChange, error)
 	RemoveTag(context.Context, string, string) (collection.TagChange, error)
+	AddStorage(context.Context, string, string) (collection.StorageChange, error)
+	RemoveStorage(context.Context, string, string) (collection.StorageChange, error)
 	Close() error
 }
 

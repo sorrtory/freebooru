@@ -560,14 +560,14 @@ Acceptance:
 - [x] Enforce collection imports and required tags.
 - [x] Evaluate the complete proposed state before mutation.
 - [x] Return demands, conflicts, suggestions, and originating reasons.
-- [ ] Adding `storage:<name>` copies/verifies content before logical commit.
-- [ ] Removing `storage:<name>` updates SQLite and deletes exactly that copy
+- [x] Adding `storage:<name>` copies/verifies content before logical commit.
+- [x] Removing `storage:<name>` updates SQLite and deletes exactly that copy
   with recoverable failure reporting.
-- [ ] Removing the final storage deletes the file record, tag/source rows, and
+- [x] Removing the final storage deletes the file record, tag/source rows, and
   final copy in the documented order.
-- [ ] Reject removal of required tags and storages.
-- [ ] Make repeated add/remove operations idempotent.
-- [ ] Test rollback after copy, delete, evaluator, and database failures.
+- [x] Reject removal of required tags and storages.
+- [x] Make repeated add/remove operations idempotent.
+- [x] Test rollback after copy, delete, evaluator, and database failures.
 
 Acceptance:
 
