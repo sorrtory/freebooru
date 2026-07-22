@@ -65,6 +65,29 @@ func TestVerifyTagValueRejectsInvalidValues(t *testing.T) {
 	}
 }
 
+func TestCanonicalPredefinedValueResolvesAliases(t *testing.T) {
+	tag := TagConfig{
+		Name: "character",
+		Type: TagTypeValue,
+		Values: []PredefinedValue{{
+			Val:     "cirno",
+			Aliases: []string{"chiruno", "チルノ"},
+		}},
+	}
+	for _, input := range []string{"cirno", "CIRNO", "Chiruno", "チルノ"} {
+		got, ok := CanonicalPredefinedValue(tag, input)
+		if !ok || got != "cirno" {
+			t.Fatalf("CanonicalPredefinedValue(%q) = %q, %t", input, got, ok)
+		}
+	}
+	if _, ok := CanonicalPredefinedValue(tag, "reimu"); ok {
+		t.Fatal("unknown alias resolved")
+	}
+	if err := VerifyTagValue(tag, "chiruno"); err != nil {
+		t.Fatalf("VerifyTagValue(alias) error = %v", err)
+	}
+}
+
 func valueTag(tagType TagType) TagConfig {
 	return TagConfig{
 		Name:   "rating",

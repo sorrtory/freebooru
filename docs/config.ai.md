@@ -61,8 +61,14 @@ is reserved. Groups are implicit and many-to-many; group/tag names may collide.
 - `int`: `0..9223372036854775807`.
 - `date`: `YYYY-MM-DD`.
 - `datetime`: RFC 3339.
-- `value`: exactly one configured `val`.
-- `multivalue`: zero or more unique configured `val` values.
+- `value`: exactly one configured canonical `val`.
+- `multivalue`: zero or more unique configured canonical `val` values.
+
+Each predefined value may declare `aliases`. Canonical values and aliases are
+case-insensitively unique within their tag and use the normal name syntax.
+Assignment, search, and relationship predicate inputs accept either spelling;
+Core and the graph resolve aliases to `val` before evaluation or persistence.
+Aliases are never stored in SQLite and never create separate graph nodes.
 
 `suggest`, `demand`, and `conflict` are MVP. They may occur at tag level or
 inside a predefined value. Tag-level rules activate on tag presence; value-level

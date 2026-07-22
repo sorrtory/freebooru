@@ -20,8 +20,8 @@ func TestResolveCanonicalizesAndTypesEverySupportedOperand(t *testing.T) {
 		"score>=10",
 		"day<2026-07-22",
 		"instant>2026-07-22T10:30:00Z",
-		"rating:SAFE",
-		"labels:SECOND",
+		"rating:SFW",
+		"labels:TWO",
 		"storage:DEFAULT",
 	})
 	if err != nil {
@@ -112,12 +112,14 @@ name: rating
 type: value
 values:
   - val: safe
+    aliases: [sfw]
 ---
 name: labels
 type: multivalue
 values:
   - val: first
   - val: second
+    aliases: [two]
 ---
 name: hidden
 type: bool

@@ -65,6 +65,8 @@ and required storage assignments come from the collection configuration. Other
 required valued tags must be provided with `--tag` or answered in interactive
 mode. `--tag` may be repeated: boolean tags use `--tag name`, scalar tags use
 `--tag name:value`, and multivalue tags repeat the same name once per value.
+Configured value aliases are accepted here and in search terms, but output and
+persisted assignments always use the canonical `val`.
 
 Successful data commands write only their documented result to standard
 output. Diagnostics and verbose logs go to standard error. Invalid arguments,

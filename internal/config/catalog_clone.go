@@ -12,6 +12,7 @@ func cloneTag(tag TagConfig) TagConfig {
 func cloneValues(values []PredefinedValue) []PredefinedValue {
 	cloned := make([]PredefinedValue, len(values))
 	for index, value := range values {
+		value.Aliases = append([]string(nil), value.Aliases...)
 		value.Suggest = cloneRelationships(value.Suggest)
 		value.Demand = cloneRelationships(value.Demand)
 		value.Conflict = cloneRelationships(value.Conflict)

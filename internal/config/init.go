@@ -1,17 +1,29 @@
 package config
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/goccy/go-yaml"
 )
 
 // EnsureDefaults creates missing default configuration and data directories
 // without modifying existing YAML files.
 func EnsureDefaults(paths Paths) (AppConfig, error) {
+	return ensureDefaults(paths, false)
+}
+
+// EnsureStarterDefaults creates the opinionated starter tag catalog used by init.
+func EnsureStarterDefaults(paths Paths) (AppConfig, error) {
+	return ensureDefaults(paths, true)
+}
+
+func ensureDefaults(paths Paths, starter bool) (AppConfig, error) {
 	if err := writeIfMissing(
 		YAMLFile[AppConfig]{Path: paths.App, Validate: VerifyAppConfig},
 		DefaultAppConfig(),
@@ -25,6 +37,11 @@ func EnsureDefaults(paths Paths) (AppConfig, error) {
 	if err := os.MkdirAll(paths.Tags, 0o755); err != nil {
 		return AppConfig{}, fmt.Errorf("create tags directory: %w", err)
 	}
+	if starter {
+		if err := ensureDefaultTags(paths.Tags); err != nil {
+			return AppConfig{}, err
+		}
+	}
 	if err := os.MkdirAll(paths.Collections, 0o755); err != nil {
 		return AppConfig{}, fmt.Errorf("create collections directory: %w", err)
 	}
@@ -32,7 +49,11 @@ func EnsureDefaults(paths Paths) (AppConfig, error) {
 		return AppConfig{}, err
 	}
 	collectionPath := filepath.Join(paths.Collections, app.DefaultCollection+".yaml")
-	if err := ensureDefaultCollection(collectionPath, app); err != nil {
+	collection := DefaultCollectionConfig(app)
+	if starter {
+		collection = StarterCollectionConfig(app)
+	}
+	if err := ensureDefaultCollection(collectionPath, app, collection); err != nil {
 		return AppConfig{}, err
 	}
 	storagePath, err := ExpandPath(app.DefaultStoragePath)
@@ -50,6 +71,76 @@ func EnsureDefaults(paths Paths) (AppConfig, error) {
 		return AppConfig{}, fmt.Errorf("create collections data directory: %w", err)
 	}
 	return app, nil
+}
+
+func ensureDefaultTags(root string) error {
+	files := map[string][]TagConfig{
+		"character.yaml": {
+			{
+				Name:   "character",
+				Type:   TagTypeMultivalue,
+				Groups: []string{"character"},
+				Values: []PredefinedValue{{Val: "original_character"}},
+			},
+		},
+		"creator.yaml": {
+			{Name: "artist", Type: TagTypeText, Groups: []string{"creator"}},
+		},
+		"general.yaml": {
+			{
+				Name:   "rating",
+				Type:   TagTypeValue,
+				Groups: []string{"general"},
+				Values: []PredefinedValue{
+					{Val: "safe"},
+					{Val: "sensitive"},
+					{Val: "questionable"},
+					{Val: "explicit"},
+				},
+			},
+			{Name: "description", Type: TagTypeText, Groups: []string{"general"}},
+		},
+		"metadata.yaml": {
+			{Name: "source", Type: TagTypeText, Groups: []string{"metadata"}},
+		},
+		"universe.yaml": {
+			{
+				Name:   "universe",
+				Type:   TagTypeMultivalue,
+				Groups: []string{"universe"},
+				Values: []PredefinedValue{{Val: "original"}},
+			},
+		},
+	}
+	for name, tags := range files {
+		path := filepath.Join(root, name)
+		if err := writeTagFileIfMissing(path, tags); err != nil {
+			return fmt.Errorf("ensure default tags: %w", err)
+		}
+	}
+	return nil
+}
+
+func writeTagFileIfMissing(path string, tags []TagConfig) error {
+	if _, err := os.Stat(path); err == nil {
+		return nil
+	} else if !errors.Is(err, fs.ErrNotExist) {
+		return fmt.Errorf("stat %q: %w", path, err)
+	}
+	var content bytes.Buffer
+	encoder := yaml.NewEncoder(&content)
+	for _, tag := range tags {
+		if err := VerifyTagConfig(tag); err != nil {
+			return fmt.Errorf("verify %q: %w", path, err)
+		}
+		if err := encoder.Encode(tag); err != nil {
+			return fmt.Errorf("marshal %q: %w", path, err)
+		}
+	}
+	if err := os.WriteFile(path, content.Bytes(), 0o600); err != nil {
+		return fmt.Errorf("write %q: %w", path, err)
+	}
+	return nil
 }
 
 func ensureDefaultStorage(path string, app AppConfig) error {
@@ -84,8 +175,7 @@ func ensureDefaultStorage(path string, app AppConfig) error {
 	return fmt.Errorf("storage config does not define default storage %q", app.DefaultStorageName)
 }
 
-func ensureDefaultCollection(path string, app AppConfig) error {
-	want := DefaultCollectionConfig(app)
+func ensureDefaultCollection(path string, app AppConfig, want CollectionConfig) error {
 	file := YAMLFile[CollectionConfig]{Path: path, Validate: VerifyCollectionConfig}
 	if err := writeIfMissing(file, want); err != nil {
 		return fmt.Errorf("ensure default collection config: %w", err)

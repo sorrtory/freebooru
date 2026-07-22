@@ -28,6 +28,7 @@ type TagConfig struct {
 // PredefinedValue declares one allowed value and rules activated by it.
 type PredefinedValue struct {
 	Val      string         `yaml:"val"`
+	Aliases  []string       `yaml:"aliases,omitempty"`
 	Suggest  []Relationship `yaml:"suggest,omitempty"`
 	Demand   []Relationship `yaml:"demand,omitempty"`
 	Conflict []Relationship `yaml:"conflict,omitempty"`

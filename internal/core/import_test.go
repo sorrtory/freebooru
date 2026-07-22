@@ -14,7 +14,7 @@ func TestPrepareImportAppliesRequiredAndDefaultValues(t *testing.T) {
 	app := newImportTestCore(t)
 	prepared, err := app.prepareImport(ImportRequest{
 		Tags: map[string]any{
-			"RATING": "SAFE",
+			"RATING": "SFW",
 			"score":  int64(7),
 		},
 	})
@@ -72,6 +72,7 @@ name: rating
 type: value
 values:
   - val: safe
+    aliases: [sfw]
   - val: questionable
 ---
 name: score

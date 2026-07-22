@@ -36,6 +36,19 @@ func DefaultCollectionConfig(app AppConfig) CollectionConfig {
 	}
 }
 
+// StarterCollectionConfig adds the starter tag groups created by init.
+func StarterCollectionConfig(app AppConfig) CollectionConfig {
+	collection := DefaultCollectionConfig(app)
+	collection.Tags.Import = []TagReference{
+		{Group: "creator"},
+		{Group: "universe"},
+		{Group: "character"},
+		{Group: "general"},
+		{Group: "metadata"},
+	}
+	return collection
+}
+
 // CollectionLocation resolves a collection's explicit or default database path.
 func CollectionLocation(collection CollectionConfig) (string, error) {
 	location := collection.Location

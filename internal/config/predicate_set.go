@@ -49,10 +49,8 @@ func compilePredefinedList(target TagConfig, field string, raw []any) ([]string,
 }
 
 func canonicalPredefinedValue(tag TagConfig, value string) (string, error) {
-	for _, declared := range tag.Values {
-		if normalizeName(declared.Val) == normalizeName(value) {
-			return declared.Val, nil
-		}
+	if canonical, ok := CanonicalPredefinedValue(tag, value); ok {
+		return canonical, nil
 	}
 	return "", fmt.Errorf("target tag %q does not declare value %q", tag.Name, value)
 }

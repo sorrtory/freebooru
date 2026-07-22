@@ -40,11 +40,14 @@ func TestCompilePredicateAcceptsSupportedPredicates(t *testing.T) {
 		{
 			name: "has and not",
 			target: TagConfig{
-				Name:   "rating",
-				Type:   TagTypeMultivalue,
-				Values: []PredefinedValue{{Val: "safe"}, {Val: "explicit"}},
+				Name: "rating",
+				Type: TagTypeMultivalue,
+				Values: []PredefinedValue{
+					{Val: "safe", Aliases: []string{"sfw"}},
+					{Val: "explicit"},
+				},
 			},
-			raw:   Relationship{Has: []any{"SAFE"}, Not: []any{"explicit"}},
+			raw:   Relationship{Has: []any{"SFW"}, Not: []any{"explicit"}},
 			check: func(got Predicate) bool { return got.Has[0] == "safe" && got.Not[0] == "explicit" },
 		},
 		{

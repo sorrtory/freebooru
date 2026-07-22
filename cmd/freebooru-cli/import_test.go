@@ -99,6 +99,9 @@ func TestInteractiveImportPromptsForRequiredThenOptionalTags(t *testing.T) {
 	t.Setenv("HOME", home)
 	executeCLI(t, []string{"init"})
 	configDir := filepath.Join(configHome, "freebooru")
+	if err := os.Remove(filepath.Join(configDir, "tags", "general.yaml")); err != nil {
+		t.Fatal(err)
+	}
 	if err := os.WriteFile(
 		filepath.Join(configDir, "tags", "fields.yaml"),
 		[]byte("name: rating\ntype: value\nvalues:\n  - val: safe\n---\nname: reviewed\ntype: bool\n"),

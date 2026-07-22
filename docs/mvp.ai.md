@@ -183,8 +183,8 @@ The MVP supports these tag types:
 | `int`        | Integer from `0` through the SQLite signed 64-bit maximum |
 | `date`       | ISO date in `YYYY-MM-DD` form                             |
 | `datetime`   | RFC 3339 timestamp                                        |
-| `value`      | One predefined value                                      |
-| `multivalue` | Zero or more predefined values                            |
+| `value`      | One predefined canonical value or one of its aliases      |
+| `multivalue` | Zero or more predefined canonical values or aliases       |
 
 For boolean constraints, `is: false` means that the tag must be absent. False
 is not stored as an assigned tag value.

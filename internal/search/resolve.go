@@ -166,10 +166,8 @@ func resolveOrderedValue(tag config.TagConfig, raw string) (any, error) {
 }
 
 func canonicalDeclaredValue(tag config.TagConfig, raw string) string {
-	for _, declared := range tag.Values {
-		if strings.EqualFold(declared.Val, raw) {
-			return declared.Val
-		}
+	if canonical, ok := config.CanonicalPredefinedValue(tag, raw); ok {
+		return canonical
 	}
 	return raw
 }

@@ -50,17 +50,36 @@ func verifyValues(tag TagConfig) error {
 		return fmt.Errorf("values are only allowed for value or multivalue tags")
 	}
 
-	names := make([]string, len(tag.Values))
+	identities := make(map[string]string)
 	for index, value := range tag.Values {
 		if err := verifyName("val", value.Val); err != nil {
 			return fmt.Errorf("values[%d].%w", index, err)
 		}
-		names[index] = value.Val
+		if err := registerValueIdentity(identities, value.Val); err != nil {
+			return fmt.Errorf("values[%d].val: %w", index, err)
+		}
+		for aliasIndex, alias := range value.Aliases {
+			if err := verifyName("alias", alias); err != nil {
+				return fmt.Errorf("values[%d].aliases[%d]: %w", index, aliasIndex, err)
+			}
+			if err := registerValueIdentity(identities, alias); err != nil {
+				return fmt.Errorf("values[%d].aliases[%d]: %w", index, aliasIndex, err)
+			}
+		}
 		if err := verifyRelationshipLists(value.Suggest, value.Demand, value.Conflict); err != nil {
 			return fmt.Errorf("values[%d].%w", index, err)
 		}
 	}
-	return verifyUniqueNames("values", names)
+	return nil
+}
+
+func registerValueIdentity(identities map[string]string, name string) error {
+	key := normalizeName(name)
+	if previous, exists := identities[key]; exists {
+		return fmt.Errorf("%q duplicates predefined value or alias %q", name, previous)
+	}
+	identities[key] = name
+	return nil
 }
 
 func verifyUniqueNames(field string, names []string) error {

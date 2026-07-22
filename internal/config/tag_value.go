@@ -91,11 +91,22 @@ func verifyMultivalue(tag TagConfig, value any) error {
 }
 
 func hasPredefinedValue(tag TagConfig, value string) bool {
+	_, ok := CanonicalPredefinedValue(tag, value)
+	return ok
+}
+
+// CanonicalPredefinedValue resolves a canonical value or alias to its val.
+func CanonicalPredefinedValue(tag TagConfig, value string) (string, bool) {
 	want := normalizeName(value)
 	for _, declared := range tag.Values {
 		if normalizeName(declared.Val) == want {
-			return true
+			return declared.Val, true
+		}
+		for _, alias := range declared.Aliases {
+			if normalizeName(alias) == want {
+				return declared.Val, true
+			}
 		}
 	}
-	return false
+	return "", false
 }

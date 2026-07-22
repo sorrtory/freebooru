@@ -18,6 +18,9 @@ func TestTagCommandsMutateAndReadTypedAssignments(t *testing.T) {
 	executeCLI(t, []string{"init"})
 
 	configDir := filepath.Join(configHome, "freebooru")
+	if err := os.Remove(filepath.Join(configDir, "tags", "general.yaml")); err != nil {
+		t.Fatal(err)
+	}
 	if err := os.WriteFile(
 		filepath.Join(configDir, "tags", "rating.yaml"),
 		[]byte("name: rating\ntype: value\nvalues:\n  - val: safe\n  - val: questionable\n"),

@@ -62,6 +62,39 @@ func TestVerifyTagConfigRejectsInvalidLocalRules(t *testing.T) {
 			want: "duplicates",
 		},
 		{
+			name: "alias collides with canonical value",
+			tag: TagConfig{
+				Name: "character",
+				Type: TagTypeMultivalue,
+				Values: []PredefinedValue{
+					{Val: "cirno", Aliases: []string{"chiruno"}},
+					{Val: "Chiruno"},
+				},
+			},
+			want: "duplicates",
+		},
+		{
+			name: "aliases collide across values",
+			tag: TagConfig{
+				Name: "character",
+				Type: TagTypeMultivalue,
+				Values: []PredefinedValue{
+					{Val: "cirno", Aliases: []string{"ice_fairy"}},
+					{Val: "reimu", Aliases: []string{"ICE_FAIRY"}},
+				},
+			},
+			want: "duplicates",
+		},
+		{
+			name: "invalid alias",
+			tag: TagConfig{
+				Name:   "character",
+				Type:   TagTypeValue,
+				Values: []PredefinedValue{{Val: "cirno", Aliases: []string{"ice fairy"}}},
+			},
+			want: "invalid character",
+		},
+		{
 			name: "missing relationship target",
 			tag: TagConfig{
 				Name:    "artist",

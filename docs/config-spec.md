@@ -63,6 +63,11 @@ Every entry references exactly one `tag`, `group`, or `storage`. `require`
 automatically imports the reference and has priority over `import`. Overrides
 are not part of the MVP.
 
+The `init` command imports the starter `creator`, `universe`, `character`,
+`general`, and `metadata` groups into the default collection. These imports are
+written only when the collection is first created and never overwrite an
+existing collection config.
+
 ## Tags
 
 Tag configs are read recursively from `tags/`. One file may contain multiple
@@ -73,7 +78,7 @@ YAML documents separated by `---`.
 | `name`     | string |                       yes | —       | Non-empty and globally unique; cannot be `storage` | Tag name                                     | Implemented     |
 | `type`     | enum   |                       yes | —       | See tag types below                                | Tag value type                               | Implemented     |
 | `groups`   | list   |                        no | empty   | No duplicates inside one tag                       | Implicit groups containing this tag          | Implemented     |
-| `values`   | list   | for `value`, `multivalue` | —       | Entries contain unique `val` fields                | Allowed predefined values                    | Implemented     |
+| `values`   | list   | for `value`, `multivalue` | —       | Entries contain unique canonical `val` fields      | Allowed predefined values                    | Implemented     |
 | `suggest`  | list   |                        no | empty   | See tag relationships                              | Tags recommended with this tag                | Implemented     |
 | `demand`   | list   |                        no | empty   | See tag relationships                              | Tags required with this tag                   | Implemented     |
 | `conflict` | list   |                        no | empty   | See tag relationships                              | Tags forbidden together with this tag         | Implemented     |
@@ -91,9 +96,20 @@ group names may be equal because references identify their category.
 | `value`      | One predefined value                           |
 | `multivalue` | Zero or more predefined values                 |
 
-Each `values` entry contains `val` and may contain its own `suggest`, `demand`,
-and `conflict` lists. A tag-level relationship applies whenever the tag exists.
-A value-level relationship applies only when that value is assigned.
+Predefined value fields:
+
+| Field     | Type   | Required | Default | Rules                                           | Description                         |
+| --------- | ------ | -------: | ------- | ----------------------------------------------- | ----------------------------------- |
+| `val`     | string |      yes | —       | Unique with every alias and `val` in the tag    | Canonical value stored in SQLite    |
+| `aliases` | list   |       no | empty   | Valid names; case-insensitively unique per tag  | Alternative accepted input spellings |
+
+Each `values` entry contains the canonical `val`, optional `aliases`, and may
+contain its own `suggest`, `demand`, and `conflict` lists. Aliases follow the
+same naming rules as `val` and are case-insensitively unique across all values
+and aliases in that tag. Input aliases are resolved to `val` before validation,
+graph evaluation, search, or persistence. Only `val` is stored. A tag-level
+relationship applies whenever the tag exists. A value-level relationship
+applies only when that canonical value or one of its aliases is assigned.
 
 ### Tag relationships
 
@@ -146,3 +162,6 @@ TODO: add relationship targets by group and collection tag overrides.
 - Invalid domain configs are reported without stopping the application, but an
   invalid definition cannot be used and a collection with an invalid dependency
   cannot be opened.
+- Core-owned file properties such as SHA-256, byte size, and import timestamps
+  are database metadata, not assignable YAML tags. See
+  [configuration best practices](./config-best_practise.md#core-metadata-is-not-ordinary-tag-configuration).

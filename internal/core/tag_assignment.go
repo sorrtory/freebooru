@@ -2,7 +2,6 @@ package core
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/sorrtory/freebooru/internal/collection"
 	"github.com/sorrtory/freebooru/internal/config"
@@ -59,10 +58,8 @@ func (c *Core) resolveMutableTag(
 
 func canonicalTagValue(tag config.TagConfig, value any) any {
 	canonical := func(value string) string {
-		for _, declared := range tag.Values {
-			if strings.EqualFold(declared.Val, value) {
-				return declared.Val
-			}
+		if result, ok := config.CanonicalPredefinedValue(tag, value); ok {
+			return result
 		}
 		return value
 	}

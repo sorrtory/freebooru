@@ -14,7 +14,7 @@ func TestEnsureDefaultsCreatesLayout(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	app, err := EnsureDefaults(paths)
+	app, err := EnsureStarterDefaults(paths)
 	if err != nil {
 		t.Fatalf("EnsureDefaults() error = %v", err)
 	}
@@ -35,9 +35,30 @@ func TestEnsureDefaultsCreatesLayout(t *testing.T) {
 		collectionPath,
 		storagePath,
 		filepath.Dir(collectionLocation),
+		filepath.Join(paths.Tags, "character.yaml"),
+		filepath.Join(paths.Tags, "creator.yaml"),
+		filepath.Join(paths.Tags, "general.yaml"),
+		filepath.Join(paths.Tags, "metadata.yaml"),
+		filepath.Join(paths.Tags, "universe.yaml"),
 	} {
 		if _, err := os.Stat(path); err != nil {
 			t.Errorf("expected %q: %v", path, err)
+		}
+	}
+	collection, err := (YAMLFile[CollectionConfig]{Path: collectionPath}).Read()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(collection.Tags.Import) != 5 {
+		t.Fatalf("starter imports = %#v, want five groups", collection.Tags.Import)
+	}
+	catalog, diagnostics := LoadCatalog(paths, app)
+	if diagnostics.HasErrors() {
+		t.Fatalf("starter catalog diagnostics = %#v", diagnostics)
+	}
+	for _, group := range []string{"creator", "universe", "character", "general", "metadata"} {
+		if _, ok := catalog.Group(group); !ok {
+			t.Errorf("starter group %q is missing", group)
 		}
 	}
 }
@@ -81,11 +102,11 @@ func TestEnsureDefaultsIsIdempotent(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := EnsureDefaults(paths); err != nil {
+	if _, err := EnsureStarterDefaults(paths); err != nil {
 		t.Fatalf("first EnsureDefaults() error = %v", err)
 	}
 	before := readDefaultFiles(t, paths, "main")
-	if _, err := EnsureDefaults(paths); err != nil {
+	if _, err := EnsureStarterDefaults(paths); err != nil {
 		t.Fatalf("second EnsureDefaults() error = %v", err)
 	}
 	after := readDefaultFiles(t, paths, "main")
@@ -169,7 +190,16 @@ func TestEnsureDefaultsStopsAfterInvalidApp(t *testing.T) {
 
 func readDefaultFiles(t *testing.T, paths Paths, collection string) map[string]string {
 	t.Helper()
-	files := []string{paths.App, paths.Storage, filepath.Join(paths.Collections, collection+".yaml")}
+	files := []string{
+		paths.App,
+		paths.Storage,
+		filepath.Join(paths.Collections, collection+".yaml"),
+		filepath.Join(paths.Tags, "character.yaml"),
+		filepath.Join(paths.Tags, "creator.yaml"),
+		filepath.Join(paths.Tags, "general.yaml"),
+		filepath.Join(paths.Tags, "metadata.yaml"),
+		filepath.Join(paths.Tags, "universe.yaml"),
+	}
 	contents := make(map[string]string, len(files))
 	for _, path := range files {
 		data, err := os.ReadFile(path)

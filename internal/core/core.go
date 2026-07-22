@@ -143,11 +143,11 @@ func (c *Core) Init(ctx context.Context) error {
 	if c.session != nil {
 		return fmt.Errorf("close collection %q before initializing the application", c.session.name)
 	}
-	appConfig, err := config.EnsureDefaults(c.paths)
+	appConfig, err := config.EnsureStarterDefaults(c.paths)
 	if err != nil {
 		return err
 	}
-	location, err := config.CollectionLocation(config.DefaultCollectionConfig(appConfig))
+	location, err := config.CollectionLocation(config.StarterCollectionConfig(appConfig))
 	if err != nil {
 		return fmt.Errorf("resolve default collection database: %w", err)
 	}

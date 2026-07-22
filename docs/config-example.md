@@ -66,6 +66,10 @@ tags:
 Tag configs are read recursively from `tags/`. A file may contain several YAML
 documents.
 
+On a new installation, `init` creates the small group-per-file starter catalog
+described in [configuration best practices](./config-best_practise.md). The
+example below shows a more specialized replacement or extension.
+
 ```text
 $HOME/.config/freebooru/tags/content.yaml
 ```
@@ -79,6 +83,7 @@ suggest:
       reason: character images often have a known artist
 values:
     - val: cirno
+      aliases: [chiruno, ice_fairy, チルノ]
       demand:
           - tag: universe
             has: [touhou]
