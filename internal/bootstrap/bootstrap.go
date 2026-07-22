@@ -8,6 +8,7 @@ import (
 	"github.com/sorrtory/freebooru/internal/core"
 )
 
+// NewCore assembles a Core using the standard FreeBooru paths.
 func NewCore(logger *slog.Logger) (*core.Core, error) {
 	paths, err := config.DefaultPaths()
 	if err != nil {

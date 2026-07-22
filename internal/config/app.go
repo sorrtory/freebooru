@@ -1,3 +1,4 @@
+// Package config loads and validates FreeBooru configuration.
 package config
 
 import (
@@ -5,6 +6,7 @@ import (
 	"strings"
 )
 
+// AppConfig contains process-wide application settings.
 type AppConfig struct {
 	Lang               string `yaml:"lang"`
 	DefaultCollection  string `yaml:"default_collection"`
@@ -14,6 +16,7 @@ type AppConfig struct {
 	RemoveOnUpload     bool   `yaml:"remove_on_upload"`
 }
 
+// DefaultAppConfig returns the application defaults.
 func DefaultAppConfig() AppConfig {
 	return AppConfig{
 		Lang:               "en",
@@ -25,6 +28,7 @@ func DefaultAppConfig() AppConfig {
 	}
 }
 
+// VerifyAppConfig checks application configuration fields.
 func VerifyAppConfig(cfg AppConfig) error {
 	if cfg.Lang != "en" && cfg.Lang != "ru" {
 		return fmt.Errorf("lang must be en or ru")
@@ -47,6 +51,7 @@ func VerifyAppConfig(cfg AppConfig) error {
 	return nil
 }
 
+// LoadApp reads application configuration and applies missing defaults.
 func LoadApp(path string) (AppConfig, error) {
 	return (YAMLFile[AppConfig]{
 		Path:     path,

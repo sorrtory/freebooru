@@ -12,6 +12,7 @@ import (
 	"github.com/goccy/go-yaml"
 )
 
+// CheckDomain validates storage, tag, and collection configuration.
 func CheckDomain(paths Paths) error {
 	var errs []error
 
@@ -58,7 +59,9 @@ func checkYAMLFile[T any](path string, verify func(T) error) error {
 	if err != nil {
 		return fmt.Errorf("open %q: %w", path, err)
 	}
-	defer file.Close()
+	defer func() {
+		_ = file.Close()
+	}()
 
 	var errs []error
 	decoder := yaml.NewDecoder(file, yaml.Strict())

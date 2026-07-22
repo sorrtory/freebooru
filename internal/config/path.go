@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+// ExpandPath expands home aliases and rejects relative paths.
 func ExpandPath(path string) (string, error) {
 	if strings.TrimSpace(path) == "" {
 		return "", fmt.Errorf("path is empty")

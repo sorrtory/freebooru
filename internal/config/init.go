@@ -9,6 +9,7 @@ import (
 	"strings"
 )
 
+// Init provisions the default application layout.
 func Init(paths Paths) error {
 	_, err := EnsureDefaults(paths)
 	return err

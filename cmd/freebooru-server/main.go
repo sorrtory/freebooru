@@ -1,3 +1,4 @@
+// Package main provides the FreeBooru HTTP server.
 package main
 
 import (

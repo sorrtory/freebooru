@@ -5,14 +5,17 @@ import (
 	"strings"
 )
 
+// StorageConfig contains configured storage providers.
 type StorageConfig []StorageProvider
 
+// StorageProvider defines one file storage backend.
 type StorageProvider struct {
 	Name string `yaml:"name"`
 	Type string `yaml:"type"`
 	Path string `yaml:"path"`
 }
 
+// DefaultStorageConfig builds the local storage selected by application defaults.
 func DefaultStorageConfig(app AppConfig) StorageConfig {
 	return StorageConfig{{
 		Name: app.DefaultStorageName,
@@ -21,6 +24,7 @@ func DefaultStorageConfig(app AppConfig) StorageConfig {
 	}}
 }
 
+// VerifyStorageProvider checks a storage definition.
 func VerifyStorageProvider(provider StorageProvider) error {
 	if err := verifyName("name", provider.Name); err != nil {
 		return err

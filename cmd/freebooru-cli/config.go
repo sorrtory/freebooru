@@ -1,3 +1,4 @@
+// Package main provides the FreeBooru command-line application.
 package main
 
 import (
@@ -39,7 +40,9 @@ func newConfigCheckCommand(options *rootOptions) *cobra.Command {
 			if err := app.CheckConfig(cmd.Context()); err != nil {
 				return fmt.Errorf("configuration check failed: %w", err)
 			}
-			fmt.Fprintln(cmd.OutOrStdout(), "Configuration is valid")
+			if _, err := fmt.Fprintln(cmd.OutOrStdout(), "Configuration is valid"); err != nil {
+				return fmt.Errorf("write result: %w", err)
+			}
 			return nil
 		},
 	}
@@ -58,7 +61,9 @@ func newConfigInitCommand(options *rootOptions) *cobra.Command {
 			if err := app.InitConfig(cmd.Context()); err != nil {
 				return fmt.Errorf("initialize configuration: %w", err)
 			}
-			fmt.Fprintln(cmd.OutOrStdout(), "FreeBooru configuration initialized")
+			if _, err := fmt.Fprintln(cmd.OutOrStdout(), "FreeBooru configuration initialized"); err != nil {
+				return fmt.Errorf("write result: %w", err)
+			}
 			return nil
 		},
 	}

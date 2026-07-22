@@ -13,6 +13,7 @@ type TagConfig struct {
 	Group string `yaml:"group,omitempty"`
 }
 
+// VerifyTagConfig checks the currently implemented tag fields.
 func VerifyTagConfig(tag TagConfig) error {
 	if strings.TrimSpace(tag.Name) == "" {
 		return fmt.Errorf("name is required")

@@ -8,6 +8,7 @@ import (
 	"github.com/goccy/go-yaml"
 )
 
+// YAMLFile reads and writes one strictly decoded YAML document.
 type YAMLFile[T any] struct {
 	Path     string
 	Default  func() T
