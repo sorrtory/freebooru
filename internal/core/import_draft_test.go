@@ -60,6 +60,24 @@ func TestEvaluateImportDraftReturnsCanonicalCompleteSnapshot(t *testing.T) {
 	}
 }
 
+func TestEvaluateImportDraftTreatsBooleanFalseAsAbsent(t *testing.T) {
+	app := newImportTestCore(t)
+
+	draft, err := app.EvaluateImportDraft(t.Context(), ImportDraftRequest{
+		Collection: "main",
+		Assignments: map[string]any{
+			"rating": "safe",
+			"flag":   false,
+		},
+	})
+	if err != nil {
+		t.Fatalf("EvaluateImportDraft() error = %v", err)
+	}
+	if _, assigned := draft.Assignments["flag"]; assigned {
+		t.Fatalf("assignments = %#v, want false flag absent", draft.Assignments)
+	}
+}
+
 func TestEvaluateImportDraftReturnsRelationships(t *testing.T) {
 	app := newImportTestCore(t)
 

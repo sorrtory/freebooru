@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/sorrtory/freebooru/internal/config"
+	"github.com/sorrtory/freebooru/internal/core"
 	"github.com/sorrtory/freebooru/internal/webapi"
 )
 
@@ -23,6 +24,17 @@ func (fakeApplication) CheckConfig(context.Context) config.Diagnostics {
 
 func (fakeApplication) AppConfig() config.AppConfig {
 	return config.DefaultAppConfig()
+}
+
+func (fakeApplication) ImportFields(string) ([]core.ImportField, error) {
+	return nil, nil
+}
+
+func (fakeApplication) EvaluateImportDraft(
+	context.Context,
+	core.ImportDraftRequest,
+) (core.ImportDraft, error) {
+	return core.ImportDraft{}, nil
 }
 
 func TestAPIMiddlewareRoutesOnlyAPIRequests(t *testing.T) {

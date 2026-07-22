@@ -10,15 +10,21 @@ import (
 	"testing"
 
 	"github.com/sorrtory/freebooru/internal/config"
+	"github.com/sorrtory/freebooru/internal/core"
 )
 
 type fakeApplication struct {
-	appConfig   config.AppConfig
-	diagnostics config.Diagnostics
-	load        func(context.Context) error
-	loadCalls   int
-	checkCalls  int
-	contextErr  error
+	appConfig    config.AppConfig
+	diagnostics  config.Diagnostics
+	load         func(context.Context) error
+	loadCalls    int
+	checkCalls   int
+	contextErr   error
+	importFields []core.ImportField
+	draft        core.ImportDraft
+	importErr    error
+	collection   string
+	draftRequest core.ImportDraftRequest
 }
 
 func (f *fakeApplication) LoadConfig(ctx context.Context) error {
@@ -38,6 +44,19 @@ func (f *fakeApplication) CheckConfig(ctx context.Context) config.Diagnostics {
 
 func (f *fakeApplication) AppConfig() config.AppConfig {
 	return f.appConfig
+}
+
+func (f *fakeApplication) ImportFields(collection string) ([]core.ImportField, error) {
+	f.collection = collection
+	return f.importFields, f.importErr
+}
+
+func (f *fakeApplication) EvaluateImportDraft(
+	_ context.Context,
+	request core.ImportDraftRequest,
+) (core.ImportDraft, error) {
+	f.draftRequest = request
+	return f.draft, f.importErr
 }
 
 func TestNewRejectsInvalidDependencies(t *testing.T) {

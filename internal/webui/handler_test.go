@@ -11,6 +11,7 @@ import (
 	"testing/fstest"
 
 	"github.com/sorrtory/freebooru/internal/config"
+	"github.com/sorrtory/freebooru/internal/core"
 	"github.com/sorrtory/freebooru/internal/webapi"
 )
 
@@ -26,6 +27,17 @@ func (staticApplication) CheckConfig(context.Context) config.Diagnostics {
 
 func (staticApplication) AppConfig() config.AppConfig {
 	return config.DefaultAppConfig()
+}
+
+func (staticApplication) ImportFields(string) ([]core.ImportField, error) {
+	return nil, nil
+}
+
+func (staticApplication) EvaluateImportDraft(
+	context.Context,
+	core.ImportDraftRequest,
+) (core.ImportDraft, error) {
+	return core.ImportDraft{}, nil
 }
 
 func TestHandlerServesAssetsAndSPAFallback(t *testing.T) {

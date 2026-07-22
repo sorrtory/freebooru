@@ -108,7 +108,13 @@ func (c *Core) collectImportAssignments(
 		if !ok {
 			return nil, nil, fmt.Errorf("tag %q does not exist", name)
 		}
-		values[tag.Name] = canonicalTagValue(tag, value)
+		value = canonicalTagValue(tag, value)
+		if tag.Type == config.TagTypeBool {
+			if assigned, ok := value.(bool); ok && !assigned {
+				continue
+			}
+		}
+		values[tag.Name] = value
 	}
 	return values, storages, nil
 }

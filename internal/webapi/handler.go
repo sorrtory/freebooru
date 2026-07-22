@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	"github.com/sorrtory/freebooru/internal/config"
+	"github.com/sorrtory/freebooru/internal/core"
 )
 
 // Mode describes the process serving the API.
@@ -22,11 +23,13 @@ const (
 	ModeDesktop Mode = "desktop"
 )
 
-// Application is the Core behavior used by the status endpoint.
+// Application is the Core behavior consumed by the current API route groups.
 type Application interface {
 	LoadConfig(context.Context) error
 	CheckConfig(context.Context) config.Diagnostics
 	AppConfig() config.AppConfig
+	ImportFields(string) ([]core.ImportField, error)
+	EvaluateImportDraft(context.Context, core.ImportDraftRequest) (core.ImportDraft, error)
 }
 
 // DiagnosticResponse is one configuration problem exposed to the frontend.
@@ -81,6 +84,9 @@ func New(mode Mode, app Application) (http.Handler, error) {
 		statusMu.Lock()
 		defer statusMu.Unlock()
 		writeJSON(response, http.StatusOK, applicationStatus(request.Context(), mode, app))
+	})
+	mux.HandleFunc("/api/v1/collections/", func(response http.ResponseWriter, request *http.Request) {
+		handleCollectionRequest(response, request, app)
 	})
 	mux.HandleFunc("/api/", func(response http.ResponseWriter, _ *http.Request) {
 		writeJSON(response, http.StatusNotFound, map[string]string{"error": "API endpoint not found"})
