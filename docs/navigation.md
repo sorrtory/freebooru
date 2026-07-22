@@ -55,6 +55,8 @@ freebooru/
 │   │
 │   ├── core/
 │   │   ├── core.go                   Shared init, config snapshot, search, and open workflows
+│   │   ├── collection_state.go       Persisted state conversion and integrity checks
+│   │   ├── collection_state_test.go  Persisted type conversion tests
 │   │   ├── core_test.go              Workflow and database lifecycle tests
 │   │   └── integration_test.go       Multi-domain config integration fixture
 │   │

@@ -10,6 +10,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/sorrtory/freebooru/internal/collection"
 	"github.com/sorrtory/freebooru/internal/config"
 )
 
@@ -18,6 +19,7 @@ type fakeDatabase struct {
 	closeErr      error
 	initialized   bool
 	closed        bool
+	files         []collection.FileRecord
 }
 
 func (d *fakeDatabase) Initialize(context.Context) error {
@@ -28,6 +30,18 @@ func (d *fakeDatabase) Initialize(context.Context) error {
 func (d *fakeDatabase) Close() error {
 	d.closed = true
 	return d.closeErr
+}
+
+func (d *fakeDatabase) ForEachFile(
+	_ context.Context,
+	visit func(collection.FileRecord) error,
+) error {
+	for _, file := range d.files {
+		if err := visit(file); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func TestInitInitializesAndClosesDefaultCollection(t *testing.T) {
@@ -206,6 +220,62 @@ func TestOpenCollectionClosesAfterInitializeFailure(t *testing.T) {
 	}
 	if !database.closed {
 		t.Fatal("OpenCollection() did not close database after initialize failure")
+	}
+}
+
+func TestOpenCollectionRejectsIncompatiblePersistedState(t *testing.T) {
+	paths, _ := provisionTestConfig(t)
+	hash := strings.Repeat("a", 64)
+	database := &fakeDatabase{files: []collection.FileRecord{{
+		SHA256:   hash,
+		Tags:     []collection.TagRecord{{Name: "missing", Type: "bool"}},
+		Storages: []string{"default"},
+	}}}
+	app, err := New(testLogger(), paths, func(context.Context, string) (CollectionDatabase, error) {
+		return database, nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := app.LoadConfig(t.Context()); err != nil {
+		t.Fatal(err)
+	}
+	if diagnostics := app.CheckConfig(t.Context()); diagnostics.HasErrors() {
+		t.Fatalf("CheckConfig() diagnostics = %#v", diagnostics)
+	}
+	_, err = app.OpenCollection(t.Context(), "main")
+	if err == nil || !strings.Contains(err.Error(), hash) ||
+		!strings.Contains(err.Error(), "not imported") {
+		t.Fatalf("OpenCollection() error = %v, want incompatible file context", err)
+	}
+	if !database.closed {
+		t.Fatal("OpenCollection() did not close incompatible database")
+	}
+}
+
+func TestOpenCollectionRejectsMissingRequiredPersistedStorage(t *testing.T) {
+	paths, _ := provisionTestConfig(t)
+	database := &fakeDatabase{files: []collection.FileRecord{{
+		SHA256: strings.Repeat("b", 64),
+	}}}
+	app, err := New(testLogger(), paths, func(context.Context, string) (CollectionDatabase, error) {
+		return database, nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := app.LoadConfig(t.Context()); err != nil {
+		t.Fatal(err)
+	}
+	if diagnostics := app.CheckConfig(t.Context()); diagnostics.HasErrors() {
+		t.Fatalf("CheckConfig() diagnostics = %#v", diagnostics)
+	}
+	_, err = app.OpenCollection(t.Context(), "main")
+	if err == nil || !strings.Contains(err.Error(), "required storage") {
+		t.Fatalf("OpenCollection() error = %v, want required storage error", err)
+	}
+	if !database.closed {
+		t.Fatal("OpenCollection() did not close database missing required storage")
 	}
 }
 

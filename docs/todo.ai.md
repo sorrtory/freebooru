@@ -486,8 +486,8 @@ Keep SQL and row conversion inside `internal/collection`.
 - [x] Add and remove logical storage assignments transactionally.
 - [x] Delete a file through foreign-key cascades only when its final storage
   assignment is removed.
-- [ ] Convert persisted assignments into evaluator input without losing types.
-- [ ] Reject persisted values incompatible with the current catalog.
+- [x] Convert persisted assignments into evaluator input without losing types.
+- [x] Reject persisted values incompatible with the current catalog.
 - [ ] Test real SQLite round trips, concurrent readers, and serialized writers.
 
 Acceptance:

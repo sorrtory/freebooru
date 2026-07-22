@@ -7,12 +7,14 @@ import (
 	"fmt"
 	"log/slog"
 
+	"github.com/sorrtory/freebooru/internal/collection"
 	"github.com/sorrtory/freebooru/internal/config"
 )
 
 // CollectionDatabase is the database lifecycle required by Core.
 type CollectionDatabase interface {
 	Initialize(context.Context) error
+	ForEachFile(context.Context, func(collection.FileRecord) error) error
 	Close() error
 }
 
@@ -89,6 +91,18 @@ func (c *Core) OpenCollection(ctx context.Context, name string) (CollectionDatab
 	if err := database.Initialize(ctx); err != nil {
 		return nil, errors.Join(
 			fmt.Errorf("initialize collection %q database: %w", collectionConfig.Name, err),
+			closeNamedCollection(database, collectionConfig.Name),
+		)
+	}
+	if err := validateCollectionRecords(
+		ctx,
+		database,
+		collectionConfig.Name,
+		c.catalog,
+		c.graph,
+	); err != nil {
+		return nil, errors.Join(
+			fmt.Errorf("validate collection %q database: %w", collectionConfig.Name, err),
 			closeNamedCollection(database, collectionConfig.Name),
 		)
 	}
