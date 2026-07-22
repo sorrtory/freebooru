@@ -63,7 +63,8 @@ freebooru/
 │   │   ├── database_test.go          Real SQLite lifecycle tests
 │   │   ├── schema.go                 Schema initialization and version checks
 │   │   └── migrations/
-│   │       └── 001_initial.sql        Initial schema-migrations table
+│   │       ├── 001_initial.sql        Initial schema-migrations table
+│   │       └── 002_collection_state.sql Persisted file, tag, and storage state
 │   │
 │   ├── evaluator/
 │   │   ├── evaluator.go               Relationship evaluation and result API

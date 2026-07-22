@@ -100,6 +100,29 @@ known source and storage information needed to find that file.
 This strict behavior avoids turning `import` into an implicit mutation command.
 A future explicit command or flag may reuse an existing record.
 
+## Mutation and failure ordering
+
+Full lowercase SHA-256 is the only MVP file selector. Unique hash prefixes are
+not accepted.
+
+Operations that add storage copies stage and finalize every physical copy
+before committing the SQLite transaction. If copying or SQL fails, the
+transaction rolls back and the operation removes only copies it created. The
+source is removed for `remove_on_upload` only after all copies and the database
+commit succeed and after verifying that the source still contains the imported
+bytes.
+
+Operations that remove storage assignments commit the logical removal before
+deleting the physical copy. A deletion failure may therefore leave an
+unreferenced copy, but it must never leave a committed row pointing to a copy
+that the operation already deleted. Removing the final storage assignment also
+deletes the file and its dependent rows in the same database transaction.
+
+A process crash may leave staged or finalized content that is not referenced by
+SQLite. Such content is safe garbage: normal operations ignore it, and automatic
+orphan cleanup is outside the MVP. A crash must not cause source deletion before
+a successful import commit or commit a row for a copy that was not finalized.
+
 ## Encryption boundary
 
 MVP collection databases are plaintext SQLite databases. The connector keeps

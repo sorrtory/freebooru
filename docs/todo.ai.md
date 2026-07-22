@@ -432,12 +432,12 @@ Freeze the remaining behavioral contracts before adding tables or commands.
 - [x] Define how required collection tags are supplied during import.
 - [x] Freeze CLI import tag syntax using the documented `tag:value` separator,
   including free-text quoting and rejection rules.
-- [ ] Make full SHA-256 the authoritative file selector; defer unique prefixes
+- [x] Make full SHA-256 the authoritative file selector; defer unique prefixes
   unless explicitly added later.
 - [x] Freeze the MVP search grammar, pagination, and deterministic result
   ordering.
-- [ ] Record database/filesystem transaction and rollback ordering.
-- [ ] State the crash policy: a crash may leave an unreferenced content copy,
+- [x] Record database/filesystem transaction and rollback ordering.
+- [x] State the crash policy: a crash may leave an unreferenced content copy,
   but must not delete the source or commit a row referring to a missing copy.
 
 Acceptance:
@@ -447,22 +447,22 @@ Acceptance:
 
 ## Phase 14: collection schema migration 2
 
-- [ ] Add a new embedded migration; never edit an applied migration.
-- [ ] Add a `file` table keyed by lowercase SHA-256 with byte size and
+- [x] Add a new embedded migration; never edit an applied migration.
+- [x] Add a `file` table keyed by lowercase SHA-256 with byte size and
   timestamps.
-- [ ] Add a `file_source` table so imported content retains its original path
+- [x] Add a `file_source` table so imported content retains its original path
   and name without making them part of content identity.
-- [ ] Add `file_tag` and `file_tag_value` tables representing bool, text, int,
+- [x] Add `file_tag` and `file_tag_value` tables representing bool, text, int,
   date, datetime, value, and multivalue without ambiguous coercion.
-- [ ] Add a `file_storage` table keyed by file and normalized storage name.
-- [ ] Add foreign keys and uniqueness constraints for idempotent imports and
-  assignments.
-- [ ] Add checks for SHA-256 shape, non-negative sizes/integers, and legal typed
+- [x] Add a `file_storage` table keyed by file and normalized storage name.
+- [x] Add foreign keys and uniqueness constraints for duplicate detection and
+  assignment identity.
+- [x] Add checks for SHA-256 shape, non-negative sizes/integers, and legal typed
   value columns where SQLite can enforce them.
-- [ ] Add indexes needed for tag/value search and storage lookup.
-- [ ] Apply migrations in version order in one transaction.
-- [ ] Preserve newer-schema rejection and idempotent initialization.
-- [ ] Test schema-1 upgrade, reopen, migration rollback, and foreign keys.
+- [x] Add indexes needed for tag/value search and storage lookup.
+- [x] Apply migrations in version order in one transaction.
+- [x] Preserve newer-schema rejection and idempotent initialization.
+- [x] Test schema-1 upgrade, reopen, migration rollback, and foreign keys.
 
 Acceptance:
 
