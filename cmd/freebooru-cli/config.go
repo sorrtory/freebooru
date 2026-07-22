@@ -1,18 +1,65 @@
 package main
 
 import (
+	"fmt"
+
+	"github.com/sorrtory/freebooru/internal/bootstrap"
 	"github.com/spf13/cobra"
 )
 
-var configCmd = &cobra.Command{
-	Use:     "config",
-	Aliases: []string{"cfg"},
-	Short:   "Work with configuration",
-	Run: func(cmd *cobra.Command, args []string) {
-		
-	},
+func newConfigCommand(options *rootOptions) *cobra.Command {
+	command := &cobra.Command{
+		Use:   "config",
+		Short: "Work with configuration",
+		Args:  cobra.NoArgs,
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			return cmd.Help()
+		},
+	}
+	command.AddCommand(
+		newConfigInitCommand(options),
+		newConfigCheckCommand(options),
+	)
+	return command
 }
 
-func init() {
-	rootCmd.AddCommand(configCmd)
+func newConfigCheckCommand(options *rootOptions) *cobra.Command {
+	return &cobra.Command{
+		Use:   "check",
+		Short: "Check storage, tag, and collection configuration",
+		Args:  cobra.NoArgs,
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			app, err := bootstrap.NewCore(newLogger(options.verbose))
+			if err != nil {
+				return err
+			}
+			if err := app.LoadConfig(cmd.Context()); err != nil {
+				return err
+			}
+			if err := app.CheckConfig(cmd.Context()); err != nil {
+				return fmt.Errorf("configuration check failed: %w", err)
+			}
+			fmt.Fprintln(cmd.OutOrStdout(), "Configuration is valid")
+			return nil
+		},
+	}
+}
+
+func newConfigInitCommand(options *rootOptions) *cobra.Command {
+	return &cobra.Command{
+		Use:   "init",
+		Short: "Create the default FreeBooru configuration layout",
+		Args:  cobra.NoArgs,
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			app, err := bootstrap.NewCore(newLogger(options.verbose))
+			if err != nil {
+				return err
+			}
+			if err := app.InitConfig(cmd.Context()); err != nil {
+				return fmt.Errorf("initialize configuration: %w", err)
+			}
+			fmt.Fprintln(cmd.OutOrStdout(), "FreeBooru configuration initialized")
+			return nil
+		},
+	}
 }

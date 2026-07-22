@@ -1,63 +1,42 @@
-// Package core provides application level business logic
+// Package core provides application-level business logic.
 package core
 
 import (
+	"context"
+	"fmt"
 	"log/slog"
-	"os"
-	"path/filepath"
+
+	"github.com/sorrtory/freebooru/internal/config"
 )
 
-type Options struct {
-	// config paths
-	configDir      string
-	configFile     string
-	storageFile    string
-	tagsDir        string
-	collectionsDir string
-}
-
 type Core struct {
-	log *slog.Logger
-	opt Options
-	// storage Database
-	// config  Config
+	log    *slog.Logger
+	config config.AppConfig
+	paths  config.Paths
 }
 
-func NewCore(logger *slog.Logger, opt Options) *Core {
+func New(logger *slog.Logger, paths config.Paths) (*Core, error) {
 	if logger == nil {
-		panic("logger is nil")
+		return nil, fmt.Errorf("logger is required")
 	}
-	return &Core{
-		log: logger,
-		opt: opt,
-	}
+	return &Core{log: logger, paths: paths}, nil
 }
 
-func NewDefaultCore() *Core {
-	// Create a logger
-	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
-
-	// Set up pathes for config dir
-	configDirOS, err := os.UserConfigDir()
+func (c *Core) LoadConfig(context.Context) error {
+	appConfig, err := config.LoadApp(c.paths.App)
 	if err != nil {
-		logger.Error("Failed to get user config dir", "error", err)
-		os.Exit(1)
+		return fmt.Errorf("load application configuration: %w", err)
 	}
-	configDir := filepath.Join(configDirOS, "freebooru")
-	
-	// Create the core application
-	app := NewCore(logger, Options{
-		configDir:      configDir,
-		configFile:     filepath.Join(configDir, "freebooru.yaml"),
-		storageFile:    filepath.Join(configDir, "storage.yaml"),
-		tagsDir:        filepath.Join(configDir, "tags"),
-		collectionsDir: filepath.Join(configDir, "collections"),
-	})
-
-	return app
+	c.config = appConfig
+	return nil
 }
 
-func (c *Core) Fatal(err error, msg string) {
-	c.log.Error(msg, "error", err)
-	os.Exit(1)
+func (c *Core) CheckConfig(context.Context) error {
+	return config.CheckDomain(c.paths)
 }
+
+func (c *Core) InitConfig(context.Context) error {
+	return config.Init(c.paths)
+}
+
+func (c *Core) AppConfig() config.AppConfig { return c.config }

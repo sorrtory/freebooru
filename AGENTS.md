@@ -9,14 +9,45 @@ FreeBooru allows you to organize and tag your files (images, videos, documents, 
 
 Also to be DRY with the tags, you have a tag config that allows you to define exact tag types, tag dependencies (and more) allowed within your booru.
 
-`rclone` is used to support a wide variety of cloud storage backends, allowing you to store your files wherever you want. However, FreeBooru can also be used with local storage only or a mix of local and remote. You can easily control the versions of each file by assigning `storage-tags`.
+`rclone` is used to support a wide variety of cloud storage backends, allowing you to store your files wherever you want. However, FreeBooru can also be used with local storage only or a mix of local and remote. You can easily control the physical location of each file by assigning special tags, which are described in `storage.yaml`
+
+### Philosophy
+
+The FreeBooru is explicit. It doesn't imply anything. It is up to you to define the tags and their relationships strictly otherwise freebooru exits with an error. This is to ensure that your booru is always in a consistent state and you don't have to deal with any unexpected behavior.
+
+### FreeBooru dictionary
+
+- **collection** - one booru instance, one sqlite database, one collection of files and
+  bunch of tags, that are imported from the tags folder. You can have multiple collections, each with its own config and storage backends.
+- **tag** - a tag is a label that can be assigned to a file. Tag has a type
+- **freebooru-cli** - the command line interface for FreeBooru. It is used to manage config validity, collections and tags. It allows you to tag files - save the tags to the database.
 
 ## Configuration
 
-The config is done in yaml. It is the key to the minimal tag quantity and quality you want to have in your booru. 
+The config is done in yaml. It is the key to the minimal tag quantity and quality you want to have in your booru. The config is usually stored in `$HOME/.config/freebooru/` folder.
+
+- **freebooru.yaml** - defines the application config, like the default collection, application settings, etc.
+- **storage.yaml** - defines the storage backends you can use. Note that storage is the tag too. So you can copy or delete file by assigning or removing the storage tag. 
+- **collections** - defines the collections you want to have. Each collection has its own config file.
+- **tags** - defines the tags you want to have. Each tag has its own config and can be imported into multiple collections.
+
+Note that config values are not case-sensitive.
 
 ### Config rules
 
-
-
 See [Configuration Example](docs/config-example.md) for details.
+See [Configuration Specification](docs/config-spec.md) for details.
+
+## Code quality
+
+We use `golangci-lint` for linting and formatting.
+We also use `task` as a task runner.
+It is useful to run `go tool task check` to verify the code quality.
+
+## Contributing
+
+- First of all, [docs](./docs/) should be the source of truth. If you want to change something or add new features, please update the docs first, then the code.
+    - if you need to make a contract or a spec, generate a new file with ai. Don't mess up human and machine-readable docs. The human-readable docs should be in `.md` files, the machine-readable docs should be in `.ai.md` files.
+- On making new code changes, please run `go tool task check` to verify the code quality.
+- Always ensure docs and code are in sync.
+- We aim to have a minimalistic and clean codebase, if you see something that can be improved, make a TODO inside the code or docs.
