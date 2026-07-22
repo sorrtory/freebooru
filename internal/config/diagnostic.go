@@ -32,3 +32,13 @@ func (d Diagnostics) HasErrors() bool {
 	}
 	return false
 }
+
+func newDiagnostic(code, message, file string, document int) Diagnostic {
+	return Diagnostic{
+		Severity: SeverityError,
+		Code:     code,
+		Message:  message,
+		File:     file,
+		Document: document,
+	}
+}
