@@ -50,7 +50,7 @@ func (c *Core) LoadConfig(context.Context) error {
 
 // CheckConfig returns all discoverable domain configuration diagnostics.
 func (c *Core) CheckConfig(context.Context) config.Diagnostics {
-	return config.CheckDomain(c.paths)
+	return config.CheckDomain(c.paths, c.config)
 }
 
 // Init provisions the default application layout.

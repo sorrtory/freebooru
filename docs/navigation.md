@@ -79,6 +79,10 @@ freebooru/
 │       ├── discover.go               Recursive YAML file discovery
 │       ├── decode.go                 Strict YAML document decoding
 │       ├── validate.go               Domain validation orchestration
+│       ├── catalog.go                Immutable catalog types and lookup API
+│       ├── catalog_build.go          Catalog loading, normalization, and indexing
+│       ├── catalog_resolve.go        Collection reference resolution
+│       ├── catalog_test.go           Catalog lookup, duplicate, and default tests
 │       ├── diagnostic.go             Structured configuration diagnostics
 │       ├── diagnostic_test.go        Diagnostic and document-rule tests
 │       └── config_test.go            Config round-trip and validation tests

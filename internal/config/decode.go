@@ -8,20 +8,36 @@ import (
 	"github.com/goccy/go-yaml"
 )
 
+type sourcedDocument[T any] struct {
+	Value  T
+	Source Source
+}
+
 func checkYAMLFile[T any](
 	path string,
 	kind string,
 	allowMultiple bool,
 	verify func(T) error,
 ) Diagnostics {
+	_, diagnostics := loadYAMLFile(path, kind, allowMultiple, verify)
+	return diagnostics
+}
+
+func loadYAMLFile[T any](
+	path string,
+	kind string,
+	allowMultiple bool,
+	verify func(T) error,
+) ([]sourcedDocument[T], Diagnostics) {
 	file, err := os.Open(path)
 	if err != nil {
-		return Diagnostics{newDiagnostic(kind+".open", err.Error(), path, 0)}
+		return nil, Diagnostics{newDiagnostic(kind+".open", err.Error(), path, 0)}
 	}
 	defer func() {
 		_ = file.Close()
 	}()
 
+	var documents []sourcedDocument[T]
 	var diagnostics Diagnostics
 	decoder := yaml.NewDecoder(file, yaml.Strict())
 	document := 0
@@ -33,7 +49,7 @@ func checkYAMLFile[T any](
 		}
 		document++
 		if err != nil {
-			return append(diagnostics, newDiagnostic(
+			return documents, append(diagnostics, newDiagnostic(
 				"yaml.decode",
 				err.Error(),
 				path,
@@ -58,7 +74,12 @@ func checkYAMLFile[T any](
 			)
 			diagnostic.Field = validationField(err)
 			diagnostics = append(diagnostics, diagnostic)
+			continue
 		}
+		documents = append(documents, sourcedDocument[T]{
+			Value:  value,
+			Source: Source{File: path, Document: document},
+		})
 	}
 	if document == 0 {
 		diagnostics = append(diagnostics, newDiagnostic(
@@ -68,5 +89,5 @@ func checkYAMLFile[T any](
 			0,
 		))
 	}
-	return diagnostics
+	return documents, diagnostics
 }

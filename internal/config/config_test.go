@@ -94,7 +94,7 @@ func TestCheckDomainAggregatesBrokenConfigs(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(paths.Collections, "main.yaml"), []byte("name: main\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	diagnostics := CheckDomain(paths)
+	diagnostics := CheckDomain(paths, DefaultAppConfig())
 	if !diagnostics.HasErrors() {
 		t.Fatal("CheckDomain() has no errors, want errors")
 	}

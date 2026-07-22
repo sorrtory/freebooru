@@ -224,20 +224,25 @@ discover -> decode -> validate document -> normalize -> index
          -> resolve references -> validate catalog -> publish snapshot
 ```
 
-- [ ] Recursively discover `.yaml` and `.yml` files according to the contract.
-- [ ] Do not follow symlinked directories.
-- [ ] Decode one document per collection file and multiple documents per tag
+- [x] Recursively discover `.yaml` and `.yml` files according to the contract.
+- [x] Do not follow symlinked directories.
+- [x] Decode one document per collection file and multiple documents per tag
   file.
-- [ ] Preserve source locations on definitions and values.
-- [ ] Normalize case-insensitive identifiers once at the indexing boundary.
-- [ ] Preserve original spelling for display and diagnostics.
+- [x] Preserve source locations on storage, collection, and tag definitions.
+- [x] Normalize case-insensitive identifiers once at the indexing boundary.
+- [x] Preserve original spelling for display and diagnostics.
 - [ ] Detect duplicate normalized storage, collection, tag, and value names.
+  Storage, collection, and tag definition duplicates are implemented; value
+  duplicates wait for the full tag model.
 - [ ] Invalidate every duplicate definition; never pick a winner by discovery
   order.
 - [ ] Build storage, collection, tag, predefined-value, and group indexes.
-- [ ] Resolve collection imports and requirements.
-- [ ] Make `require` imply `import`.
-- [ ] Require at least one storage per collection.
+  Storage, collection, and tag indexes are implemented; value and group indexes
+  wait for the full tag model.
+- [ ] Resolve collection imports and requirements. Storage references are
+  resolved; tag and group references wait for their full model.
+- [x] Make `require` imply `import`.
+- [x] Require at least one existing storage per collection.
 - [ ] Publish an immutable catalog plus diagnostics.
 - [ ] Preserve valid independent definitions when other definitions are broken.
 

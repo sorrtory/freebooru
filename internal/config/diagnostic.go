@@ -1,5 +1,7 @@
 package config
 
+import "strings"
+
 // Severity classifies the effect of a configuration diagnostic.
 type Severity string
 
@@ -41,4 +43,12 @@ func newDiagnostic(code, message, file string, document int) Diagnostic {
 		File:     file,
 		Document: document,
 	}
+}
+
+func validationField(err error) string {
+	field, _, found := strings.Cut(err.Error(), " ")
+	if !found {
+		return ""
+	}
+	return field
 }
