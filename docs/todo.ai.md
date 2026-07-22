@@ -128,24 +128,24 @@ Acceptance:
 
 Add `internal/collection` without designing the file/tag persistence schema.
 
-- [ ] Add `github.com/ncruces/go-sqlite3` as a direct dependency.
-- [ ] Register the `github.com/ncruces/go-sqlite3/driver` `database/sql`
+- [x] Add `github.com/ncruces/go-sqlite3` as a direct dependency.
+- [x] Register the `github.com/ncruces/go-sqlite3/driver` `database/sql`
   driver.
-- [ ] Introduce a small connector API: open, initialize, ping, and close.
-- [ ] Accept an absolute database path and create only its parent directory.
-- [ ] Open with a `file:` URI suitable for the selected driver.
-- [ ] Use context-aware database calls.
-- [ ] Enable foreign-key enforcement for every connection using a driver-safe
+- [x] Introduce a small connector API: open, initialize, ping, and close.
+- [x] Accept an absolute database path and create only its parent directory.
+- [x] Open with a `file:` URI suitable for the selected driver.
+- [x] Use context-aware database calls.
+- [x] Enable foreign-key enforcement for every connection using a driver-safe
   connection option, not a one-time pragma on an arbitrary pooled connection.
-- [ ] Configure a conservative SQLite connection pool; document the choice.
-- [ ] Create a minimal versioned schema containing only migration metadata.
-- [ ] Apply schema initialization transactionally.
-- [ ] Make schema initialization idempotent.
-- [ ] Detect a database schema newer than the application supports.
-- [ ] Close the database if any open/initialize step fails.
-- [ ] Add integration tests for create, ping, close, reopen, repeated initialize,
+- [x] Configure a conservative SQLite connection pool; document the choice.
+- [x] Create a minimal versioned schema containing only migration metadata.
+- [x] Apply schema initialization transactionally.
+- [x] Make schema initialization idempotent.
+- [x] Detect a database schema newer than the application supports.
+- [x] Close the database if any open/initialize step fails.
+- [x] Add integration tests for create, ping, close, reopen, repeated initialize,
   and unsupported schema version.
-- [ ] Keep encryption configuration out of logs and error strings.
+- [x] Keep encryption configuration out of logs and error strings.
 
 Initial API target:
 
