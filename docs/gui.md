@@ -11,6 +11,21 @@ Vue uses relative `/api/v1/...` URLs in both environments. The server handles
 those requests over TCP. Wails routes them internally through the same Go
 `http.Handler` without opening a localhost port.
 
+## Application readiness
+
+After connecting, Vue requests `GET /api/v1/status`. The status screen has four
+observable states:
+
+- loading while Core reads configuration;
+- ready with the runtime and default collection;
+- ready with warnings and their structured details;
+- unready with configuration errors and their structured details.
+
+A connection failure is distinct from invalid configuration. Retry requests
+status again, so correcting YAML on disk recovers the screen without restarting
+the server or desktop application. The GUI never creates or repairs
+configuration automatically; use `freebooru-cli init` for provisioning.
+
 ## Desktop
 
 We use Wails v2 to build the desktop application.

@@ -237,5 +237,6 @@ freebooru/
     ├── release.ai.md                 MVP criteria, evidence, and release command
     ├── todo.ai.md                    Ordered implementation checklist
     ├── todo-gui.ai.md                Hello web and Wails implementation checklist
+    ├── todo-gui-core.ai.md           Core readiness GUI implementation checklist
     └── user-story.excalidraw         Editable user-flow diagram
 ```
