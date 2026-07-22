@@ -90,8 +90,35 @@ The standalone server attempts to load `http_port` before listening. If that
 load fails, it logs a warning and remains accessible on the default port
 `52800`, allowing the web interface to explain the configuration problem.
 
+## Import workspace
+
+All import calls name their collection explicitly and behave identically over
+the standalone server and the Wails asset server:
+
+```http
+GET /api/v1/collections/{collection}/imports/schema
+POST /api/v1/collections/{collection}/imports/evaluate
+POST /api/v1/collections/{collection}/imports
+```
+
+The schema describes Core's typed fields. Evaluation accepts
+`{"assignments": {...}}`, is side-effect-free, and returns the complete
+canonical draft plus demands, conflicts, and suggestions.
+
+Final import uses `multipart/form-data` with exactly one `file` part and one
+`assignments` part containing the typed assignment JSON object. The server
+streams the file into a private temporary file, limits the whole request to
+10 GiB, limits assignment JSON to 1 MiB, preserves only the basename of the
+client filename, and removes the temporary source on every outcome. Success is
+`201 Created`; duplicate content is `409 Conflict` with code
+`import.duplicate` and the existing SHA-256 in the safe display message.
+
+See [the library GUI contract](./todo-gui-library.ai.md) and
+[the import workspace contract](./gui-import.ai.md) for DTO and interaction
+details.
+
 ## Deferred server concerns
 
-Multipart upload limits, authentication, authorization, TLS, cross-origin
-deployment, media streaming, and progress reporting are outside the hello
-contract and require explicit specifications before implementation.
+Authentication, authorization, TLS, cross-origin deployment, media streaming,
+resumable uploads, and progress reporting require explicit specifications
+before implementation.

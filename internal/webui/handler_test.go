@@ -40,6 +40,10 @@ func (staticApplication) EvaluateImportDraft(
 	return core.ImportDraft{}, nil
 }
 
+func (staticApplication) Import(context.Context, core.ImportRequest) (core.ImportResult, error) {
+	return core.ImportResult{}, nil
+}
+
 func TestHandlerServesAssetsAndSPAFallback(t *testing.T) {
 	assets := fstest.MapFS{
 		"index.html":    &fstest.MapFile{Data: []byte("<main>FreeBooru</main>")},

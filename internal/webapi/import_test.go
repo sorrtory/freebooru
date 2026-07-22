@@ -1,16 +1,89 @@
 package webapi
 
 import (
+	"bytes"
 	"encoding/json"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strings"
 	"testing"
 
+	"github.com/sorrtory/freebooru/internal/collection"
 	"github.com/sorrtory/freebooru/internal/config"
 	"github.com/sorrtory/freebooru/internal/core"
 	"github.com/sorrtory/freebooru/internal/evaluator"
 )
+
+func TestImportUploadStreamsFileAndCleansTemporarySource(t *testing.T) {
+	app := &fakeApplication{
+		importFields: testImportFields(),
+		importResult: core.ImportResult{
+			SHA256: "abc123", SizeBytes: 7, Storages: []string{"default"},
+			RecordCreated: true, CreatedCopies: []string{"default"},
+		},
+	}
+	request := multipartImportRequest(t, `{"flag":true,"score":7}`, "folder\\picture.png", []byte("content"))
+	response := httptest.NewRecorder()
+
+	mustNew(t, ModeServer, app).ServeHTTP(response, request)
+
+	if response.Code != http.StatusCreated {
+		t.Fatalf("status = %d, body = %q", response.Code, response.Body.String())
+	}
+	if app.importRequest.Collection != "Main" || app.importRequest.SourceFilename != "picture.png" {
+		t.Fatalf("import request = %#v", app.importRequest)
+	}
+	if app.importRequest.Tags["score"] != int64(7) {
+		t.Fatalf("score = %#v", app.importRequest.Tags["score"])
+	}
+	if _, err := os.Stat(app.importRequest.SourcePath); !os.IsNotExist(err) {
+		t.Fatalf("temporary source still exists: %v", err)
+	}
+	if response.Header().Get("Location") != "/api/v1/collections/Main/files/abc123" {
+		t.Fatalf("Location = %q", response.Header().Get("Location"))
+	}
+}
+
+func TestImportUploadReturnsDuplicateHash(t *testing.T) {
+	app := &fakeApplication{
+		importFields:     testImportFields(),
+		importResult:     core.ImportResult{SHA256: "existing"},
+		executeImportErr: collection.ErrDuplicateFile,
+	}
+	response := httptest.NewRecorder()
+	mustNew(t, ModeServer, app).ServeHTTP(
+		response,
+		multipartImportRequest(t, `{}`, "same.jpg", []byte("same")),
+	)
+
+	if response.Code != http.StatusConflict || !strings.Contains(response.Body.String(), `"code":"import.duplicate"`) || !strings.Contains(response.Body.String(), "existing") {
+		t.Fatalf("response = %d %q", response.Code, response.Body.String())
+	}
+}
+
+func multipartImportRequest(t *testing.T, assignments, filename string, content []byte) *http.Request {
+	t.Helper()
+	var body bytes.Buffer
+	writer := multipart.NewWriter(&body)
+	file, err := writer.CreateFormFile("file", filename)
+	if err != nil {
+		t.Fatalf("create file part: %v", err)
+	}
+	if _, err := file.Write(content); err != nil {
+		t.Fatalf("write file part: %v", err)
+	}
+	if err := writer.WriteField("assignments", assignments); err != nil {
+		t.Fatalf("write assignments: %v", err)
+	}
+	if err := writer.Close(); err != nil {
+		t.Fatalf("close multipart: %v", err)
+	}
+	request := httptest.NewRequest(http.MethodPost, "/api/v1/collections/Main/imports", &body)
+	request.Header.Set("Content-Type", writer.FormDataContentType())
+	return request
+}
 
 func TestImportSchema(t *testing.T) {
 	app := &fakeApplication{importFields: testImportFields()}

@@ -14,17 +14,25 @@ import (
 )
 
 type fakeApplication struct {
-	appConfig    config.AppConfig
-	diagnostics  config.Diagnostics
-	load         func(context.Context) error
-	loadCalls    int
-	checkCalls   int
-	contextErr   error
-	importFields []core.ImportField
-	draft        core.ImportDraft
-	importErr    error
-	collection   string
-	draftRequest core.ImportDraftRequest
+	appConfig        config.AppConfig
+	diagnostics      config.Diagnostics
+	load             func(context.Context) error
+	loadCalls        int
+	checkCalls       int
+	contextErr       error
+	importFields     []core.ImportField
+	draft            core.ImportDraft
+	importErr        error
+	collection       string
+	draftRequest     core.ImportDraftRequest
+	importRequest    core.ImportRequest
+	importResult     core.ImportResult
+	executeImportErr error
+}
+
+func (f *fakeApplication) Import(_ context.Context, request core.ImportRequest) (core.ImportResult, error) {
+	f.importRequest = request
+	return f.importResult, f.executeImportErr
 }
 
 func (f *fakeApplication) LoadConfig(ctx context.Context) error {

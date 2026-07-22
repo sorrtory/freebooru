@@ -5,15 +5,23 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"mime/multipart"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
+	"github.com/sorrtory/freebooru/internal/collection"
 	"github.com/sorrtory/freebooru/internal/config"
 	"github.com/sorrtory/freebooru/internal/core"
 )
 
-const maxImportDraftBodyBytes int64 = 1 << 20
+const (
+	maxImportDraftBodyBytes   int64 = 1 << 20
+	maxImportUploadBytes      int64 = 10 << 30
+	maxImportAssignmentsBytes int64 = 1 << 20
+)
 
 // ImportFieldResponse describes one typed control in the import workspace.
 type ImportFieldResponse struct {
@@ -75,6 +83,15 @@ type importDraftRequest struct {
 	Assignments map[string]json.RawMessage `json:"assignments"`
 }
 
+// ImportResponse identifies content created by a multipart import.
+type ImportResponse struct {
+	SHA256        string   `json:"sha256"`
+	SizeBytes     int64    `json:"size_bytes"`
+	Storages      []string `json:"storages"`
+	RecordCreated bool     `json:"record_created"`
+	CreatedCopies []string `json:"created_copies"`
+}
+
 type errorEnvelope struct {
 	Error errorResponse `json:"error"`
 }
@@ -87,8 +104,12 @@ type errorResponse struct {
 func handleCollectionRequest(response http.ResponseWriter, request *http.Request, app Application) {
 	path := strings.TrimPrefix(request.URL.Path, "/api/v1/collections/")
 	parts := strings.Split(path, "/")
-	if len(parts) != 3 || parts[0] == "" || parts[1] != "imports" {
+	if len(parts) < 2 || len(parts) > 3 || parts[0] == "" || parts[1] != "imports" {
 		writeAPIError(response, http.StatusNotFound, "route.not_found", "API endpoint not found")
+		return
+	}
+	if len(parts) == 2 {
+		handleImportUpload(response, request, app, parts[0])
 		return
 	}
 	switch parts[2] {
@@ -99,6 +120,146 @@ func handleCollectionRequest(response http.ResponseWriter, request *http.Request
 	default:
 		writeAPIError(response, http.StatusNotFound, "route.not_found", "API endpoint not found")
 	}
+}
+
+func handleImportUpload(
+	response http.ResponseWriter,
+	request *http.Request,
+	app Application,
+	collectionName string,
+) {
+	if request.Method != http.MethodPost {
+		methodNotAllowed(response, http.MethodPost)
+		return
+	}
+	fields, err := app.ImportFields(collectionName)
+	if err != nil {
+		writeAPIError(response, http.StatusUnprocessableEntity, "collection.invalid", err.Error())
+		return
+	}
+	request.Body = http.MaxBytesReader(response, request.Body, maxImportUploadBytes)
+	reader, err := request.MultipartReader()
+	if err != nil {
+		writeAPIError(response, http.StatusBadRequest, "request.invalid", "Expected multipart import form")
+		return
+	}
+	temp, sourceFilename, rawAssignments, err := readImportMultipart(reader)
+	if err != nil {
+		writeMultipartError(response, err)
+		return
+	}
+	defer func() {
+		_ = temp.Close()
+		_ = os.Remove(temp.Name())
+	}()
+	assignments, err := decodeAssignmentJSON(rawAssignments, fields)
+	if err != nil {
+		writeAPIError(response, http.StatusBadRequest, "tag.value_invalid", err.Error())
+		return
+	}
+	result, err := app.Import(request.Context(), core.ImportRequest{
+		Collection:     collectionName,
+		SourcePath:     temp.Name(),
+		SourceFilename: sourceFilename,
+		Tags:           assignments,
+	})
+	if errors.Is(err, collection.ErrDuplicateFile) {
+		writeAPIError(response, http.StatusConflict, "import.duplicate", result.SHA256)
+		return
+	}
+	if err != nil {
+		writeAPIError(response, http.StatusUnprocessableEntity, "import.invalid", err.Error())
+		return
+	}
+	response.Header().Set("Location", "/api/v1/collections/"+collectionName+"/files/"+result.SHA256)
+	writeJSON(response, http.StatusCreated, ImportResponse{
+		SHA256: result.SHA256, SizeBytes: result.SizeBytes,
+		Storages: append([]string{}, result.Storages...), RecordCreated: result.RecordCreated,
+		CreatedCopies: append([]string{}, result.CreatedCopies...),
+	})
+}
+
+func readImportMultipart(reader *multipart.Reader) (*os.File, string, []byte, error) {
+	var temp *os.File
+	var filename string
+	var assignments []byte
+	cleanup := func() {
+		if temp != nil {
+			_ = temp.Close()
+			_ = os.Remove(temp.Name())
+		}
+	}
+	for {
+		part, err := reader.NextPart()
+		if errors.Is(err, io.EOF) {
+			break
+		}
+		if err != nil {
+			cleanup()
+			return nil, "", nil, err
+		}
+		switch part.FormName() {
+		case "file":
+			if temp != nil || part.FileName() == "" {
+				cleanup()
+				return nil, "", nil, fmt.Errorf("exactly one file part is required")
+			}
+			temp, err = os.CreateTemp("", "freebooru-upload-*")
+			if err == nil {
+				_, err = io.Copy(temp, part)
+			}
+			if err != nil {
+				cleanup()
+				return nil, "", nil, err
+			}
+			filename = filepath.Base(strings.ReplaceAll(part.FileName(), `\`, "/"))
+		case "assignments":
+			if assignments != nil || part.FileName() != "" {
+				cleanup()
+				return nil, "", nil, fmt.Errorf("exactly one assignments field is required")
+			}
+			assignments, err = io.ReadAll(io.LimitReader(part, maxImportAssignmentsBytes+1))
+			if err != nil || int64(len(assignments)) > maxImportAssignmentsBytes {
+				cleanup()
+				return nil, "", nil, fmt.Errorf("assignments field is too large")
+			}
+		default:
+			cleanup()
+			return nil, "", nil, fmt.Errorf("unexpected multipart field %q", part.FormName())
+		}
+		_ = part.Close()
+	}
+	if temp == nil || assignments == nil {
+		cleanup()
+		return nil, "", nil, fmt.Errorf("file and assignments parts are required")
+	}
+	if _, err := temp.Seek(0, io.SeekStart); err != nil {
+		cleanup()
+		return nil, "", nil, err
+	}
+	return temp, filename, assignments, nil
+}
+
+func decodeAssignmentJSON(raw []byte, fields []core.ImportField) (map[string]any, error) {
+	var body map[string]json.RawMessage
+	decoder := json.NewDecoder(strings.NewReader(string(raw)))
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&body); err != nil {
+		return nil, fmt.Errorf("invalid assignments JSON")
+	}
+	if err := ensureJSONEnd(decoder); err != nil {
+		return nil, fmt.Errorf("invalid assignments JSON")
+	}
+	return decodeAssignments(body, fields)
+}
+
+func writeMultipartError(response http.ResponseWriter, err error) {
+	var tooLarge *http.MaxBytesError
+	if errors.As(err, &tooLarge) {
+		writeAPIError(response, http.StatusRequestEntityTooLarge, "import.too_large", "Import exceeds the 10 GiB limit")
+		return
+	}
+	writeAPIError(response, http.StatusBadRequest, "request.invalid", err.Error())
 }
 
 func handleImportSchema(

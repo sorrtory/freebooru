@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, shallowRef } from 'vue'
 
-import type { Relationship, TagValue } from '../api'
+import { APIError, importFile } from '../api'
+import type { ImportResult, Relationship, TagValue } from '../api'
 import AssignedTags from '../components/AssignedTags.vue'
 import ImportGuidance from '../components/ImportGuidance.vue'
 import TagCatalog from '../components/TagCatalog.vue'
@@ -13,6 +14,9 @@ const file = shallowRef<File>()
 const previewURL = shallowRef('')
 const activePanel = shallowRef<'assigned' | 'suggested' | 'add'>('assigned')
 const selectedTag = shallowRef('')
+const uploading = shallowRef(false)
+const uploadResult = shallowRef<ImportResult>()
+const uploadError = shallowRef('')
 
 const assignedNames = computed(() => new Set(draft.value?.assignments.map((item) => item.name) ?? []))
 const representedNames = computed(() => new Set([
@@ -64,6 +68,21 @@ function applyTag(name: string, value: TagValue) {
   void apply(name, value)
 }
 
+async function submit() {
+  if (!file.value || !draft.value?.complete || uploading.value) return
+  uploading.value = true
+  uploadError.value = ''
+  try {
+    uploadResult.value = await importFile(props.collection, file.value, Object.fromEntries(draft.value.assignments.map((item) => [item.name, item.value])))
+  } catch (error) {
+    uploadError.value = error instanceof APIError && error.code === 'import.duplicate'
+      ? `This content already exists: ${error.message}`
+      : error instanceof Error ? error.message : 'Import failed'
+  } finally {
+    uploading.value = false
+  }
+}
+
 onMounted(() => void load())
 onBeforeUnmount(() => { if (previewURL.value) URL.revokeObjectURL(previewURL.value) })
 </script>
@@ -108,16 +127,18 @@ onBeforeUnmount(() => { if (previewURL.value) URL.revokeObjectURL(previewURL.val
           <TagCatalog :fields="schema.fields" :assigned="representedNames" :selected="selectedTag" @apply="applyTag" />
         </div>
       </div>
-      <p v-if="errorMessage" class="inline-error" role="alert">{{ errorMessage }}</p>
+      <p v-if="errorMessage || uploadError" class="inline-error" role="alert">{{ errorMessage || uploadError }}</p>
       <footer class="action-bar">
         <div>
-          <strong v-if="issueCount">{{ issueCount }} blocking {{ issueCount === 1 ? 'issue' : 'issues' }}</strong>
+          <strong v-if="uploadResult">Imported {{ uploadResult.sha256.slice(0, 12) }}</strong>
+          <strong v-else-if="issueCount">{{ issueCount }} blocking {{ issueCount === 1 ? 'issue' : 'issues' }}</strong>
           <strong v-else>Draft valid</strong>
           <span v-if="draft.active_conflicts.length">{{ draft.active_conflicts.length }} conflict{{ draft.active_conflicts.length === 1 ? '' : 's' }}</span>
+          <span v-else-if="uploading">Streaming file to FreeBooru…</span>
           <span v-else-if="evaluating">Checking relationships…</span>
           <span v-else>{{ file ? file.name : 'Choose a file to continue' }}</span>
         </div>
-        <button class="button button--primary" type="button" :disabled="!file || !draft.complete || evaluating">Import file</button>
+        <button class="button button--primary" type="button" :disabled="!file || !draft.complete || evaluating || uploading || Boolean(uploadResult)" @click="submit">{{ uploading ? 'Importing…' : uploadResult ? 'Imported' : 'Import file' }}</button>
       </footer>
     </template>
   </main>

@@ -37,6 +37,10 @@ func (fakeApplication) EvaluateImportDraft(
 	return core.ImportDraft{}, nil
 }
 
+func (fakeApplication) Import(context.Context, core.ImportRequest) (core.ImportResult, error) {
+	return core.ImportResult{}, nil
+}
+
 func TestAPIMiddlewareRoutesOnlyAPIRequests(t *testing.T) {
 	api, err := webapi.New(webapi.ModeDesktop, fakeApplication{})
 	if err != nil {

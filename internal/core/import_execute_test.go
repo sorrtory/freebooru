@@ -23,7 +23,8 @@ func TestImportPersistsContentAndTypedState(t *testing.T) {
 		t.Fatal(err)
 	}
 	result, err := app.Import(t.Context(), ImportRequest{
-		SourcePath: source,
+		SourcePath:     source,
+		SourceFilename: "browser-name.txt",
 		Tags: map[string]any{
 			"rating": "safe",
 			"score":  int64(9),
@@ -56,14 +57,18 @@ func TestImportPersistsContentAndTypedState(t *testing.T) {
 	if len(file.Tags) != 3 || len(file.Storages) != 1 || file.Storages[0] != "default" {
 		t.Fatalf("persisted file = %#v", file)
 	}
-	if len(file.Sources) != 1 || file.Sources[0].Path != source {
+	if len(file.Sources) != 1 || file.Sources[0].Path != source || file.Sources[0].Filename != "browser-name.txt" {
 		t.Fatalf("persisted sources = %#v", file.Sources)
 	}
-	if _, err := app.Import(t.Context(), ImportRequest{
+	duplicate, err := app.Import(t.Context(), ImportRequest{
 		SourcePath: source,
 		Tags:       map[string]any{"rating": "safe"},
-	}); !errors.Is(err, collection.ErrDuplicateFile) {
+	})
+	if !errors.Is(err, collection.ErrDuplicateFile) {
 		t.Fatalf("duplicate Import() error = %v, want ErrDuplicateFile", err)
+	}
+	if duplicate.SHA256 != result.SHA256 || duplicate.SizeBytes != result.SizeBytes {
+		t.Fatalf("duplicate Import() result = %#v, want existing content identity", duplicate)
 	}
 	if _, err := os.Stat(source); err != nil {
 		t.Fatalf("duplicate import changed source: %v", err)

@@ -72,6 +72,21 @@ export interface ImportDraft {
   complete: boolean
 }
 
+export interface ImportResult {
+  sha256: string
+  size_bytes: number
+  storages: string[]
+  record_created: boolean
+  created_copies: string[]
+}
+
+export class APIError extends Error {
+  constructor(public readonly code: string, message: string) {
+    super(message)
+    this.name = 'APIError'
+  }
+}
+
 interface ErrorResponse {
   error?: string | { code?: string; message?: string }
 }
@@ -145,6 +160,25 @@ export async function evaluateImportDraft(
   return body
 }
 
+export async function importFile(
+  collection: string,
+  file: File,
+  assignments: Record<string, TagValue>,
+  signal?: AbortSignal,
+  request: typeof fetch = fetch,
+): Promise<ImportResult> {
+  const form = new FormData()
+  form.append('file', file, file.name)
+  form.append('assignments', JSON.stringify(assignments))
+  const response = await request(`/api/v1/collections/${encodeURIComponent(collection)}/imports`, {
+    method: 'POST', headers: { Accept: 'application/json' }, body: form, signal,
+  })
+  if (!response.ok) throw apiError(await errorBody(response), response.status)
+  const body: unknown = await response.json()
+  if (!isImportResult(body)) throw new Error('FreeBooru returned an invalid import result')
+  return body
+}
+
 function importURL(collection: string, action: 'schema' | 'evaluate') {
   return `/api/v1/collections/${encodeURIComponent(collection)}/imports/${action}`
 }
@@ -157,6 +191,13 @@ function errorMessage(body: ErrorResponse, status: number): string {
   if (typeof body.error === 'string') return body.error
   if (body.error && typeof body.error.message === 'string') return body.error.message
   return `FreeBooru returned HTTP ${status}`
+}
+
+function apiError(body: ErrorResponse, status: number): APIError {
+  if (body.error && typeof body.error === 'object') {
+    return new APIError(body.error.code ?? 'application.error', body.error.message ?? `FreeBooru returned HTTP ${status}`)
+  }
+  return new APIError('application.error', errorMessage(body, status))
 }
 
 function isImportSchema(value: unknown): value is ImportSchema {
@@ -189,6 +230,10 @@ function isTagValue(value: unknown): value is TagValue {
 
 function isTagType(value: unknown): value is TagType {
   return ['bool', 'text', 'int', 'date', 'datetime', 'value', 'multivalue'].includes(String(value))
+}
+
+function isImportResult(value: unknown): value is ImportResult {
+  return isRecord(value) && typeof value.sha256 === 'string' && typeof value.size_bytes === 'number' && Array.isArray(value.storages) && value.storages.every((item) => typeof item === 'string') && typeof value.record_created === 'boolean' && Array.isArray(value.created_copies) && value.created_copies.every((item) => typeof item === 'string')
 }
 
 function isApplicationStatus(value: unknown): value is ApplicationStatus {

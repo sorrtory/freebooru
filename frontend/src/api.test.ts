@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { evaluateImportDraft, getHello, getImportSchema, getStatus } from './api'
+import { evaluateImportDraft, getHello, getImportSchema, getStatus, importFile } from './api'
 
 describe('getHello', () => {
   it('accepts the server hello response', async () => {
@@ -134,5 +134,19 @@ describe('import workspace API', () => {
     const request = vi.fn<typeof fetch>().mockResolvedValue(new Response(JSON.stringify({ error: { code: 'tag.value_invalid', message: 'pages must be an integer' } }), { status: 400 }))
 
     await expect(evaluateImportDraft('main', { pages: 3.5 }, undefined, request)).rejects.toThrow('pages must be an integer')
+  })
+
+  it('sends file content and typed assignments as multipart data', async () => {
+    const result = { sha256: 'abc', size_bytes: 4, storages: ['default'], record_created: true, created_copies: ['default'] }
+    const request = vi.fn<typeof fetch>().mockResolvedValue(new Response(JSON.stringify(result), { status: 201 }))
+    const file = new File(['data'], 'image.png', { type: 'image/png' })
+
+    await expect(importFile('main', file, { score: 7 }, undefined, request)).resolves.toEqual(result)
+    const [, init] = request.mock.calls[0]
+    const form = init?.body as FormData
+    expect(form.get('file')).toBeInstanceOf(File)
+    expect((form.get('file') as File).name).toBe('image.png')
+    expect(form.get('assignments')).toBe(JSON.stringify({ score: 7 }))
+    expect((init?.headers as Record<string, string>)['Content-Type']).toBeUndefined()
   })
 })

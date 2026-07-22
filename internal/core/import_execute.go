@@ -38,11 +38,15 @@ func (c *Core) Import(ctx context.Context, request ImportRequest) (result Import
 		return ImportResult{}, errors.Join(err, cleanupStoredCopies(copies))
 	}
 	first := copies[0].file
+	sourceFilename := filepath.Base(sourcePath)
+	if request.SourceFilename != "" {
+		sourceFilename = filepath.Base(request.SourceFilename)
+	}
 	record, err := session.database.CreateFile(ctx, collection.NewFile{
 		SHA256:         first.SHA256,
 		SizeBytes:      first.SizeBytes,
 		SourcePath:     sourcePath,
-		SourceFilename: filepath.Base(sourcePath),
+		SourceFilename: sourceFilename,
 		Tags:           importTagRecords(c.catalog, prepared.values),
 		Storages:       storageNamesFromProviders(prepared.storages),
 	})
@@ -52,7 +56,7 @@ func (c *Core) Import(ctx context.Context, request ImportRequest) (result Import
 		// path because the winner may already reference it. An unreferenced copy
 		// is permitted safe garbage; a referenced missing copy is not.
 		if errors.Is(err, collection.ErrDuplicateFile) {
-			return ImportResult{}, err
+			return ImportResult{SHA256: first.SHA256, SizeBytes: first.SizeBytes}, err
 		}
 		return ImportResult{}, errors.Join(err, cleanupStoredCopies(copies))
 	}

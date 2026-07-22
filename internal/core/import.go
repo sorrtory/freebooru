@@ -11,9 +11,10 @@ import (
 // ImportRequest contains frontend-independent input for one file import.
 // An empty Collection selects the configured default collection.
 type ImportRequest struct {
-	Collection string
-	SourcePath string
-	Tags       map[string]any
+	Collection     string
+	SourcePath     string
+	SourceFilename string
+	Tags           map[string]any
 }
 
 type preparedImport struct {

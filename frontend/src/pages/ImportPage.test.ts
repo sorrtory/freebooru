@@ -54,4 +54,23 @@ describe('ImportPage', () => {
     expect(wrapper.get('.assignment-summary output').text()).toBe('safe')
     expect(request).toHaveBeenNthCalledWith(3, '/api/v1/collections/main/imports/evaluate', expect.objectContaining({ body: JSON.stringify({ assignments: { rating: 'safe' } }) }))
   })
+
+  it('submits the selected file after Core marks the draft complete', async () => {
+    const applied = { ...emptyDraft, assignments: [{ name: 'rating', type: 'value', value: 'safe', required: true }], missing_required: [], complete: true }
+    const result = { sha256: 'abcdef1234567890', size_bytes: 4, storages: ['default'], record_created: true, created_copies: ['default'] }
+    const request = vi.fn().mockResolvedValueOnce(json(schema)).mockResolvedValueOnce(json(applied)).mockResolvedValueOnce(new Response(JSON.stringify(result), { status: 201 }))
+    vi.stubGlobal('fetch', request)
+    vi.stubGlobal('URL', { createObjectURL: vi.fn(() => 'blob:preview'), revokeObjectURL: vi.fn() })
+    const wrapper = mount(ImportPage, { props: { collection: 'main' }, global: { stubs: { RouterLink: true } } })
+    await flushPromises()
+    const input = wrapper.get<HTMLInputElement>('#import-file')
+    const file = new File(['data'], 'sample.txt', { type: 'text/plain' })
+    Object.defineProperty(input.element, 'files', { value: [file] })
+    await input.trigger('change')
+    await wrapper.get('.action-bar button').trigger('click')
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('Imported abcdef123456')
+    expect(request).toHaveBeenNthCalledWith(3, '/api/v1/collections/main/imports', expect.objectContaining({ method: 'POST' }))
+  })
 })

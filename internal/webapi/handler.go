@@ -30,6 +30,7 @@ type Application interface {
 	AppConfig() config.AppConfig
 	ImportFields(string) ([]core.ImportField, error)
 	EvaluateImportDraft(context.Context, core.ImportDraftRequest) (core.ImportDraft, error)
+	Import(context.Context, core.ImportRequest) (core.ImportResult, error)
 }
 
 // DiagnosticResponse is one configuration problem exposed to the frontend.
