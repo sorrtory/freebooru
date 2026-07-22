@@ -1,9 +1,9 @@
 # FreeBooru implementation TODO
 
 Implementation-facing execution plan for the MVP defined by
-[mvp.ai.md](./mvp.ai.md) and [config.ai.md](./config.ai.md). Complete phases in
-order. Keep every phase small enough to review and leave `go tool task check`
-passing.
+[mvp.ai.md](./mvp.ai.md), [config.ai.md](./config.ai.md), and
+[collection-db.md](./collection-db.md). Complete phases in order. Keep every
+phase small enough to review and leave `go tool task check` passing.
 
 ## Fixed decisions
 
@@ -16,10 +16,28 @@ passing.
 - Use `database/sql` with `github.com/ncruces/go-sqlite3/driver` and driver name
   `sqlite3`.
 - Preserve a connector seam for the driver's Adiantum VFS. Encryption, key
-  storage, and key acquisition are not part of the initial connector.
+  storage, and key acquisition are post-MVP work.
 - The config catalog is immutable after a successful build.
 - Catalog lookup, relationship traversal, and file-state evaluation are
   separate responsibilities.
+- File content identity is lowercase SHA-256 plus byte size.
+- Importing content already present in the selected collection fails without
+  mutation and reports the existing file.
+- Local storage shards content as
+  `<root>/<sha256-prefix-2>/<full-sha256>`.
+- SQLite stores logical storage assignments; the local backend derives paths
+  from storage configuration and content identity.
+- MVP import accepts one regular file and rejects directories and symlinks.
+- Import assignments use repeated `--tag 'name[:value]'` flags; only the first
+  colon is structural.
+- Interactive import prompts for required tags and then optionally for other
+  imported tags before sending a complete request to Core.
+- Import without an explicit storage uses `default_storage_name` only when it
+  is available to the selected collection.
+- MVP search is AND-only and has deterministic import-time/hash ordering with
+  `--limit 100 --offset 0` defaults.
+- Opening a collection streams and validates all persisted assignments against
+  the current YAML catalog; incompatible state blocks that collection only.
 
 ## Phase 0: contract and baseline
 
@@ -375,7 +393,7 @@ Acceptance:
 - Validation and config-editor hints use the same compiled rules.
 - The editor cannot suggest a value the validator would immediately reject.
 
-## Phase 12: integration and completion
+## Phase 12: configuration foundation integration
 
 - [x] Make `Core.CheckConfig` build the catalog and graph and return structured
   diagnostics.
@@ -389,11 +407,295 @@ Acceptance:
   collections, storages, relationships, and broken references.
 - [x] Add regression tests for every documented configuration failure policy.
 - [x] Update status columns in human docs as features become implemented.
-- [x] Run `go tool task check` after every phase and at MVP completion.
+- [x] Run `go tool task check` after every configuration-foundation phase.
+
+Acceptance:
+
+- Core publishes one consistent catalog and compiled graph snapshot.
+- Broken domain definitions remain reportable without hiding independent valid
+  collections.
+- The configuration, relationship, and in-memory evaluation foundation is
+  ready for persistence workflows.
+
+## Phase 13: persistence and CLI contracts
+
+Freeze the remaining behavioral contracts before adding tables or commands.
+
+- [x] Document the canonical lowercase SHA-256 content ID and byte-size
+  metadata.
+- [x] Document sharded local path derivation; extensions are not part of stored
+  identity.
+- [x] Define duplicate import as a non-mutating error that identifies the
+  existing SHA-256 and known source/storage information.
+- [x] Define the SQLite representation for every tag type. Boolean false is
+  absence; integers remain signed 64-bit; dates retain canonical strings.
+- [x] Define how required collection tags are supplied during import.
+- [x] Freeze CLI import tag syntax using the documented `tag:value` separator,
+  including free-text quoting and rejection rules.
+- [ ] Make full SHA-256 the authoritative file selector; defer unique prefixes
+  unless explicitly added later.
+- [x] Freeze the MVP search grammar, pagination, and deterministic result
+  ordering.
+- [ ] Record database/filesystem transaction and rollback ordering.
+- [ ] State the crash policy: a crash may leave an unreferenced content copy,
+  but must not delete the source or commit a row referring to a missing copy.
+
+Acceptance:
+
+- SQL and Cobra code need not invent user-visible semantics.
+- Every completion criterion in `mvp.ai.md` maps to a later phase.
+
+## Phase 14: collection schema migration 2
+
+- [ ] Add a new embedded migration; never edit an applied migration.
+- [ ] Add a `file` table keyed by lowercase SHA-256 with byte size and
+  timestamps.
+- [ ] Add a `file_source` table so imported content retains its original path
+  and name without making them part of content identity.
+- [ ] Add `file_tag` and `file_tag_value` tables representing bool, text, int,
+  date, datetime, value, and multivalue without ambiguous coercion.
+- [ ] Add a `file_storage` table keyed by file and normalized storage name.
+- [ ] Add foreign keys and uniqueness constraints for idempotent imports and
+  assignments.
+- [ ] Add checks for SHA-256 shape, non-negative sizes/integers, and legal typed
+  value columns where SQLite can enforce them.
+- [ ] Add indexes needed for tag/value search and storage lookup.
+- [ ] Apply migrations in version order in one transaction.
+- [ ] Preserve newer-schema rejection and idempotent initialization.
+- [ ] Test schema-1 upgrade, reopen, migration rollback, and foreign keys.
+
+Acceptance:
+
+- SQLite can represent all persisted MVP state without storing GUI state,
+  configuration caches, or speculative remote-storage fields.
+
+## Phase 15: collection repositories
+
+Keep SQL and row conversion inside `internal/collection`.
+
+- [ ] Define persisted file, source, typed tag, and storage models.
+- [ ] Add context-aware transaction helpers without exposing `*sql.Tx`.
+- [ ] Insert a new file by SHA-256 and return a typed duplicate error when its
+  content identity already exists.
+- [ ] Record source observations without overwriting earlier paths.
+- [ ] Load one file with every typed tag and storage assignment.
+- [ ] Stream every persisted assignment for collection-open integrity checks
+  without loading the complete collection into memory.
+- [ ] Add, replace, and remove typed tag values transactionally.
+- [ ] Add and remove logical storage assignments transactionally.
+- [ ] Delete a file through foreign-key cascades only when its final storage
+  assignment is removed.
+- [ ] Convert persisted assignments into evaluator input without losing types.
+- [ ] Reject persisted values incompatible with the current catalog.
+- [ ] Test real SQLite round trips, concurrent readers, and serialized writers.
+
+Acceptance:
+
+- SQLite round-trips every supported `FileState` value.
+- Callers do not construct SQL or depend on table layouts.
+
+## Phase 16: local content-addressed storage
+
+- [ ] Add a local backend rooted at the expanded configured path.
+- [ ] Derive `<root>/<sha[0:2]>/<sha>` from a validated lowercase SHA-256.
+- [ ] Reject malformed hashes, symlinked sources, directories, and non-regular
+  files.
+- [ ] Stream bytes while calculating SHA-256 and size; never read whole files
+  into memory.
+- [ ] Stage writes in the destination filesystem and atomically rename them.
+- [ ] Treat an existing verified content path as idempotent success.
+- [ ] Treat an existing path with unexpected size or digest as corruption.
+- [ ] Remove only copies created by the current failed operation.
+- [ ] Delete copies idempotently and remove empty shard directories when
+  practical.
+- [ ] Keep source deletion outside the storage backend.
+- [ ] Test empty and large files, duplicates, corruption, permissions,
+  cancellation, and cleanup.
+
+Acceptance:
+
+- The backend creates, verifies, and deletes physical copies without knowing
+  collection schemas or tag rules.
+
+## Phase 17: transactional import workflow
+
+Coordinate catalog, evaluator, repository, and local storages in Core.
+
+- [ ] Define an import request with collection, one source path, and explicit
+  tag assignments.
+- [ ] Resolve explicit or default collection through the validated snapshot.
+- [ ] Reject symlinks, directories, and non-regular sources before mutation.
+- [ ] Stream and stage the source once, producing SHA-256 and size.
+- [ ] Apply collection-required tags; require explicit values for required
+  non-boolean tags.
+- [ ] When no storage is explicit or required, use `default_storage_name` only
+  if it is available to the collection; otherwise fail before mutation.
+- [ ] Assign at least one valid storage using explicit assignments, collection
+  requirements, and the documented default rule.
+- [ ] Build proposed `FileState` and reject missing demands or active conflicts.
+- [ ] Copy or verify content in every selected storage.
+- [ ] Commit file, source, typed tags, and storage assignments in one SQLite
+  transaction.
+- [ ] On copy or SQL failure, remove only new copies, roll back SQL, and preserve
+  the source.
+- [ ] Run `remove_on_upload` only after every copy and database commit succeeds.
+- [ ] Before removing the source, verify it still names the imported bytes.
+- [ ] Reject duplicate imports without changing the existing record, copies,
+  tags, observed sources, or import source.
+- [ ] Return canonical SHA-256 and whether the record/copies were new.
+
+Acceptance:
+
+- Success leaves every requested copy and one consistent database record.
+- Failure never commits a partial record or removes the source.
+
+## Phase 18: persisted tag and storage mutation
+
+- [ ] Load persisted files into `FileState`.
+- [ ] Implement add/set/remove for every tag type.
+- [ ] Canonicalize tag and predefined-value names.
+- [ ] Treat boolean false as removal.
+- [ ] Enforce collection imports and required tags.
+- [ ] Evaluate the complete proposed state before mutation.
+- [ ] Return demands, conflicts, suggestions, and originating reasons.
+- [ ] Adding `storage:<name>` copies/verifies content before logical commit.
+- [ ] Removing `storage:<name>` updates SQLite and deletes exactly that copy
+  with recoverable failure reporting.
+- [ ] Removing the final storage deletes the file record, tag/source rows, and
+  final copy in the documented order.
+- [ ] Reject removal of required tags and storages.
+- [ ] Make repeated add/remove operations idempotent.
+- [ ] Test rollback after copy, delete, evaluator, and database failures.
+
+Acceptance:
+
+- Successful mutations always produce evaluator-valid persisted state.
+- Storage tags and physical copies agree after successful calls.
+
+## Phase 19: search
+
+- [ ] Implement the documented query parser independently of Cobra and SQL.
+- [ ] Resolve query names through the selected collection catalog.
+- [ ] Compile typed equality, presence/absence, range, and membership terms.
+- [ ] Combine every term with AND; reject OR, grouping, negated values, fuzzy
+  matching, and unsupported operators.
+- [ ] Use SQL parameters only; never interpolate user values.
+- [ ] Search only tags imported by the selected collection.
+- [ ] Return SHA-256, original name, size, and assigned tags needed by clients.
+- [ ] Order by `imported_at` descending and full SHA-256 ascending.
+- [ ] Implement non-negative limit/offset pagination with defaults of 100 and
+  0.
+- [ ] Test every type, combined terms, no matches, malformed queries, and
+  SQL-injection-shaped input.
+
+Acceptance:
+
+- Search reads persisted SQLite state and shares assignment type rules.
+
+## Phase 20: Core collection session
+
+One process owns at most one open collection session in the MVP.
+
+- [ ] Replace raw database handles returned to frontends with a Core-owned
+  session.
+- [ ] Open and initialize one validated collection at a time.
+- [ ] Bind collection config, catalog subset, graph, evaluator, repository, and
+  storage backends into the session.
+- [ ] Before publishing the session, validate every persisted tag name, tag
+  type, typed value, and storage name against the current catalog and evaluate
+  every reconstructed file state.
+- [ ] Refuse to open a collection containing incompatible persisted state and
+  report the affected SHA-256 values without preventing application startup or
+  unrelated collections from opening.
+- [ ] Reject opening a second collection before closing the first.
+- [ ] Expose import, mutation, lookup, hints, and search through Core.
+- [ ] Propagate context cancellation through hashing, copying, SQL, and search.
+- [ ] Close the database exactly once on success, failure, and shutdown.
+- [ ] Keep frontend types out of Core APIs.
+- [ ] Test lifecycle, failed open, repeated close, cancellation, and independent
+  valid collections.
+
+Acceptance:
+
+- Frontends cannot bypass validation or coordinate storage and SQL themselves.
+- Separate GUI and CLI processes can concurrently use SQLite.
+
+## Phase 21: CLI MVP commands
+
+- [ ] Document arguments, flags, output, and exit behavior before each command.
+- [ ] Add `collection <name> import <file>` and the documented default alias.
+- [ ] Add explicit `--interactive` import: prompt for missing required tags,
+  then offer skippable optional imported tags, and pass a complete request to
+  Core.
+- [ ] Add collection-specific and default typed tag add/set/remove commands.
+- [ ] Add collection-specific and default `tag <sha256> get` commands that
+  return every assigned typed tag and storage.
+- [ ] Add collection-specific and default search commands.
+- [ ] Accept repeated tag assignments during import using Phase 13 syntax.
+- [ ] Print canonical SHA-256 after import and mutation.
+- [ ] Render evaluator failures and reasons without Cobra usage noise.
+- [ ] Add side-effect-free tag/value completion through Core.
+- [ ] Use `RunE`, argument validators, `cmd.Context`, and command writers.
+- [ ] Test fresh command trees, default/explicit collections, invalid input,
+  cancellation, output, and nonzero failures.
+
+Acceptance:
+
+- Every CLI command in `mvp.ai.md` operates on persisted data.
+- Explicit collection selection never changes `default_collection`.
+
+## Phase 22: failure, concurrency, and recovery tests
+
+- [ ] Test simultaneous GUI-like and CLI-like database connections.
+- [ ] Test busy-timeout behavior and transaction contention.
+- [ ] Test source modification during import.
+- [ ] Test cancellation during hashing, each copy, and SQL mutation.
+- [ ] Test multi-storage failure after each copy.
+- [ ] Test SQL failure after physical copies are finalized.
+- [ ] Test duplicate concurrent imports of identical content.
+- [ ] Test restart handling of orphaned staged/finalized copies under the Phase
+  13 crash policy.
+- [ ] Test removing one of several copies and the final copy.
+- [ ] Test required tags and every relationship against persisted state.
+- [ ] Run race tests where supported.
+
+Acceptance:
+
+- No tested failure silently loses the source or commits a row pointing to a
+  missing copy.
+
+## Phase 23: MVP documentation and release gate
+
+- [ ] Update `docs/cli.md` with all commands and examples.
+- [ ] Update `docs/config-spec.md`, including `remove_on_upload` status.
+- [ ] Update `docs/navigation.md` for all new files.
+- [ ] Document the dependency flow from config through Core to frontends.
+- [ ] Verify clean-home init, check, import, tag, search, storage removal, and
+  reopen.
+- [ ] Verify all eleven `mvp.ai.md` completion criteria explicitly.
+- [ ] Run `go tool task check`.
+- [ ] Run relevant race and integration suites.
+- [ ] Record platform limitations without weakening data safety.
+
+Acceptance:
+
+- Product behavior, human docs, AI contracts, and tests describe one MVP.
+- The release gate cannot pass while persistence or required CLI workflows are
+  absent.
 
 ## Deferred beyond this TODO
 
-- Enabling Adiantum encryption and defining key management UX.
+- [ ] Define the database-encryption threat model and key lifecycle: creation,
+  acquisition, storage, sharing between GUI and CLI, rotation, and recovery.
+- [ ] Enable the `ncruces/go-sqlite3` Adiantum VFS without exposing keys in
+  logs, errors, configuration diagnostics, process arguments, or command
+  history.
+- [ ] Implement and test an interruption-safe plaintext-to-encrypted export and
+  replacement workflow; merely reopening a plaintext database with an
+  encrypted VFS is not a migration.
+- [ ] Keep SQLite temporary data in memory when encryption is enabled and
+  document that collection database encryption does not encrypt stored file
+  contents.
 - Remote/rclone storage.
 - Collection tag overrides.
 - Relationship targets by group.

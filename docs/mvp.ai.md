@@ -30,7 +30,9 @@ The CLI must support at least:
 freebooru-cli init
 freebooru-cli config check
 freebooru-cli collection main import <path>
+freebooru-cli collection main import <path> --interactive
 freebooru-cli collection main tag <operation>
+freebooru-cli collection main tag <sha256> get
 freebooru-cli collection main search <query>
 ```
 
@@ -38,6 +40,7 @@ When `default_collection` is `main`, commands that omit `collection main` use
 that collection:
 
 ```bash
+freebooru-cli import <path>
 freebooru-cli tag <operation>
 freebooru-cli search <query>
 ```
@@ -92,6 +95,8 @@ tags:
 ## Collections
 
 - A collection has one SQLite database.
+- The collection-state schema and its YAML boundary are defined in
+  [collection-db.md](./collection-db.md).
 - A collection is selected explicitly or through `default_collection`.
 - One process opens at most one collection in the MVP.
 - A collection must allow at least one storage.
@@ -109,6 +114,32 @@ the MVP.
 ## Storage and files
 
 The MVP supports local storage only.
+
+Files are content-addressed by lowercase SHA-256. Local storage derives the
+physical path as `<storage-root>/<first-two-hash-characters>/<full-sha256>`.
+SQLite stores the SHA-256 identity, byte size, original source metadata, tags,
+and assigned storage names. Importing bytes whose SHA-256 already exists in the
+selected collection fails without modifying the existing record, its copies,
+or the source file. The error reports the existing content identity and known
+location information.
+
+The MVP import command accepts exactly one regular file. Directories and
+symbolic links are rejected. Repeated `--tag 'name[:value]'` flags supply
+assignments without a prompt. The first `:` separates the normalized tag name
+from its value; later colons belong to the value. A boolean assignment is only
+its tag name. Shell quoting is the caller's responsibility for whitespace and
+other shell-significant characters.
+
+When required values are still missing, plain import fails with an actionable
+error. `--interactive` prompts for missing required assignments first and then
+offers the collection's optional imported tags; the optional step may be
+skipped. Prompting belongs to the CLI. Core receives the same complete typed
+import request for interactive and non-interactive imports. Recursive directory
+import is outside the MVP.
+
+When no `storage:<name>` assignment is supplied, import uses
+`default_storage_name` if that storage is available to the selected collection.
+Otherwise import fails and requires an explicit available storage assignment.
 
 Storage is exposed as the built-in multivalue tag `storage`:
 
@@ -187,6 +218,28 @@ Relationship targets must be imported or required by the collection; graph
 edges do not auto-import tags. `suggest` and `demand` cycles are valid.
 Self-demand, self-conflict, and demanding and conflicting with the same target
 condition from the same source condition are invalid.
+
+## Search
+
+MVP search is a whitespace-separated AND query. Every term must match the same
+file:
+
+```text
+reviewed rating:safe score>=10 !blocked
+```
+
+- `tag` requires a boolean tag to be present.
+- `!tag` requires a tag to be absent.
+- `tag:value` matches an exact scalar value or membership in a multivalue tag.
+- `tag<value`, `tag<=value`, `tag>value`, and `tag>=value` compare `int`,
+  `date`, or `datetime` values using their typed ordering.
+- The first operator recognized after the tag name separates the term. Values
+  containing whitespace must be shell-quoted.
+
+OR, grouping, negated values, fuzzy text matching, and unique SHA-256 prefixes
+are outside the MVP. Results are ordered by `imported_at` descending and then
+by full SHA-256 ascending. `--limit` defaults to `100`; `--offset` defaults to
+`0`. Both must be non-negative integers.
 
 ## Names and case
 

@@ -120,6 +120,7 @@ freebooru/
     ├── config-example.md             Human configuration examples
     ├── config-spec.md                Human configuration field reference
     ├── config-best_practise.md       Naming and configuration conventions
+    ├── collection-db.md              Collection SQLite schema and encryption boundary
     ├── dependencies.md               Selected libraries and tools
     ├── config.ai.md                  Implementation-facing config contract
     ├── mvp.ai.md                     MVP goal and completion criteria
