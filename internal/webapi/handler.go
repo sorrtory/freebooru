@@ -2,8 +2,13 @@
 package webapi
 
 import (
+	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"sync"
+
+	"github.com/sorrtory/freebooru/internal/config"
 )
 
 // Mode describes the process serving the API.
@@ -16,9 +21,42 @@ const (
 	ModeDesktop Mode = "desktop"
 )
 
+// Application is the Core behavior used by the status endpoint.
+type Application interface {
+	LoadConfig(context.Context) error
+	CheckConfig(context.Context) config.Diagnostics
+	AppConfig() config.AppConfig
+}
+
+// DiagnosticResponse is one configuration problem exposed to the frontend.
+type DiagnosticResponse struct {
+	Severity string `json:"severity"`
+	Code     string `json:"code"`
+	Message  string `json:"message"`
+	File     string `json:"file"`
+	Document int    `json:"document"`
+	Field    string `json:"field"`
+}
+
+// StatusResponse describes whether FreeBooru configuration is usable.
+type StatusResponse struct {
+	Ready             bool                 `json:"ready"`
+	Mode              Mode                 `json:"mode"`
+	DefaultCollection string               `json:"default_collection"`
+	Diagnostics       []DiagnosticResponse `json:"diagnostics"`
+}
+
 // New returns the versioned FreeBooru API handler.
-func New(mode Mode) http.Handler {
+func New(mode Mode, app Application) (http.Handler, error) {
+	if mode != ModeServer && mode != ModeDesktop {
+		return nil, fmt.Errorf("invalid API mode %q", mode)
+	}
+	if app == nil {
+		return nil, fmt.Errorf("application is required")
+	}
+
 	mux := http.NewServeMux()
+	var statusMu sync.Mutex
 	mux.HandleFunc("/api/v1/hello", func(response http.ResponseWriter, request *http.Request) {
 		if request.Method != http.MethodGet {
 			response.Header().Set("Allow", http.MethodGet)
@@ -33,10 +71,50 @@ func New(mode Mode) http.Handler {
 			Mode:    mode,
 		})
 	})
+	mux.HandleFunc("/api/v1/status", func(response http.ResponseWriter, request *http.Request) {
+		if request.Method != http.MethodGet {
+			response.Header().Set("Allow", http.MethodGet)
+			writeJSON(response, http.StatusMethodNotAllowed, map[string]string{"error": "method not allowed"})
+			return
+		}
+		statusMu.Lock()
+		defer statusMu.Unlock()
+		writeJSON(response, http.StatusOK, applicationStatus(request.Context(), mode, app))
+	})
 	mux.HandleFunc("/api/", func(response http.ResponseWriter, _ *http.Request) {
 		writeJSON(response, http.StatusNotFound, map[string]string{"error": "API endpoint not found"})
 	})
-	return mux
+	return mux, nil
+}
+
+func applicationStatus(ctx context.Context, mode Mode, app Application) StatusResponse {
+	status := StatusResponse{
+		Mode:        mode,
+		Diagnostics: make([]DiagnosticResponse, 0),
+	}
+	if err := app.LoadConfig(ctx); err != nil {
+		status.Diagnostics = append(status.Diagnostics, DiagnosticResponse{
+			Severity: string(config.SeverityError),
+			Code:     "application.config_load",
+			Message:  err.Error(),
+		})
+		return status
+	}
+
+	diagnostics := app.CheckConfig(ctx)
+	status.Ready = !diagnostics.HasErrors()
+	status.DefaultCollection = app.AppConfig().DefaultCollection
+	for _, diagnostic := range diagnostics {
+		status.Diagnostics = append(status.Diagnostics, DiagnosticResponse{
+			Severity: string(diagnostic.Severity),
+			Code:     diagnostic.Code,
+			Message:  diagnostic.Message,
+			File:     diagnostic.File,
+			Document: diagnostic.Document,
+			Field:    diagnostic.Field,
+		})
+	}
+	return status
 }
 
 func writeJSON(response http.ResponseWriter, status int, value any) {

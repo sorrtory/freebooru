@@ -1,6 +1,7 @@
 package webui
 
 import (
+	"context"
 	"io"
 	"io/fs"
 	"net/http"
@@ -9,8 +10,23 @@ import (
 	"testing"
 	"testing/fstest"
 
+	"github.com/sorrtory/freebooru/internal/config"
 	"github.com/sorrtory/freebooru/internal/webapi"
 )
+
+type staticApplication struct{}
+
+func (staticApplication) LoadConfig(context.Context) error {
+	return nil
+}
+
+func (staticApplication) CheckConfig(context.Context) config.Diagnostics {
+	return nil
+}
+
+func (staticApplication) AppConfig() config.AppConfig {
+	return config.DefaultAppConfig()
+}
 
 func TestHandlerServesAssetsAndSPAFallback(t *testing.T) {
 	assets := fstest.MapFS{
@@ -64,7 +80,11 @@ func TestEmbeddedAssetsAreRootedAtDist(t *testing.T) {
 
 func TestHTTPServerServesHelloAndApplication(t *testing.T) {
 	assets := fstest.MapFS{"index.html": &fstest.MapFile{Data: []byte("FreeBooru app")}}
-	server := httptest.NewServer(NewHandler(webapi.New(webapi.ModeServer), assets))
+	api, err := webapi.New(webapi.ModeServer, staticApplication{})
+	if err != nil {
+		t.Fatalf("construct API: %v", err)
+	}
+	server := httptest.NewServer(NewHandler(api, assets))
 	t.Cleanup(server.Close)
 
 	for _, test := range []struct {
@@ -73,6 +93,7 @@ func TestHTTPServerServesHelloAndApplication(t *testing.T) {
 	}{
 		{path: "/", want: "FreeBooru app"},
 		{path: "/api/v1/hello", want: `{"message":"Hello FreeBooru","mode":"server"}`},
+		{path: "/api/v1/status", want: `{"ready":true,"mode":"server"`},
 	} {
 		response, err := server.Client().Get(server.URL + test.path)
 		if err != nil {

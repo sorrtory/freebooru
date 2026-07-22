@@ -13,9 +13,15 @@ import (
 	"time"
 
 	"github.com/sorrtory/freebooru/internal/bootstrap"
+	"github.com/sorrtory/freebooru/internal/config"
 	"github.com/sorrtory/freebooru/internal/webapi"
 	"github.com/sorrtory/freebooru/internal/webui"
 )
+
+type configLoader interface {
+	LoadConfig(context.Context) error
+	AppConfig() config.AppConfig
+}
 
 func main() {
 	logger := slog.New(slog.NewJSONHandler(os.Stderr, nil))
@@ -30,19 +36,12 @@ func run(logger *slog.Logger) error {
 	if err != nil {
 		return fmt.Errorf("construct application: %w", err)
 	}
-	if err := app.LoadConfig(context.Background()); err != nil {
-		return fmt.Errorf("load configuration: %w", err)
-	}
-
-	for _, diagnostic := range app.CheckConfig(context.Background()) {
+	port, loadErr := httpPort(context.Background(), app)
+	if loadErr != nil {
 		logger.Warn(
-			"configuration problem",
-			"severity", diagnostic.Severity,
-			"code", diagnostic.Code,
-			"file", diagnostic.File,
-			"document", diagnostic.Document,
-			"field", diagnostic.Field,
-			"message", diagnostic.Message,
+			"application configuration unavailable; using default HTTP port",
+			"port", port,
+			"error", loadErr,
 		)
 	}
 
@@ -50,9 +49,13 @@ func run(logger *slog.Logger) error {
 	if err != nil {
 		return fmt.Errorf("load web assets: %w", err)
 	}
-	handler := webui.NewHandler(webapi.New(webapi.ModeServer), assets)
+	api, err := webapi.New(webapi.ModeServer, app)
+	if err != nil {
+		return fmt.Errorf("construct web API: %w", err)
+	}
+	handler := webui.NewHandler(api, assets)
 	server := &http.Server{
-		Addr:              fmt.Sprintf("127.0.0.1:%d", app.AppConfig().HTTPPort),
+		Addr:              fmt.Sprintf("127.0.0.1:%d", port),
 		Handler:           handler,
 		ReadHeaderTimeout: 5 * time.Second,
 		ReadTimeout:       30 * time.Second,
@@ -85,4 +88,11 @@ func run(logger *slog.Logger) error {
 		}
 		return nil
 	}
+}
+
+func httpPort(ctx context.Context, app configLoader) (int, error) {
+	if err := app.LoadConfig(ctx); err != nil {
+		return config.DefaultAppConfig().HTTPPort, err
+	}
+	return app.AppConfig().HTTPPort, nil
 }

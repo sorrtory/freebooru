@@ -3,10 +3,12 @@ package main
 
 import (
 	"fmt"
+	"log/slog"
 	"net/http"
 	"os"
 	"strings"
 
+	"github.com/sorrtory/freebooru/internal/bootstrap"
 	"github.com/sorrtory/freebooru/internal/webapi"
 	"github.com/sorrtory/freebooru/internal/webui"
 	"github.com/wailsapp/wails/v2"
@@ -22,11 +24,19 @@ func main() {
 }
 
 func run() error {
+	logger := slog.New(slog.NewJSONHandler(os.Stderr, nil))
+	app, err := bootstrap.NewCore(logger)
+	if err != nil {
+		return fmt.Errorf("construct application: %w", err)
+	}
 	assets, err := webui.Assets()
 	if err != nil {
 		return fmt.Errorf("load web assets: %w", err)
 	}
-	api := webapi.New(webapi.ModeDesktop)
+	api, err := webapi.New(webapi.ModeDesktop, app)
+	if err != nil {
+		return fmt.Errorf("construct web API: %w", err)
+	}
 
 	if err := wails.Run(&options.App{
 		Title:     "FreeBooru",

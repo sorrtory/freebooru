@@ -1,16 +1,35 @@
 package main
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 
+	"github.com/sorrtory/freebooru/internal/config"
 	"github.com/sorrtory/freebooru/internal/webapi"
 )
 
+type fakeApplication struct{}
+
+func (fakeApplication) LoadConfig(context.Context) error {
+	return nil
+}
+
+func (fakeApplication) CheckConfig(context.Context) config.Diagnostics {
+	return nil
+}
+
+func (fakeApplication) AppConfig() config.AppConfig {
+	return config.DefaultAppConfig()
+}
+
 func TestAPIMiddlewareRoutesOnlyAPIRequests(t *testing.T) {
-	api := webapi.New(webapi.ModeDesktop)
+	api, err := webapi.New(webapi.ModeDesktop, fakeApplication{})
+	if err != nil {
+		t.Fatalf("construct API: %v", err)
+	}
 	next := http.HandlerFunc(func(response http.ResponseWriter, _ *http.Request) {
 		response.WriteHeader(http.StatusTeapot)
 	})
@@ -23,6 +42,12 @@ func TestAPIMiddlewareRoutesOnlyAPIRequests(t *testing.T) {
 	}
 	if !strings.Contains(apiResponse.Body.String(), `"mode":"desktop"`) {
 		t.Fatalf("API body = %q, want desktop mode", apiResponse.Body.String())
+	}
+
+	statusResponse := httptest.NewRecorder()
+	handler.ServeHTTP(statusResponse, httptest.NewRequest(http.MethodGet, "/api/v1/status", nil))
+	if statusResponse.Code != http.StatusOK || !strings.Contains(statusResponse.Body.String(), `"ready":true`) {
+		t.Fatalf("status response = %d %q", statusResponse.Code, statusResponse.Body.String())
 	}
 
 	assetResponse := httptest.NewRecorder()
