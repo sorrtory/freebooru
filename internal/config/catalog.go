@@ -29,7 +29,14 @@ type Catalog struct {
 	storages    map[string]catalogEntry[StorageProvider]
 	collections map[string]catalogEntry[CollectionConfig]
 	tags        map[string]catalogEntry[TagConfig]
+	groups      map[string]Group
 	references  map[string]ResolvedReferences
+}
+
+// Group is an implicit navigation group formed by tag memberships.
+type Group struct {
+	Name string
+	tags []string
 }
 
 // ResolvedReferences is the effective view of one collection's references.
@@ -43,39 +50,4 @@ type ResolvedReferences struct {
 
 func normalizeName(name string) string {
 	return strings.ToLower(name)
-}
-
-// Storage returns a storage definition using case-insensitive lookup.
-func (c *Catalog) Storage(name string) (StorageProvider, Source, bool) {
-	entry, ok := c.storages[normalizeName(name)]
-	return entry.value, entry.source, ok
-}
-
-// Tag returns a tag definition using case-insensitive lookup.
-func (c *Catalog) Tag(name string) (TagConfig, Source, bool) {
-	entry, ok := c.tags[normalizeName(name)]
-	return entry.value, entry.source, ok
-}
-
-// Collection returns a defensive copy using case-insensitive lookup.
-func (c *Catalog) Collection(name string) (CollectionConfig, Source, bool) {
-	entry, ok := c.collections[normalizeName(name)]
-	if !ok {
-		return CollectionConfig{}, Source{}, false
-	}
-	value := entry.value
-	value.Tags.Require = append([]TagReference(nil), value.Tags.Require...)
-	value.Tags.Import = append([]TagReference(nil), value.Tags.Import...)
-	return value, entry.source, true
-}
-
-// CollectionReferences returns defensive copies of effective references.
-func (c *Catalog) CollectionReferences(name string) (ResolvedReferences, bool) {
-	references, ok := c.references[normalizeName(name)]
-	if !ok {
-		return ResolvedReferences{}, false
-	}
-	references.Required = append([]TagReference(nil), references.Required...)
-	references.Imported = append([]TagReference(nil), references.Imported...)
-	return references, true
 }

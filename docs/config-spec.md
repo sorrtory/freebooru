@@ -68,7 +68,7 @@ YAML documents separated by `---`.
 | ---------- | ------ | ------------------------: | ------- | -------------------------------------------------- | -------------------------------------------- | --------------- |
 | `name`     | string |                       yes | —       | Non-empty and globally unique; cannot be `storage` | Tag name                                     | Implemented     |
 | `type`     | enum   |                       yes | —       | See tag types below                                | Tag value type                               | Implemented     |
-| `groups`   | list   |                        no | empty   | No duplicates inside one tag                       | Implicit groups containing this tag          | Parsed; index pending |
+| `groups`   | list   |                        no | empty   | No duplicates inside one tag                       | Implicit groups containing this tag          | Implemented     |
 | `values`   | list   | for `value`, `multivalue` | —       | Entries contain unique `val` fields                | Allowed predefined values                    | Implemented     |
 | `suggest`  | list   |                        no | empty   | See tag relationships                              | Tags recommended with this tag                | Parsed; graph pending |
 | `demand`   | list   |                        no | empty   | See tag relationships                              | Tags required with this tag                   | Parsed; graph pending |

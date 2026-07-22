@@ -82,6 +82,9 @@ freebooru/
 │       ├── validate.go               Domain validation orchestration
 │       ├── catalog.go                Immutable catalog types and lookup API
 │       ├── catalog_build.go          Catalog loading, normalization, and indexing
+│       ├── catalog_clone.go          Defensive copies for immutable query results
+│       ├── catalog_group.go          Implicit group index construction
+│       ├── catalog_query.go          Catalog lookup and prefix-search methods
 │       ├── catalog_resolve.go        Collection reference resolution
 │       ├── catalog_test.go           Catalog lookup, duplicate, and default tests
 │       ├── diagnostic.go             Structured configuration diagnostics

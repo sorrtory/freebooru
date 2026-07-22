@@ -39,6 +39,7 @@ func LoadCatalog(paths Paths, app AppConfig) (*Catalog, Diagnostics) {
 		func(tag TagConfig) string { return tag.Name },
 		diagnostics,
 	)
+	catalog.groups = buildGroups(catalog.tags)
 	catalog.collections, diagnostics = indexDefinitions(
 		collections,
 		"collection",
@@ -46,7 +47,7 @@ func LoadCatalog(paths Paths, app AppConfig) (*Catalog, Diagnostics) {
 		diagnostics,
 	)
 	// Cross-file checks happen only after all independent definitions are known.
-	diagnostics = append(diagnostics, catalog.resolveCollectionStorages()...)
+	diagnostics = append(diagnostics, catalog.resolveCollections()...)
 	diagnostics = append(diagnostics, catalog.checkDefaults(paths.App, app)...)
 	return catalog, diagnostics
 }

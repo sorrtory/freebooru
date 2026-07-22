@@ -2,9 +2,9 @@ package config
 
 import "fmt"
 
-// resolveCollectionStorages removes collections that reference unavailable
-// storage. Tag and group resolution is added when their full models exist.
-func (c *Catalog) resolveCollectionStorages() Diagnostics {
+// resolveCollections removes collections containing any unavailable reference.
+// Group references expand to their member tags in the effective snapshot.
+func (c *Catalog) resolveCollections() Diagnostics {
 	c.references = make(map[string]ResolvedReferences, len(c.collections))
 	var diagnostics Diagnostics
 	for key, entry := range c.collections {
@@ -47,24 +47,65 @@ func (c *Catalog) resolveReferenceList(
 	source Source,
 	field string,
 ) ([]TagReference, Diagnostics) {
+	resolved := make([]TagReference, 0, len(references))
 	var diagnostics Diagnostics
 	for index, reference := range references {
-		if reference.Storage == "" {
-			continue
+		found, diagnostic := c.resolveReference(reference, source, field, index)
+		resolved = append(resolved, found...)
+		if diagnostic != nil {
+			diagnostics = append(diagnostics, *diagnostic)
 		}
-		if _, ok := c.storages[normalizeName(reference.Storage)]; ok {
-			continue
-		}
-		diagnostic := newDiagnostic(
-			"collection.storage_missing",
-			fmt.Sprintf("storage %q does not exist", reference.Storage),
-			source.File,
-			source.Document,
-		)
-		diagnostic.Field = fmt.Sprintf("%s[%d].storage", field, index)
-		diagnostics = append(diagnostics, diagnostic)
 	}
-	return references, diagnostics
+	return resolved, diagnostics
+}
+
+func (c *Catalog) resolveReference(
+	reference TagReference,
+	source Source,
+	field string,
+	index int,
+) ([]TagReference, *Diagnostic) {
+	switch {
+	case reference.Tag != "":
+		entry, ok := c.tags[normalizeName(reference.Tag)]
+		if ok {
+			return []TagReference{{Tag: entry.value.Name}}, nil
+		}
+		return nil, missingReferenceDiagnostic("tag", reference.Tag, source, field, index)
+	case reference.Group != "":
+		group, ok := c.groups[normalizeName(reference.Group)]
+		if !ok {
+			return nil, missingReferenceDiagnostic("group", reference.Group, source, field, index)
+		}
+		resolved := make([]TagReference, 0, len(group.tags))
+		for _, tagKey := range group.tags {
+			resolved = append(resolved, TagReference{Tag: c.tags[tagKey].value.Name})
+		}
+		return resolved, nil
+	default:
+		entry, ok := c.storages[normalizeName(reference.Storage)]
+		if ok {
+			return []TagReference{{Storage: entry.value.Name}}, nil
+		}
+		return nil, missingReferenceDiagnostic("storage", reference.Storage, source, field, index)
+	}
+}
+
+func missingReferenceDiagnostic(
+	kind string,
+	name string,
+	source Source,
+	field string,
+	index int,
+) *Diagnostic {
+	diagnostic := newDiagnostic(
+		"collection."+kind+"_missing",
+		fmt.Sprintf("%s %q does not exist", kind, name),
+		source.File,
+		source.Document,
+	)
+	diagnostic.Field = fmt.Sprintf("%s[%d].%s", field, index, kind)
+	return &diagnostic
 }
 
 func uniqueReferences(references []TagReference) []TagReference {

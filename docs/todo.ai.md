@@ -231,20 +231,15 @@ discover -> decode -> validate document -> normalize -> index
 - [x] Preserve source locations on storage, collection, and tag definitions.
 - [x] Normalize case-insensitive identifiers once at the indexing boundary.
 - [x] Preserve original spelling for display and diagnostics.
-- [ ] Detect duplicate normalized storage, collection, tag, and value names.
-  Storage, collection, and tag definition duplicates are implemented; value
-  duplicates wait for the full tag model.
-- [ ] Invalidate every duplicate definition; never pick a winner by discovery
+- [x] Detect duplicate normalized storage, collection, tag, and value names.
+- [x] Invalidate every duplicate definition; never pick a winner by discovery
   order.
-- [ ] Build storage, collection, tag, predefined-value, and group indexes.
-  Storage, collection, and tag indexes are implemented; value and group indexes
-  wait for the full tag model.
-- [ ] Resolve collection imports and requirements. Storage references are
-  resolved; tag and group references wait for their full model.
+- [x] Build storage, collection, tag, predefined-value, and group indexes.
+- [x] Resolve collection imports and requirements.
 - [x] Make `require` imply `import`.
 - [x] Require at least one existing storage per collection.
-- [ ] Publish an immutable catalog plus diagnostics.
-- [ ] Preserve valid independent definitions when other definitions are broken.
+- [x] Publish an immutable catalog plus diagnostics.
+- [x] Preserve valid independent definitions when other definitions are broken.
 
 Catalog query target:
 
@@ -276,8 +271,7 @@ Acceptance:
 - [ ] Strictly parse `YYYY-MM-DD` dates.
 - [ ] Strictly parse RFC 3339 datetimes.
 - [x] Enforce unique normalized predefined values within each tag.
-- [ ] Model `groups: [...]` as implicit many-to-many navigation indexes. The
-  field and tag-local uniqueness rules are implemented; catalog indexes remain.
+- [x] Model `groups: [...]` as implicit many-to-many navigation indexes.
 - [ ] Allow tag/group name collisions because references are explicitly typed.
 - [x] Reserve the built-in `storage` tag name.
 - [ ] Expose storage providers as values of the built-in multivalue tag.
