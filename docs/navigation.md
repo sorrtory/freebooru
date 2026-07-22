@@ -60,6 +60,11 @@ freebooru/
 │   │   ├── collection_state_test.go  Persisted type conversion tests
 │   │   ├── core_test.go              Workflow and database lifecycle tests
 │   │   ├── import.go                  Import request preparation and validation
+│   │   ├── import_execute.go          Physical and SQLite import transaction workflow
+│   │   ├── import_execute_test.go     Import persistence and rollback tests
+│   │   ├── import_copies.go           Multi-storage copy and rollback coordination
+│   │   ├── import_record.go           Typed import-to-database conversion
+│   │   ├── import_source.go           Verified remove-on-upload handling
 │   │   ├── import_test.go             Import defaults and validation tests
 │   │   └── integration_test.go       Multi-domain config integration fixture
 │   │

@@ -526,8 +526,8 @@ Coordinate catalog, evaluator, repository, and local storages in Core.
 - [x] Define an import request with collection, one source path, and explicit
   tag assignments.
 - [x] Resolve explicit or default collection through the validated snapshot.
-- [ ] Reject symlinks, directories, and non-regular sources before mutation.
-- [ ] Stream and stage the source once, producing SHA-256 and size.
+- [x] Reject symlinks, directories, and non-regular sources before mutation.
+- [x] Stream and stage the source once, producing SHA-256 and size.
 - [x] Apply collection-required tags; require explicit values for required
   non-boolean tags.
 - [x] When no storage is explicit or required, use `default_storage_name` only
@@ -535,16 +535,16 @@ Coordinate catalog, evaluator, repository, and local storages in Core.
 - [x] Assign at least one valid storage using explicit assignments, collection
   requirements, and the documented default rule.
 - [x] Build proposed `FileState` and reject missing demands or active conflicts.
-- [ ] Copy or verify content in every selected storage.
-- [ ] Commit file, source, typed tags, and storage assignments in one SQLite
+- [x] Copy or verify content in every selected storage.
+- [x] Commit file, source, typed tags, and storage assignments in one SQLite
   transaction.
-- [ ] On copy or SQL failure, remove only new copies, roll back SQL, and preserve
+- [x] On copy or SQL failure, remove only new copies, roll back SQL, and preserve
   the source.
-- [ ] Run `remove_on_upload` only after every copy and database commit succeeds.
-- [ ] Before removing the source, verify it still names the imported bytes.
-- [ ] Reject duplicate imports without changing the existing record, copies,
+- [x] Run `remove_on_upload` only after every copy and database commit succeeds.
+- [x] Before removing the source, verify it still names the imported bytes.
+- [x] Reject duplicate imports without changing the existing record, copies,
   tags, observed sources, or import source.
-- [ ] Return canonical SHA-256 and whether the record/copies were new.
+- [x] Return canonical SHA-256 and whether the record/copies were new.
 
 Acceptance:
 

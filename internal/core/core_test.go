@@ -20,6 +20,8 @@ type fakeDatabase struct {
 	initialized   bool
 	closed        bool
 	files         []collection.FileRecord
+	createErr     error
+	created       *collection.NewFile
 }
 
 func (d *fakeDatabase) Initialize(context.Context) error {
@@ -42,6 +44,22 @@ func (d *fakeDatabase) ForEachFile(
 		}
 	}
 	return nil
+}
+
+func (d *fakeDatabase) CreateFile(
+	_ context.Context,
+	input collection.NewFile,
+) (collection.FileRecord, error) {
+	inputCopy := input
+	d.created = &inputCopy
+	if d.createErr != nil {
+		return collection.FileRecord{}, d.createErr
+	}
+	return collection.FileRecord{
+		SHA256:    input.SHA256,
+		SizeBytes: input.SizeBytes,
+		Storages:  append([]string(nil), input.Storages...),
+	}, nil
 }
 
 func TestInitInitializesAndClosesDefaultCollection(t *testing.T) {

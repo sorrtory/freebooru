@@ -15,6 +15,7 @@ import (
 type CollectionDatabase interface {
 	Initialize(context.Context) error
 	ForEachFile(context.Context, func(collection.FileRecord) error) error
+	CreateFile(context.Context, collection.NewFile) (collection.FileRecord, error)
 	Close() error
 }
 

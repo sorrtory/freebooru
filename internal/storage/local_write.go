@@ -23,9 +23,6 @@ type StoredFile struct {
 
 // Store streams a regular source into this backend and publishes it atomically.
 func (s *Local) Store(ctx context.Context, sourcePath string) (result StoredFile, err error) {
-	if err := os.MkdirAll(s.root, 0o755); err != nil {
-		return StoredFile{}, fmt.Errorf("create local storage root: %w", err)
-	}
 	source, err := openRegular(sourcePath)
 	if err != nil {
 		return StoredFile{}, err
@@ -35,6 +32,9 @@ func (s *Local) Store(ctx context.Context, sourcePath string) (result StoredFile
 			err = errors.Join(err, fmt.Errorf("close source %q: %w", sourcePath, closeErr))
 		}
 	}()
+	if err := os.MkdirAll(s.root, 0o755); err != nil {
+		return StoredFile{}, fmt.Errorf("create local storage root: %w", err)
+	}
 	staged, err := os.CreateTemp(s.root, ".freebooru-stage-*")
 	if err != nil {
 		return StoredFile{}, fmt.Errorf("create staged content: %w", err)
