@@ -353,8 +353,8 @@ graph itself.
 - [x] Return missing demands and active conflicts.
 - [x] Return non-binding suggestions separately from validity errors.
 - [x] Return all declared values through the catalog.
-- [ ] Return currently allowed values through the evaluator.
-- [ ] Explain why a value is unavailable using the originating edges and
+- [x] Return currently allowed values through the evaluator.
+- [x] Explain why a value is unavailable using the originating edges and
   reasons.
 - [x] Support prefix tag search through the catalog.
 - [x] Support incoming relationship/backlink display through the graph.

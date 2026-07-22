@@ -68,7 +68,9 @@ freebooru/
 │   │   ├── evaluator.go               Relationship evaluation and result API
 │   │   ├── predicate.go               Compiled predicate matching
 │   │   ├── state.go                   Immutable validated file tag state
-│   │   └── state_test.go              State validation and active-source tests
+│   │   ├── values.go                  Allowed-value hints and blocking reasons
+│   │   ├── state_test.go              State validation and active-source tests
+│   │   └── values_test.go             Candidate-value evaluation tests
 │   │
 │   └── config/
 │       ├── app.go                    Application config, defaults, loading, validation
