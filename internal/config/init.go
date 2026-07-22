@@ -80,7 +80,24 @@ func ensureDefaultTags(root string) error {
 				Name:   "character",
 				Type:   TagTypeMultivalue,
 				Groups: []string{"character"},
-				Values: []PredefinedValue{{Val: "original_character"}},
+				Values: []PredefinedValue{
+					{Val: "original_character"},
+					{
+						Val: "konata_izumi",
+						Aliases: []string{
+							"konata",
+							"izumi_konata",
+							"泉こなた",
+							"коната",
+							"коната_изуми",
+						},
+						Demand: []Relationship{{
+							Tag:    "universe",
+							Has:    []any{"lucky_star"},
+							Reason: "Konata Izumi is a character from Lucky Star",
+						}},
+					},
+				},
 			},
 		},
 		"creator.yaml": {
@@ -108,7 +125,11 @@ func ensureDefaultTags(root string) error {
 				Name:   "universe",
 				Type:   TagTypeMultivalue,
 				Groups: []string{"universe"},
-				Values: []PredefinedValue{{Val: "original"}},
+				Values: []PredefinedValue{
+					{Val: "irl"},
+					{Val: "lucky_star"},
+					{Val: "original"},
+				},
 			},
 		},
 	}

@@ -720,3 +720,25 @@ Acceptance:
 - Wildcard imports and exclusions.
 - Multiple open collections in one process.
 - Persistent GUI window state and live config reload.
+
+### Starter catalog follow-up
+
+- [ ] Add optional `comment` to tag, predefined value, storage, and collection
+  configuration and expose it through catalog/UI response models.
+- [ ] Expose core-owned SHA-256, file size, file type/MIME, import time, record
+  update time, and last-interaction time as read-only searchable system tags.
+- [ ] Define which actions update last-interaction time so passive background
+  reads do not silently change it.
+- [ ] Detect file type from content during import; do not trust only the source
+  filename extension.
+- [ ] Specify and migrate a first-class file relationship table with parent,
+  child, relationship kind, optional comment, and optional display order.
+- [ ] Reject parent/child cycles and distinguish variants from ordered pools.
+
+Acceptance:
+
+- Computed metadata uses one authoritative database value while remaining
+  searchable through tag-like query syntax.
+- Config comments are available to frontends without affecting validation.
+- Variant families can branch and can select a preferred representative without
+  relying on an unstable version counter.

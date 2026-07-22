@@ -56,10 +56,35 @@ func TestEnsureDefaultsCreatesLayout(t *testing.T) {
 	if diagnostics.HasErrors() {
 		t.Fatalf("starter catalog diagnostics = %#v", diagnostics)
 	}
+	if _, graphDiagnostics := BuildValidatedGraph(catalog); graphDiagnostics.HasErrors() {
+		t.Fatalf("starter graph diagnostics = %#v", graphDiagnostics)
+	}
 	for _, group := range []string{"creator", "universe", "character", "general", "metadata"} {
 		if _, ok := catalog.Group(group); !ok {
 			t.Errorf("starter group %q is missing", group)
 		}
+	}
+	character, _, ok := catalog.Tag("character")
+	if !ok {
+		t.Fatal("starter character tag is missing")
+	}
+	for _, alias := range []string{
+		"konata",
+		"izumi_konata",
+		"泉こなた",
+		"коната",
+		"коната_изуми",
+	} {
+		canonical, found := CanonicalPredefinedValue(character, alias)
+		if !found || canonical != "konata_izumi" {
+			t.Errorf("character alias %q resolved to %q, %t", alias, canonical, found)
+		}
+	}
+	konata := character.Values[1]
+	if len(konata.Demand) != 1 || konata.Demand[0].Tag != "universe" ||
+		len(konata.Demand[0].Has) != 1 || konata.Demand[0].Has[0] != "lucky_star" ||
+		konata.Demand[0].Reason == "" {
+		t.Fatalf("Konata demand = %#v", konata.Demand)
 	}
 }
 

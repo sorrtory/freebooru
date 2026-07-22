@@ -40,9 +40,11 @@ The filename is organization for humans; `groups` in each tag document is the
 semantic group membership. One file per group is a good default, but a tag may
 belong to multiple groups and larger catalogs may use nested directories.
 
-The starter `universe` and `character` values are deliberately small. Replace
-or extend them with the collection's real controlled vocabulary. A character
-value should normally demand its universe once that relationship is known.
+The starter `universe` values are `irl`, `lucky_star`, and `original`.
+`character:konata_izumi` demonstrates localized aliases and demands
+`universe:lucky_star` with an explanatory reason. Replace or extend this small
+vocabulary for the collection. A character value should normally demand its
+universe once that relationship is known.
 
 ### Core metadata is not ordinary tag configuration
 

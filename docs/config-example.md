@@ -108,6 +108,12 @@ values:
             is: human
             reason: cirno is not human
     - val: reimu
+    - val: konata_izumi
+      aliases: [konata, izumi_konata, 泉こなた, коната, коната_изуми]
+      demand:
+          - tag: universe
+            has: [lucky_star]
+            reason: Konata Izumi is a character from Lucky Star
 ---
 name: source
 type: text
@@ -138,6 +144,7 @@ type: multivalue
 groups: [content]
 values:
     - val: touhou
+    - val: lucky_star
 ---
 name: baka
 type: bool
