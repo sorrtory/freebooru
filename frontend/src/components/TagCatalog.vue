@@ -38,7 +38,7 @@ const selectedField = computed(() => props.fields.find((field) => field.name ===
 <style scoped>
 .catalog-search { display: grid; gap: .4rem; padding: 1rem; border-bottom: 1px solid var(--line); }
 .catalog-search label { color: var(--muted); font: .68rem var(--mono); letter-spacing: .06em; text-transform: uppercase; }
-.catalog-search input { min-height: 2.75rem; padding: .65rem .75rem; border: 1px solid var(--line-strong); border-radius: .25rem; color: var(--text); background: #111411; }
+.catalog-search input { min-height: 2.75rem; padding: .65rem .75rem; border: 1px solid var(--line-strong); border-radius: .25rem; color: var(--text); background: var(--surface); }
 .catalog-list { display: grid; gap: .4rem; padding: 1rem; }
 .catalog-list button { display: flex; width: 100%; min-height: 3.25rem; align-items: center; justify-content: space-between; gap: .75rem; padding: .65rem .75rem; border: 1px solid var(--line); border-radius: .25rem; color: var(--text); text-align: left; background: transparent; cursor: pointer; }
 .catalog-list button:hover, .catalog-list button[aria-pressed='true'] { border-color: var(--accent); background: rgb(181 240 99 / 5%); }

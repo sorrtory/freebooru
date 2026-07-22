@@ -13,7 +13,7 @@ onBeforeUnmount(cancel)
 
 <template>
   <main class="page">
-    <header class="page-heading"><p>{{ collection }}</p><h1>All files</h1></header>
+    <header class="page-heading"><p>{{ collection }}</p><h1>Files</h1></header>
     <FileResults :page="page" :collection="collection" :loading="loading" :error-message="errorMessage" empty-message="This collection has no files yet." :return-to="`/collections/${encodeURIComponent(collection)}/files`" @page="loadPage" @retry="loadPage(page?.offset ?? 0)" />
   </main>
 </template>

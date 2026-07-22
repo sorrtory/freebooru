@@ -7,6 +7,7 @@ import FilesPage from './pages/FilesPage.vue'
 import FileDetailPage from './pages/FileDetailPage.vue'
 import ImportPage from './pages/ImportPage.vue'
 import SearchPage from './pages/SearchPage.vue'
+import SettingsPage from './pages/SettingsPage.vue'
 import StatusPage from './pages/StatusPage.vue'
 
 export default createRouter({
@@ -14,6 +15,7 @@ export default createRouter({
   routes: [
     { path: '/', component: StatusPage },
     { path: '/collections', component: CollectionsPage },
+    { path: '/settings', component: SettingsPage },
     { path: '/collections/:collection', component: AppShell, props: true, children: [
       { path: '', component: CollectionOverviewPage, props: true },
       { path: 'files', component: FilesPage, props: true },

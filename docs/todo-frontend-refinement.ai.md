@@ -46,26 +46,26 @@ must not leave Overview selected.
 
 ### Theme consistency
 
-- [ ] Replace Upload-specific colors and fonts with global semantic tokens.
-- [ ] Remove hard-coded dark input, panel, and card backgrounds.
-- [ ] Use the shared body font for controls and compact metadata; retain the
+- [x] Replace Upload-specific colors and fonts with global semantic tokens.
+- [x] Remove hard-coded dark input, panel, and card backgrounds.
+- [x] Use the shared body font for controls and compact metadata; retain the
   display face only for deliberate page headings.
-- [ ] Refine primary blue into a mature mid/deep blue in both themes.
-- [ ] Change Upload and Assign actions to primary blue.
-- [ ] Reserve danger red for trash, destructive confirmation, conflicts, and
+- [x] Refine primary blue into a mature mid/deep blue in both themes.
+- [x] Change Upload and Assign actions to primary blue.
+- [x] Reserve danger red for trash, destructive confirmation, conflicts, and
   errors.
-- [ ] Verify Upload in System, Light, and Dark themes before and after mount.
+- [x] Verify Upload in System, Light, and Dark themes before and after mount.
 
 ### Shell corrections
 
-- [ ] Add a magnifying-glass icon to Search and an upload-tray icon to Upload.
-- [ ] Use inline SVG with `aria-hidden` when adjacent text is present.
-- [ ] Replace the visible theme selector with a settings gear.
-- [ ] Move System/Light/Dark selection into the Settings surface.
-- [ ] Fix Overview active state using exact route matching.
-- [ ] Rename `All files` to `Files` consistently in navigation and headings.
-- [ ] Test desktop, compact desktop, and mobile active states.
-- [ ] Autoreview and commit this phase independently.
+- [x] Add a magnifying-glass icon to Search and an upload-tray icon to Upload.
+- [x] Use inline SVG with `aria-hidden` when adjacent text is present.
+- [x] Replace the visible theme selector with a settings gear.
+- [x] Move System/Light/Dark selection into the Settings surface.
+- [x] Fix Overview active state using exact route matching.
+- [x] Rename `All files` to `Files` consistently in navigation and headings.
+- [x] Test desktop, compact desktop, and mobile active states.
+- [x] Autoreview and commit this phase independently.
 
 ## Phase 2: collection resource contracts
 

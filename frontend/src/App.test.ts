@@ -15,6 +15,7 @@ afterEach(() => {
 async function mountStatus() {
   const router = createRouter({ history: createMemoryHistory(), routes: [
     { path: '/', component: { template: '<div />' } },
+    { path: '/settings', component: { template: '<div />' } },
     { path: '/collections/:collection', component: { template: '<div />' } },
   ] })
   await router.push('/')

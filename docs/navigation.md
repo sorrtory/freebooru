@@ -60,6 +60,7 @@ freebooru/
 │       │   ├── FilesPage.vue         Collection-wide file browser
 │       │   ├── FileDetailPage.vue    Preview, metadata, and typed tag editing
 │       │   ├── SearchPage.vue        URL-backed tag search
+│       │   ├── SettingsPage.vue      Appearance and application settings
 │       │   ├── ImportPage.vue        Responsive three-area import workspace
 │       │   └── ImportPage.test.ts    Canonical draft workspace interaction tests
 │       ├── components/
@@ -67,6 +68,7 @@ freebooru/
 │       │   ├── CollectionSwitcher.vue Searchable explicit collection switcher
 │       │   ├── ThemeMenu.vue         System/light/dark preference menu
 │       │   ├── ThemeMenu.test.ts     Theme application and persistence test
+│       │   ├── AppShell.test.ts      Exact collection navigation state test
 │       │   ├── FileCard.vue          Compact safe file thumbnail and summary
 │       │   ├── FileResults.vue       Shared browse/search grid and pagination
 │       │   ├── ValueCombobox.vue     Searchable value and multivalue control

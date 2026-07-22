@@ -1,39 +1,11 @@
-<script setup lang="ts">
-import { useTheme } from '../useTheme'
-import type { ThemePreference } from '../useTheme'
-
-const { preference, resolved, select } = useTheme()
-const choices: { value: ThemePreference; label: string }[] = [
-  { value: 'system', label: 'System' },
-  { value: 'light', label: 'Light' },
-  { value: 'dark', label: 'Dark' },
-]
-</script>
-
 <template>
-  <details class="theme-menu">
-    <summary :aria-label="`Theme: ${preference}`" title="Theme">
-      <span aria-hidden="true">{{ resolved === 'dark' ? '◐' : '◑' }}</span>
-      <span class="wide-label">Theme</span>
-    </summary>
-    <fieldset>
-      <legend>Appearance</legend>
-      <label v-for="choice in choices" :key="choice.value">
-        <input type="radio" name="theme" :value="choice.value" :checked="preference === choice.value" @change="select(choice.value)">
-        {{ choice.label }}
-      </label>
-    </fieldset>
-  </details>
+  <RouterLink class="settings-link" to="/settings" aria-label="Settings" title="Settings">
+    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.56V21h-4v-.09A1.7 1.7 0 0 0 8.94 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.57 15 1.7 1.7 0 0 0 3 14H3v-4h.09A1.7 1.7 0 0 0 4.6 8.94a1.7 1.7 0 0 0-.34-1.88L4.2 7l2.83-2.83.06.06A1.7 1.7 0 0 0 9 4.57 1.7 1.7 0 0 0 10 3.09V3h4v.09A1.7 1.7 0 0 0 15.06 4.6a1.7 1.7 0 0 0 1.88-.34L17 4.2 19.83 7l-.06.06A1.7 1.7 0 0 0 19.43 9 1.7 1.7 0 0 0 20.91 10H21v4h-.09A1.7 1.7 0 0 0 19.4 15Z"/></svg>
+  </RouterLink>
 </template>
 
 <style scoped>
-.theme-menu { position: relative; }
-summary { display: flex; min-width: 2.75rem; min-height: 2.75rem; align-items: center; justify-content: center; gap: .45rem; padding: 0 .75rem; border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); background: var(--surface); cursor: pointer; font-weight: 700; list-style: none; }
-summary::-webkit-details-marker { display: none; }
-fieldset { display: grid; position: absolute; top: calc(100% + .5rem); right: 0; z-index: 20; width: 10rem; gap: .15rem; margin: 0; padding: .5rem; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); box-shadow: var(--shadow); }
-legend { padding: .35rem .45rem; color: var(--text-muted); font-size: .75rem; font-weight: 700; text-transform: uppercase; }
-label { display: flex; min-height: 2.75rem; align-items: center; gap: .65rem; padding: .5rem; border-radius: var(--radius); cursor: pointer; }
-label:hover { background: var(--primary-soft); }
-input { accent-color: var(--primary); }
-@media (max-width: 47.999rem) { .wide-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); } }
+.settings-link { display: grid; width: 2.75rem; height: 2.75rem; place-items: center; border: 1px solid var(--border); border-radius: var(--radius); color: var(--text-muted); background: var(--surface); }
+.settings-link:hover, .settings-link.router-link-active { color: var(--primary); border-color: var(--primary); }
+svg { width: 1.25rem; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.7; }
 </style>
