@@ -5,10 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#10120f" />
     <title>FreeBooru</title>
-    <script type="module" crossorigin src="/assets/index-6hav3T0T.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-Bcc0ZCi-.css">
+    <script type="module" crossorigin src="/assets/index-Bc0TbhHZ.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-DzkVCKqe.css">
   </head>
   <body>
     <div id="app"></div>
+    <script>
+      (() => {
+        const preference = localStorage.getItem('freebooru.theme') || 'system'
+        const dark = preference === 'dark' || (preference === 'system' && matchMedia('(prefers-color-scheme: dark)').matches)
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light'
+      })()
+    </script>
   </body>
 </html>

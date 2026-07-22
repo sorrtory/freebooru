@@ -1,5 +1,6 @@
 import { flushPromises, mount } from '@vue/test-utils'
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { createMemoryHistory, createRouter } from 'vue-router'
 
 import StatusPage from './pages/StatusPage.vue'
 
@@ -11,7 +12,15 @@ afterEach(() => {
   vi.unstubAllGlobals()
 })
 
-const mountStatus = () => mount(StatusPage, { global: { stubs: { RouterLink: true } } })
+async function mountStatus() {
+  const router = createRouter({ history: createMemoryHistory(), routes: [
+    { path: '/', component: { template: '<div />' } },
+    { path: '/collections/:collection', component: { template: '<div />' } },
+  ] })
+  await router.push('/')
+  await router.isReady()
+  return { wrapper: mount(StatusPage, { global: { plugins: [router] } }), router }
+}
 
 describe('StatusPage', () => {
   it('shows a ready desktop application', async () => {
@@ -27,14 +36,11 @@ describe('StatusPage', () => {
       ),
     )
 
-    const wrapper = mountStatus()
-    expect(wrapper.get('[role="status"]').text()).toContain('Loading')
+    const { wrapper, router } = await mountStatus()
+    expect(wrapper.get('[role="status"]').text()).toContain('Opening')
     await flushPromises()
 
-    expect(wrapper.get('h1').text()).toBe('FreeBooru is ready')
-    expect(wrapper.text()).toContain('Wails desktop')
-    expect(wrapper.text()).toContain('main')
-    expect(wrapper.find('button').exists()).toBe(false)
+    expect(router.currentRoute.value.path).toBe('/collections/main')
   })
 
   it('shows warnings while remaining ready', async () => {
@@ -59,16 +65,10 @@ describe('StatusPage', () => {
       ),
     )
 
-    const wrapper = mountStatus()
+    const { router } = await mountStatus()
     await flushPromises()
 
-    expect(wrapper.get('h1').text()).toBe('FreeBooru is ready')
-    expect(wrapper.text()).toContain('Web server')
-    expect(wrapper.get('[aria-label="Configuration diagnostics"]').text()).toContain(
-      'tag.unused',
-    )
-    expect(wrapper.text()).toContain('/config/tags/example.yaml · document 2 · name')
-    expect(wrapper.text()).toContain('1 diagnostic')
+    expect(router.currentRoute.value.path).toBe('/collections/main')
   })
 
   it('shows configuration errors without empty source metadata', async () => {
@@ -93,13 +93,13 @@ describe('StatusPage', () => {
       ),
     )
 
-    const wrapper = mountStatus()
+    const { wrapper } = await mountStatus()
     await flushPromises()
 
-    expect(wrapper.get('h1').text()).toBe('Configuration needs attention')
+    expect(wrapper.get('h1').text()).toBe('FreeBooru needs attention')
     expect(wrapper.text()).toContain('Configuration file is missing')
     expect(wrapper.text()).not.toContain('document 0')
-    expect(wrapper.get('button').text()).toBe('Retry')
+    expect(wrapper.get('button').text()).toBe('Check again')
   })
 
   it('recovers after retrying a configuration error', async () => {
@@ -132,12 +132,12 @@ describe('StatusPage', () => {
       )
     vi.stubGlobal('fetch', request)
 
-    const wrapper = mountStatus()
+    const { wrapper, router } = await mountStatus()
     await flushPromises()
     await wrapper.get('button').trigger('click')
     await flushPromises()
 
-    expect(wrapper.get('h1').text()).toBe('FreeBooru is ready')
+    expect(router.currentRoute.value.path).toBe('/collections/main')
     expect(request).toHaveBeenCalledTimes(2)
   })
 
@@ -155,12 +155,12 @@ describe('StatusPage', () => {
       )
     vi.stubGlobal('fetch', request)
 
-    const wrapper = mountStatus()
+    const { wrapper, router } = await mountStatus()
     await flushPromises()
     expect(wrapper.get('[role="alert"]').text()).toContain('network unavailable')
 
     await wrapper.get('button').trigger('click')
     await flushPromises()
-    expect(wrapper.get('h1').text()).toBe('FreeBooru is ready')
+    expect(router.currentRoute.value.path).toBe('/collections/main')
   })
 })

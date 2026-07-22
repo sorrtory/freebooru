@@ -307,13 +307,13 @@ in presentation components.
 
 ### Phase 1: visual foundation and shell
 
-- [ ] Add semantic light/dark tokens derived from the reference image.
-- [ ] Implement `System`, `Light`, and `Dark` preference without theme flash.
-- [ ] Restyle existing status/import surfaces in both themes.
-- [ ] Remove slogans and runtime exposition from the ready experience.
-- [ ] Add responsive `AppShell`, primary navigation, and route-aware states.
-- [ ] Add keyboard, contrast, mobile, and theme persistence tests.
-- [ ] Build embedded assets and commit this phase independently.
+- [x] Add semantic light/dark tokens derived from the reference image.
+- [x] Implement `System`, `Light`, and `Dark` preference without theme flash.
+- [x] Restyle existing status/import surfaces in both themes.
+- [x] Remove slogans and runtime exposition from the ready experience.
+- [x] Add responsive `AppShell`, primary navigation, and route-aware states.
+- [x] Add keyboard, contrast, mobile, and theme persistence tests.
+- [x] Build embedded assets and commit this phase independently.
 
 ### Phase 2: collections
 

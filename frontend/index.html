@@ -8,6 +8,13 @@
   </head>
   <body>
     <div id="app"></div>
+    <script>
+      (() => {
+        const preference = localStorage.getItem('freebooru.theme') || 'system'
+        const dark = preference === 'dark' || (preference === 'system' && matchMedia('(prefers-color-scheme: dark)').matches)
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light'
+      })()
+    </script>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

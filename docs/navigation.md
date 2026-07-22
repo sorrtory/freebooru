@@ -54,15 +54,22 @@ freebooru/
 │       ├── router.ts                 Status and explicit-collection import routes
 │       ├── pages/
 │       │   ├── StatusPage.vue        Runtime and configuration readiness screen
+│       │   ├── CollectionOverviewPage.vue Collection landing actions and summary
+│       │   ├── FilesPage.vue         Collection-wide file browser
+│       │   ├── SearchPage.vue        URL-backed tag search
 │       │   ├── ImportPage.vue        Responsive three-area import workspace
 │       │   └── ImportPage.test.ts    Canonical draft workspace interaction tests
 │       ├── components/
+│       │   ├── AppShell.vue          Responsive collection navigation shell
+│       │   ├── ThemeMenu.vue         System/light/dark preference menu
+│       │   ├── ThemeMenu.test.ts     Theme application and persistence test
 │       │   ├── AssignedTags.vue      Required and canonical assigned tag cards
 │       │   ├── ImportGuidance.vue    Demand and recommendation cards
 │       │   ├── TagCatalog.vue        Searchable unassigned-tag catalog
 │       │   └── TagField.vue          FreeBooru type-aware assignment editor
 │       ├── StatusDiagnostics.vue     Configuration diagnostic list
 │       ├── useApplicationStatus.ts   Status loading and retry state
+│       ├── useTheme.ts               System-aware persisted theme state
 │       ├── useImportDraft.ts         Canonical draft evaluation state and cancellation
 │       ├── api.ts                    Typed status and import HTTP client
 │       ├── api.test.ts               Status and import HTTP contract tests

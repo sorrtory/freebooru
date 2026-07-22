@@ -90,7 +90,6 @@ onBeforeUnmount(() => { if (previewURL.value) URL.revokeObjectURL(previewURL.val
 <template>
   <main class="import-shell">
     <header class="import-header">
-      <div class="breadcrumb"><RouterLink to="/">← FreeBooru</RouterLink><span>/</span><span>{{ collection }}</span><span>/</span><strong>Import</strong></div>
       <div class="file-picker">
         <div v-if="file" class="file-summary">
           <img v-if="imagePreview" :src="previewURL" alt="Selected file preview">
@@ -147,9 +146,6 @@ onBeforeUnmount(() => { if (previewURL.value) URL.revokeObjectURL(previewURL.val
 <style scoped>
 .import-shell { min-height: 100vh; padding-bottom: 6.5rem; background: linear-gradient(90deg, rgb(255 255 255 / 1.5%) 1px, transparent 1px) 0 0 / 3rem 3rem; }
 .import-header { border-bottom: 1px solid var(--line-strong); background: rgb(13 15 13 / 94%); }
-.breadcrumb { display: flex; flex-wrap: wrap; align-items: center; gap: .55rem; min-height: 2.75rem; padding: .45rem clamp(1rem, 3vw, 2rem); border-bottom: 1px solid var(--line); color: var(--muted); font: .7rem var(--mono); text-transform: uppercase; }
-.breadcrumb a { color: var(--accent); text-decoration: none; }
-.breadcrumb strong { color: var(--text); }
 .file-picker { display: flex; min-height: 8rem; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem clamp(1rem, 3vw, 2rem); }
 .file-picker h1 { margin: .25rem 0 0; font: clamp(2rem, 5vw, 3.7rem)/1 var(--display); letter-spacing: -.045em; }
 .file-summary { display: flex; min-width: 0; align-items: center; gap: 1rem; }
