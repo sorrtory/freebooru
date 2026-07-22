@@ -65,6 +65,20 @@ func (c *Catalog) SearchTags(prefix string) []TagConfig {
 	return tags
 }
 
+// Storages returns safe defensive copies in normalized-name order.
+func (c *Catalog) Storages() []StorageProvider {
+	keys := make([]string, 0, len(c.storages))
+	for key := range c.storages {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	storages := make([]StorageProvider, 0, len(keys))
+	for _, key := range keys {
+		storages = append(storages, c.storages[key].value)
+	}
+	return storages
+}
+
 // Collections returns defensive copies in normalized-name order.
 func (c *Catalog) Collections() []CollectionConfig {
 	keys := make([]string, 0, len(c.collections))

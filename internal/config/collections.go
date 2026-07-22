@@ -83,6 +83,43 @@ func CreateCollectionConfig(paths Paths, collection CollectionConfig) (Collectio
 	return collection, nil
 }
 
+// ReplaceCollectionConfig atomically replaces one validated collection YAML.
+func ReplaceCollectionConfig(paths Paths, collection CollectionConfig) error {
+	if err := VerifyCollectionConfig(collection); err != nil {
+		return err
+	}
+	data, err := yaml.Marshal(collection)
+	if err != nil {
+		return fmt.Errorf("marshal collection %q: %w", collection.Name, err)
+	}
+	target := filepath.Join(paths.Collections, collection.Name+".yaml")
+	temporary, err := os.CreateTemp(paths.Collections, ".freebooru-collection-update-*")
+	if err != nil {
+		return fmt.Errorf("create temporary collection %q: %w", collection.Name, err)
+	}
+	temporaryName := temporary.Name()
+	defer func() { _ = os.Remove(temporaryName) }()
+	if err := temporary.Chmod(0o600); err != nil {
+		_ = temporary.Close()
+		return fmt.Errorf("protect temporary collection %q: %w", collection.Name, err)
+	}
+	if _, err := temporary.Write(data); err != nil {
+		_ = temporary.Close()
+		return fmt.Errorf("write temporary collection %q: %w", collection.Name, err)
+	}
+	if err := temporary.Sync(); err != nil {
+		_ = temporary.Close()
+		return fmt.Errorf("sync temporary collection %q: %w", collection.Name, err)
+	}
+	if err := temporary.Close(); err != nil {
+		return fmt.Errorf("close temporary collection %q: %w", collection.Name, err)
+	}
+	if err := os.Rename(temporaryName, target); err != nil {
+		return fmt.Errorf("replace collection %q: %w", collection.Name, err)
+	}
+	return nil
+}
+
 // CollectionTagImports separates required and optional tag references.
 type CollectionTagImports struct {
 	Require []TagReference `yaml:"require,omitempty"`

@@ -125,6 +125,20 @@ Tag replacement accepts `{"value": ...}` and delegates typed validation and
 relationship enforcement to Core. Both mutation methods return the refreshed
 safe file DTO; invalid proposed states are rejected without persistence.
 
+Collection resources use:
+
+```http
+GET  /api/v1/collections/{collection}/tags
+POST /api/v1/collections/{collection}/tags/{tag}/import
+GET  /api/v1/collections/{collection}/storages
+POST /api/v1/collections/{collection}/storages/{storage}/import
+```
+
+Lists put resources already imported by the explicit collection first, then
+other globally configured resources. They expose comments, types, and aggregate
+usage but no storage paths or credentials. Import updates collection YAML
+atomically and publishes the new catalog only after complete graph validation.
+
 All import calls name their collection explicitly and behave identically over
 the standalone server and the Wails asset server:
 

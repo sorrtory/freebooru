@@ -65,6 +65,14 @@ func (fakeApplication) SetTag(context.Context, core.TagMutationRequest) (core.Ta
 func (fakeApplication) RemoveTag(context.Context, core.TagRemovalRequest) (core.TagMutationResult, error) {
 	return core.TagMutationResult{}, nil
 }
+func (fakeApplication) ListCollectionTagInfo(context.Context, string) ([]core.CollectionTagInfo, error) {
+	return nil, nil
+}
+func (fakeApplication) ListCollectionStorageInfo(context.Context, string) ([]core.CollectionStorageInfo, error) {
+	return nil, nil
+}
+func (fakeApplication) ImportCollectionTag(context.Context, string, string) error     { return nil }
+func (fakeApplication) ImportCollectionStorage(context.Context, string, string) error { return nil }
 
 func TestAPIMiddlewareRoutesOnlyAPIRequests(t *testing.T) {
 	api, err := webapi.New(webapi.ModeDesktop, fakeApplication{})

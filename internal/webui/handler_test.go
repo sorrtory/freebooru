@@ -68,6 +68,14 @@ func (staticApplication) SetTag(context.Context, core.TagMutationRequest) (core.
 func (staticApplication) RemoveTag(context.Context, core.TagRemovalRequest) (core.TagMutationResult, error) {
 	return core.TagMutationResult{}, nil
 }
+func (staticApplication) ListCollectionTagInfo(context.Context, string) ([]core.CollectionTagInfo, error) {
+	return nil, nil
+}
+func (staticApplication) ListCollectionStorageInfo(context.Context, string) ([]core.CollectionStorageInfo, error) {
+	return nil, nil
+}
+func (staticApplication) ImportCollectionTag(context.Context, string, string) error     { return nil }
+func (staticApplication) ImportCollectionStorage(context.Context, string, string) error { return nil }
 
 func TestHandlerServesAssetsAndSPAFallback(t *testing.T) {
 	assets := fstest.MapFS{

@@ -75,25 +75,25 @@ storage paths.
 
 ### Tags
 
-- [ ] Define a collection tag summary DTO with name, type, comment, required
+- [x] Define a collection tag summary DTO with name, type, comment, required
   state, allowed values, assignment count, and imported state.
-- [ ] List imported tags first and globally configured but unimported tags
+- [x] List imported tags first and globally configured but unimported tags
   second.
-- [ ] Add collection-scoped filtering by name and required state.
-- [ ] Define an atomic `Import tag into collection` Core operation.
-- [ ] Reject duplicate imports and references unavailable to the collection.
-- [ ] Rewrite collection YAML atomically, reload the catalog/graph, and roll
+- [x] Add collection-scoped filtering by name and required state.
+- [x] Define an atomic `Import tag into collection` Core operation.
+- [x] Reject duplicate imports and references unavailable to the collection.
+- [x] Rewrite collection YAML atomically, reload the catalog/graph, and roll
   back the file if validation fails.
 
 ### Storage
 
-- [ ] Define a safe collection storage summary DTO with name, imported state,
+- [x] Define a safe collection storage summary DTO with name, imported state,
   file count, aggregate size, and availability/status that does not disclose
   credentials or paths.
-- [ ] List imported storage first and configured but unimported storage second.
-- [ ] Define an atomic `Import storage into collection` Core operation with the
+- [x] List imported storage first and configured but unimported storage second.
+- [x] Define an atomic `Import storage into collection` Core operation with the
   same validation and rollback guarantees as tags.
-- [ ] Keep importing storage distinct from copying a particular file to it.
+- [x] Keep importing storage distinct from copying a particular file to it.
 
 ```http
 GET  /api/v1/collections/{collection}/tags
@@ -102,11 +102,11 @@ GET  /api/v1/collections/{collection}/storages
 POST /api/v1/collections/{collection}/storages/{storage}/import
 ```
 
-- [ ] Test explicit collection propagation on every Core call.
-- [ ] Test safe remote DTOs for path and credential disclosure.
-- [ ] Test atomic success, invalid graph rollback, duplicate import, and
+- [x] Test explicit collection propagation on every Core call.
+- [x] Test safe remote DTOs for path and credential disclosure.
+- [x] Test atomic success, invalid graph rollback, duplicate import, and
   concurrent update behavior.
-- [ ] Document and commit this phase independently.
+- [x] Document and commit this phase independently.
 
 ## Phase 3: Tags, Storage, and linked overview
 

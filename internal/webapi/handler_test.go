@@ -34,6 +34,9 @@ type fakeApplication struct {
 	collectionErr    error
 	files            []collection.FileRecord
 	file             collection.FileRecord
+	tags             []core.CollectionTagInfo
+	storages         []core.CollectionStorageInfo
+	resource         string
 }
 
 func (f *fakeApplication) Search(_ context.Context, request core.FileSearchRequest) ([]collection.FileRecord, error) {
@@ -54,6 +57,22 @@ func (f *fakeApplication) SetTag(context.Context, core.TagMutationRequest) (core
 }
 func (f *fakeApplication) RemoveTag(context.Context, core.TagRemovalRequest) (core.TagMutationResult, error) {
 	return core.TagMutationResult{}, f.collectionErr
+}
+func (f *fakeApplication) ListCollectionTagInfo(_ context.Context, name string) ([]core.CollectionTagInfo, error) {
+	f.collection = name
+	return f.tags, f.collectionErr
+}
+func (f *fakeApplication) ListCollectionStorageInfo(_ context.Context, name string) ([]core.CollectionStorageInfo, error) {
+	f.collection = name
+	return f.storages, f.collectionErr
+}
+func (f *fakeApplication) ImportCollectionTag(_ context.Context, name, resource string) error {
+	f.collection, f.resource = name, resource
+	return f.collectionErr
+}
+func (f *fakeApplication) ImportCollectionStorage(_ context.Context, name, resource string) error {
+	f.collection, f.resource = name, resource
+	return f.collectionErr
 }
 
 func (f *fakeApplication) ListCollections() ([]config.CollectionConfig, error) {

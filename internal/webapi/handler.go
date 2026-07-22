@@ -40,6 +40,10 @@ type Application interface {
 	OpenFileContent(context.Context, string, string) (core.FileContent, error)
 	SetTag(context.Context, core.TagMutationRequest) (core.TagMutationResult, error)
 	RemoveTag(context.Context, core.TagRemovalRequest) (core.TagMutationResult, error)
+	ListCollectionTagInfo(context.Context, string) ([]core.CollectionTagInfo, error)
+	ListCollectionStorageInfo(context.Context, string) ([]core.CollectionStorageInfo, error)
+	ImportCollectionTag(context.Context, string, string) error
+	ImportCollectionStorage(context.Context, string, string) error
 }
 
 // DiagnosticResponse is one configuration problem exposed to the frontend.

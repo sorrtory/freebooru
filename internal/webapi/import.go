@@ -115,6 +115,10 @@ func handleCollectionRequest(response http.ResponseWriter, request *http.Request
 		handleFiles(response, request, app, parts[0], parts)
 		return
 	}
+	if len(parts) >= 2 && len(parts) <= 4 && (parts[1] == "tags" || parts[1] == "storages") {
+		handleCollectionResources(response, request, app, parts)
+		return
+	}
 	if len(parts) < 2 || len(parts) > 3 || parts[0] == "" || parts[1] != "imports" {
 		writeAPIError(response, http.StatusNotFound, "route.not_found", "API endpoint not found")
 		return

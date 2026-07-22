@@ -130,6 +130,8 @@ freebooru/
 │   │   ├── handler_test.go          API status, reload, and error contract tests
 │   │   ├── collections.go           Collection list, creation, and safe summary API
 │   │   ├── collections_test.go      Collection HTTP contract tests
+│   │   ├── resources.go             Safe collection tag/storage resource API
+│   │   ├── resources_test.go        Resource API scope and disclosure tests
 │   │   ├── files.go                 Safe file browse, detail, and content API
 │   │   ├── files_test.go            File API scope and disclosure tests
 │   │   ├── import.go                Import schema, evaluation, and upload API
@@ -153,6 +155,8 @@ freebooru/
 │   │   ├── core.go                   Shared init, config snapshot, search, and open workflows
 │   │   ├── catalog.go                Frontend-neutral catalog lists and source lookup
 │   │   ├── catalog_create_test.go    Collection creation and summary integration test
+│   │   ├── resources.go              Collection resource summaries and atomic imports
+│   │   ├── resources_test.go         Resource listing/import integration tests
 │   │   ├── file_list.go              Persisted file/storage assignment listing
 │   │   ├── file.go                   Validated collection file lookup workflow
 │   │   ├── file_test.go              File lookup and database lifecycle tests
