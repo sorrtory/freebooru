@@ -10,7 +10,8 @@ import (
 func TestYAMLFileRoundTrip(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "nested", "freebooru.yaml")
 	file := YAMLFile[AppConfig]{Path: path, Validate: VerifyAppConfig}
-	want := AppConfig{HTTPPort: 9090}
+	want := DefaultAppConfig()
+	want.HTTPPort = 9090
 	if err := file.Write(want); err != nil {
 		t.Fatalf("Write() error = %v", err)
 	}
@@ -25,12 +26,35 @@ func TestYAMLFileRoundTrip(t *testing.T) {
 
 func TestYAMLFileRejectsInvalidAppConfig(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "freebooru.yaml")
-	if err := os.WriteFile(path, []byte("http_port: 70000\n"), 0o600); err != nil {
+	content := `lang: en
+default_collection: main
+default_storage_name: default
+default_storage_path: $HOME/.local/share/freebooru/storage/default
+http_port: 70000
+remove_on_upload: false
+`
+	if err := os.WriteFile(path, []byte(content), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	_, err := (YAMLFile[AppConfig]{Path: path, Validate: VerifyAppConfig}).Read()
+	_, err := (YAMLFile[AppConfig]{Path: path, Default: DefaultAppConfig, Validate: VerifyAppConfig}).Read()
 	if err == nil || !strings.Contains(err.Error(), "http_port") {
 		t.Fatalf("Read() error = %v, want port validation error", err)
+	}
+}
+
+func TestLoadAppAppliesDefaults(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "freebooru.yaml")
+	if err := os.WriteFile(path, []byte("remove_on_upload: true\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	got, err := LoadApp(path)
+	if err != nil {
+		t.Fatalf("LoadApp() error = %v", err)
+	}
+	want := DefaultAppConfig()
+	want.RemoveOnUpload = true
+	if got != want {
+		t.Fatalf("LoadApp() = %#v, want %#v", got, want)
 	}
 }
 
@@ -74,10 +98,94 @@ func TestCheckDomainAggregatesBrokenConfigs(t *testing.T) {
 	if err == nil {
 		t.Fatal("CheckDomain() succeeded, want errors")
 	}
-	for _, want := range []string{"path is required", "parse YAML", "location is required"} {
+	for _, want := range []string{"path is required", "parse YAML", "tags must contain"} {
 		if !strings.Contains(err.Error(), want) {
 			t.Errorf("CheckDomain() error = %q, want %q", err, want)
 		}
+	}
+}
+
+func TestDefaultConfigsRoundTrip(t *testing.T) {
+	app := DefaultAppConfig()
+	tests := []struct {
+		name  string
+		write func(string) error
+		read  func(string) error
+	}{
+		{
+			name: "application",
+			write: func(path string) error {
+				return (YAMLFile[AppConfig]{Path: path, Validate: VerifyAppConfig}).Write(app)
+			},
+			read: func(path string) error {
+				_, err := (YAMLFile[AppConfig]{Path: path, Validate: VerifyAppConfig}).Read()
+				return err
+			},
+		},
+		{
+			name: "storage",
+			write: func(path string) error {
+				return (YAMLFile[StorageConfig]{Path: path}).Write(DefaultStorageConfig(app))
+			},
+			read: func(path string) error {
+				got, err := (YAMLFile[StorageConfig]{Path: path}).Read()
+				if err != nil {
+					return err
+				}
+				for _, provider := range got {
+					if err := VerifyStorageProvider(provider); err != nil {
+						return err
+					}
+				}
+				return nil
+			},
+		},
+		{
+			name: "collection",
+			write: func(path string) error {
+				return (YAMLFile[CollectionConfig]{Path: path, Validate: VerifyCollectionConfig}).Write(DefaultCollectionConfig(app))
+			},
+			read: func(path string) error {
+				_, err := (YAMLFile[CollectionConfig]{Path: path, Validate: VerifyCollectionConfig}).Read()
+				return err
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			path := filepath.Join(t.TempDir(), tt.name+".yaml")
+			if err := tt.write(path); err != nil {
+				t.Fatalf("Write() error = %v", err)
+			}
+			if err := tt.read(path); err != nil {
+				t.Fatalf("Read() error = %v", err)
+			}
+		})
+	}
+}
+
+func TestYAMLFileRejectsUnknownFields(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "freebooru.yaml")
+	content := "lang: en\nunknown: true\n"
+	if err := os.WriteFile(path, []byte(content), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	_, err := (YAMLFile[AppConfig]{Path: path}).Read()
+	if err == nil || !strings.Contains(err.Error(), "unknown field") {
+		t.Fatalf("Read() error = %v, want unknown field error", err)
+	}
+}
+
+func TestCollectionLocationUsesDefault(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	got, err := CollectionLocation(CollectionConfig{Name: "main"})
+	if err != nil {
+		t.Fatalf("CollectionLocation() error = %v", err)
+	}
+	want := filepath.Join(home, ".local", "share", "freebooru", "collections", "main.sqlite")
+	if got != want {
+		t.Fatalf("CollectionLocation() = %q, want %q", got, want)
 	}
 }
 

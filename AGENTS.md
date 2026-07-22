@@ -49,5 +49,13 @@ It is useful to run `go tool task check` to verify the code quality.
 - First of all, [docs](./docs/) should be the source of truth. If you want to change something or add new features, please update the docs first, then the code.
     - if you need to make a contract or a spec, generate a new file with ai. Don't mess up human and machine-readable docs. The human-readable docs should be in `.md` files, the machine-readable docs should be in `.ai.md` files.
 - On making new code changes, please run `go tool task check` to verify the code quality.
+    - Go-installed tools may not be on an agent shell's `PATH`. Check
+      `$(go env GOBIN)` and `$(go env GOPATH)/bin` before reporting a tool as
+      missing.
+    - In a restricted agent sandbox where the normal user cache is read-only,
+      run the check with a command-scoped writable cache:
+      `env PATH="$(go env GOPATH)/bin:$PATH" XDG_CACHE_HOME=/tmp/freebooru-agent-cache go tool task check`.
+      This cache override is for sandboxed agents only; developers should use
+      their normal writable user cache.
 - Always ensure docs and code are in sync.
 - We aim to have a minimalistic and clean codebase, if you see something that can be improved, make a TODO inside the code or docs.

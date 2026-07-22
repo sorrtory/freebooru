@@ -10,16 +10,20 @@ import (
 
 type YAMLFile[T any] struct {
 	Path     string
+	Default  func() T
 	Validate func(T) error
 }
 
 func (f YAMLFile[T]) Read() (T, error) {
 	var value T
+	if f.Default != nil {
+		value = f.Default()
+	}
 	data, err := os.ReadFile(f.Path)
 	if err != nil {
 		return value, fmt.Errorf("read %q: %w", f.Path, err)
 	}
-	if err := yaml.Unmarshal(data, &value); err != nil {
+	if err := yaml.UnmarshalWithOptions(data, &value, yaml.Strict()); err != nil {
 		return value, fmt.Errorf("parse %q: %w", f.Path, err)
 	}
 	if f.Validate != nil {

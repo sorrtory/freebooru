@@ -61,7 +61,7 @@ func checkYAMLFile[T any](path string, verify func(T) error) error {
 	defer file.Close()
 
 	var errs []error
-	decoder := yaml.NewDecoder(file)
+	decoder := yaml.NewDecoder(file, yaml.Strict())
 	for document := 1; ; document++ {
 		var value T
 		err := decoder.Decode(&value)

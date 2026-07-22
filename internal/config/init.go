@@ -14,10 +14,11 @@ func Init(paths Paths) error {
 	if err := os.MkdirAll(paths.Collections, 0o755); err != nil {
 		return fmt.Errorf("create collections directory: %w", err)
 	}
-	if err := writeIfMissing(YAMLFile[AppConfig]{Path: paths.App, Validate: VerifyAppConfig}, DefaultAppConfig()); err != nil {
+	app := DefaultAppConfig()
+	if err := writeIfMissing(YAMLFile[AppConfig]{Path: paths.App, Validate: VerifyAppConfig}, app); err != nil {
 		return err
 	}
-	if err := writeIfMissing(YAMLFile[StorageConfig]{Path: paths.Storage}, DefaultStorageConfig()); err != nil {
+	if err := writeIfMissing(YAMLFile[StorageConfig]{Path: paths.Storage}, DefaultStorageConfig(app)); err != nil {
 		return err
 	}
 	return nil

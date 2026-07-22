@@ -8,8 +8,6 @@ passing.
 ## Fixed decisions
 
 - The only initialization command is `freebooru-cli init`.
-- `freebooru-cli config init` is removed; no alias or compatibility path is
-  required.
 - `freebooru-cli config check` remains a read-only validation command.
 - Application workflows belong to `core`.
 - YAML loading, defaults, path handling, and config validation belong to
@@ -27,8 +25,12 @@ passing.
 
 - [x] Remove `config init` from user-facing command lists in human and AI docs.
 - [ ] Record `freebooru-cli init` output and failure behavior in CLI docs.
-- [ ] Run the existing tests before structural changes.
-- [ ] Record any already-failing checks without changing unrelated code.
+- [x] Run the existing tests before structural changes.
+- [x] Record any already-failing checks without changing unrelated code.
+
+Baseline note: `go test ./...` and `go vet ./...` passed. With Go's binary
+directory added to `PATH`, `go tool task check` reached `golangci-lint` and
+reported the repository's existing `errcheck` and `revive` findings.
 
 Acceptance:
 
@@ -40,24 +42,24 @@ Acceptance:
 Update Go structures only as far as needed to represent and round-trip the
 documented default application, storage, and collection files.
 
-- [ ] Make `AppConfig` represent `lang`, `default_collection`,
+- [x] Make `AppConfig` represent `lang`, `default_collection`,
   `default_storage_name`, `default_storage_path`, `http_port`, and
   `remove_on_upload`.
-- [ ] Make `DefaultAppConfig` exactly match `config.ai.md`.
-- [ ] Keep storage as a list of providers with `name`, `type`, and local `path`.
-- [ ] Make the default storage list contain the configured default local
+- [x] Make `DefaultAppConfig` exactly match `config.ai.md`.
+- [x] Keep storage as a list of providers with `name`, `type`, and local `path`.
+- [x] Make the default storage list contain the configured default local
   storage.
-- [ ] Remove obsolete collection `storage` fields.
-- [ ] Represent collection `tags.require` and `tags.import`.
-- [ ] Add `storage` to `TagReference`.
-- [ ] Enforce exactly one reference discriminator: `tag`, `group`, or
+- [x] Remove obsolete collection `storage` fields.
+- [x] Represent collection `tags.require` and `tags.import`.
+- [x] Add `storage` to `TagReference`.
+- [x] Enforce exactly one reference discriminator: `tag`, `group`, or
   `storage`.
-- [ ] Allow collection `location` to be omitted and resolve its documented
+- [x] Allow collection `location` to be omitted and resolve its documented
   absolute default from the collection name.
-- [ ] Keep `$HOME` and leading `~` expansion in reusable config path helpers.
-- [ ] Reject relative paths after expansion.
-- [ ] Add strict YAML round-trip tests for all three default documents.
-- [ ] Add tests proving generated YAML is accepted by the same loader that
+- [x] Keep `$HOME` and leading `~` expansion in reusable config path helpers.
+- [x] Reject relative paths after expansion.
+- [x] Add strict YAML round-trip tests for all three default documents.
+- [x] Add tests proving generated YAML is accepted by the same loader that
   reads user configuration.
 
 Acceptance:
