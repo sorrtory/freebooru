@@ -73,6 +73,8 @@ freebooru/
 │       │   ├── AppShell.test.ts      Exact collection navigation state test
 │       │   ├── FileCard.vue          Compact safe file thumbnail and summary
 │       │   ├── FileResults.vue       Shared browse/search grid and pagination
+│       │   ├── SearchSidebar.vue     Hot tags and keyboard tag/value completion
+│       │   ├── SearchSidebar.test.ts Search completion and hot-tag tests
 │       │   ├── ValueCombobox.vue     Searchable value and multivalue control
 │       │   ├── AssignedTags.vue      Required and canonical assigned tag cards
 │       │   ├── ImportGuidance.vue    Demand and recommendation cards

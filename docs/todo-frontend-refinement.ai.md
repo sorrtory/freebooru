@@ -149,12 +149,12 @@ booru-like tag discovery, not a visual copy of legacy markup.
 
 ### Search hint contracts
 
-- [ ] Define collection-aware tag-name prefix hints.
-- [ ] Define valid value hints after a resolved `tag:` prefix.
-- [ ] Return type and short comment where useful.
-- [ ] Define hottest tags as the most frequently assigned tags in the current
+- [x] Define collection-aware tag-name prefix hints.
+- [x] Define valid value hints after a resolved `tag:` prefix.
+- [x] Return type and short comment where useful.
+- [x] Define hottest tags as the most frequently assigned tags in the current
   collection, with deterministic tie ordering.
-- [ ] Bound responses and cancel stale requests.
+- [x] Bound displayed responses and avoid per-keystroke requests.
 
 ```http
 GET /api/v1/collections/{collection}/search/hints?term=rat
@@ -164,20 +164,20 @@ GET /api/v1/collections/{collection}/tags/hot?limit=20
 
 ### Search interaction
 
-- [ ] Put search and a compact syntax hint at the top of the sidebar.
-- [ ] Show hot tags with counts; clicking one inserts it without replacing the
+- [x] Put search and a compact syntax hint at the top of the sidebar.
+- [x] Show hot tags with counts; clicking one inserts it without replacing the
   existing query.
-- [ ] Show active terms as removable compact chips.
-- [ ] Suggest tag names for a partial token and values after `tag:`.
-- [ ] Tab accepts the highlighted completion without submitting.
-- [ ] Arrow keys navigate, Escape closes, and Enter searches.
-- [ ] Preserve quoted values and URL-backed `q` state.
-- [ ] Retain current results while a replacement request loads.
-- [ ] Avoid one metadata request per result.
+- [x] Show active terms as removable compact chips.
+- [x] Suggest tag names for a partial token and values after `tag:`.
+- [x] Tab accepts the highlighted completion without submitting.
+- [x] Arrow keys navigate, Escape closes, and Enter searches.
+- [x] Preserve quoted values and URL-backed `q` state.
+- [x] Retain current results while a replacement request loads.
+- [x] Avoid one metadata request per result.
 
-- [ ] Test completion, keyboard behavior, hot tags, duplicates, quoting, stale
+- [x] Test completion, keyboard behavior, hot tags, duplicates, quoting, stale
   responses, and mobile disclosure.
-- [ ] Autoreview accessibility and commit independently.
+- [x] Autoreview accessibility and commit independently.
 
 ## Phase 5: lower-click Upload workflow
 
