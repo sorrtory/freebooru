@@ -43,6 +43,7 @@ freebooru/
 ├── docs/todo-frontend-refinement.ai.md Phased frontend refinement contract
 ├── docs/todo-frontend-unification.ai.md Files/search and assignment interaction contract
 ├── docs/todo-frontend-header-polish.ai.md Header, catalog, and upload polish contract
+├── docs/todo-search-preview.ai.md        Shared search hints and text preview contract
 ├── frontend/                         Shared Vue 3 and TypeScript application
 │   ├── package.json                  Frontend dependencies and commands
 │   ├── package-lock.json             Reproducible frontend dependency lock
@@ -71,6 +72,7 @@ freebooru/
 │       │   ├── HeaderSearch.vue      Fluid collection search and completion popover
 │       │   ├── HeaderSearch.test.ts  Header completion and Popular-tag test
 │       │   ├── CollectionSwitcher.vue Searchable explicit collection switcher
+│       │   ├── CollectionSwitcher.test.ts Collection outside-close test
 │       │   ├── ThemeMenu.vue         System/light/dark preference menu
 │       │   ├── ThemeMenu.test.ts     Theme application and persistence test
 │       │   ├── AppShell.test.ts      Exact collection navigation state test
@@ -84,11 +86,13 @@ freebooru/
 │       │   ├── AssignedTags.vue      Required and canonical assigned tag cards
 │       │   ├── ImportGuidance.vue    Demand and recommendation cards
 │       │   ├── TagCatalog.vue        Searchable unassigned-tag catalog
-│       │   └── TagField.vue          FreeBooru type-aware assignment editor
+│       │   ├── TagField.vue          FreeBooru type-aware assignment editor
+│       │   └── TextPreview.vue       Bounded read-only Monaco text preview
 │       ├── StatusDiagnostics.vue     Configuration diagnostic list
 │       ├── useApplicationStatus.ts   Status loading and retry state
 │       ├── useCollections.ts         Cached collection list and creation state
 │       ├── useFileSearch.ts          Cancel-safe paginated file query state
+│       ├── useSearchHints.ts         Shared tag, persisted-value, and Popular hints
 │       ├── useTheme.ts               System-aware persisted theme state
 │       ├── useImportDraft.ts         Canonical draft evaluation state and cancellation
 │       ├── searchQuery.ts            Quoted browser search tokenizer

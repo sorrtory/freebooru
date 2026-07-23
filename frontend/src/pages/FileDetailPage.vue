@@ -5,6 +5,7 @@ import { useRoute } from 'vue-router'
 
 import { getFile, getImportSchema, removeFileTag, setFileTag, type FileRecord, type ImportField, type TagValue } from '../api'
 import TagField from '../components/TagField.vue'
+import TextPreview from '../components/TextPreview.vue'
 
 const props = defineProps<{ collection: string; sha256: string }>()
 const route = useRoute()
@@ -14,6 +15,7 @@ const editing = shallowRef('')
 const error = shallowRef('')
 const saving = shallowRef(false)
 const isImage = computed(() => file.value?.mime_type.startsWith('image/'))
+const isText = computed(() => Boolean(file.value && (file.value.mime_type.startsWith('text/') || /(json|javascript|xml|yaml)/i.test(file.value.mime_type) || /\.(md|txt|json|ya?ml|xml|html?|css|[cm]?[jt]sx?)$/i.test(file.value.filename))))
 const available = computed(() => fields.value.filter((field) => field.name !== 'storage' && !file.value?.assignments.some((assignment) => assignment.name === field.name)))
 const backTo = computed(() => typeof route.query.from === 'string' && route.query.from.startsWith(`/collections/${props.collection}/`) ? route.query.from : `/collections/${props.collection}/files`)
 
@@ -61,6 +63,7 @@ function formatBytes(bytes: number) { return new Intl.NumberFormat(undefined, { 
     <template v-if="file">
       <section class="preview-panel">
         <img v-if="isImage" :src="file.content_url" :alt="file.filename">
+        <TextPreview v-else-if="isText" :url="file.content_url" :filename="file.filename" :mime-type="file.mime_type" :size-bytes="file.size_bytes" />
         <div v-else class="file-fallback"><strong>{{ file.mime_type || 'File' }}</strong><a class="button" :href="file.content_url">Open file</a></div>
       </section>
       <section class="detail-main">
@@ -83,6 +86,7 @@ function formatBytes(bytes: number) { return new Intl.NumberFormat(undefined, { 
 .detail-page { display: grid; align-content: start; gap: 1rem; }
 .back-link { color: var(--primary); font-weight: 800; }
 .preview-panel { display: grid; min-height: 18rem; max-height: 70vh; place-items: center; overflow: hidden; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface-raised); }
+.preview-panel:has(.text-preview) { max-height: none; }
 .preview-panel img { width: 100%; height: 100%; max-height: 70vh; object-fit: contain; }
 .file-fallback { display: grid; gap: 1rem; justify-items: center; }
 .detail-main { min-width: 0; }

@@ -1,15 +1,16 @@
 <script setup lang="ts">
-import { computed, onMounted, shallowRef, watch } from 'vue'
+import { computed, shallowRef, watch } from 'vue'
 
-import { getCollectionTags, type CollectionTag } from '../api'
+import type { CollectionTag } from '../api'
 import { parseSearchQuery } from '../searchQuery'
+import { quoteSearchValue, replaceSearchToken, useSearchHints } from '../useSearchHints'
 
 const props = defineProps<{ collection: string; modelValue: string; errorMessage: string }>()
 const emit = defineEmits<{ 'update:modelValue': [value: string]; search: []; change: [] }>()
 const input = shallowRef(props.modelValue)
-const tags = shallowRef<CollectionTag[]>([])
 const open = shallowRef(false)
 const active = shallowRef(0)
+const { suggestions, popular: hot } = useSearchHints(props.collection, input)
 
 watch(() => props.modelValue, (value) => { input.value = value })
 watch(input, (value, _previous, onCleanup) => {
@@ -17,29 +18,13 @@ watch(input, (value, _previous, onCleanup) => {
   const timer = window.setTimeout(() => emit('change'), 180)
   onCleanup(() => window.clearTimeout(timer))
 })
-onMounted(async () => { try { tags.value = (await getCollectionTags(props.collection)).filter((tag) => tag.imported && !tag.system) } catch { tags.value = [] } })
-
-const hot = computed(() => [...tags.value].filter((tag) => tag.assignment_count > 0).sort((left, right) => right.assignment_count - left.assignment_count || left.name.localeCompare(right.name)).slice(0, 12))
 const terms = computed(() => { try { return parseSearchQuery(input.value) } catch { return [] } })
-const suggestions = computed(() => {
-  const token = input.value.slice(input.value.lastIndexOf(' ') + 1).toLowerCase()
-  if (!token) return []
-  const colon = token.indexOf(':')
-  if (colon >= 0) {
-    const name = token.slice(0, colon)
-    const valuePrefix = token.slice(colon + 1)
-    const tag = tags.value.find((item) => item.name.toLowerCase() === name)
-    return tag?.values.filter((value) => value.value.toLowerCase().startsWith(valuePrefix)).map((value) => `${tag.name}:${quote(value.value)}`).slice(0, 8) ?? []
-  }
-  return tags.value.filter((tag) => tag.name.toLowerCase().startsWith(token)).map((tag) => tag.type === 'bool' ? tag.name : `${tag.name}:`).slice(0, 8)
-})
 
-function quote(value: string) { return /\s/.test(value) ? `"${value}"` : value }
-function replaceToken(value: string) { const boundary = input.value.lastIndexOf(' '); input.value = `${boundary >= 0 ? input.value.slice(0, boundary + 1) : ''}${value}`; active.value = 0; open.value = value.endsWith(':') }
+function replaceToken(value: string) { input.value = replaceSearchToken(input.value, value); active.value = 0; open.value = value.endsWith(':') }
 function complete(event: KeyboardEvent) { if (!suggestions.value.length) return; event.preventDefault(); replaceToken(suggestions.value[active.value] ?? suggestions.value[0]) }
 function move(step: number) { if (!suggestions.value.length) return; open.value = true; active.value = (active.value + step + suggestions.value.length) % suggestions.value.length }
-function addHot(tag: CollectionTag) { const next = [...terms.value, tag.name]; input.value = next.join(' '); emit('search') }
-function removeTerm(index: number) { input.value = terms.value.filter((_, current) => current !== index).map(quote).join(' '); emit('search') }
+function addHot(tag: CollectionTag) { const next = terms.value.includes(tag.name) ? terms.value.filter((term) => term !== tag.name) : [...terms.value, tag.name]; input.value = next.map(quoteSearchValue).join(' '); emit('search') }
+function removeTerm(index: number) { input.value = terms.value.filter((_, current) => current !== index).map(quoteSearchValue).join(' '); emit('search') }
 </script>
 
 <template>

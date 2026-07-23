@@ -180,7 +180,7 @@ describe('collection API', () => {
   })
 
   it('loads and imports explicit collection resources', async () => {
-    const tags = { tags: [{ name: 'rating', type: 'value', comment: '', values: [{ value: 'safe', comment: '' }], required: true, imported: true, system: false, assignment_count: 2 }] }
+    const tags = { tags: [{ name: 'rating', type: 'value', comment: '', groups: ['general'], values: [{ value: 'safe', comment: '' }], required: true, imported: true, system: false, assignment_count: 2 }] }
     const storages = { storages: [{ name: 'default', type: 'local', comment: '', imported: true, file_count: 2, total_size_bytes: 42 }] }
     const request = vi.fn<typeof fetch>()
       .mockResolvedValueOnce(new Response(JSON.stringify(tags), { status: 200 }))

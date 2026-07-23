@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/sorrtory/freebooru/internal/collection"
@@ -61,19 +62,36 @@ func (c *Core) ListCollectionTagInfo(
 		})
 	}
 	indexes := make(map[string]int, len(items))
+	valueSets := make([]map[string]bool, len(items))
 	for index := range items {
 		indexes[normalizeStateName(items[index].Name)] = index
+		valueSets[index] = make(map[string]bool, len(items[index].Values))
+		for _, value := range items[index].Values {
+			valueSets[index][normalizeStateName(value.Val)] = true
+		}
 	}
 	err = session.database.ForEachFile(ctx, func(file collection.FileRecord) error {
 		for _, tag := range file.Tags {
 			if index, ok := indexes[normalizeStateName(tag.Name)]; ok {
 				items[index].AssignmentCount++
+				for _, value := range persistedHintValues(tag) {
+					key := normalizeStateName(value)
+					if !valueSets[index][key] && len(valueSets[index]) < 128 {
+						items[index].Values = append(items[index].Values, config.PredefinedValue{Val: value})
+						valueSets[index][key] = true
+					}
+				}
 			}
 		}
 		return ctx.Err()
 	})
 	if err != nil {
 		return nil, fmt.Errorf("count collection tag usage: %w", err)
+	}
+	for index := range items {
+		sort.SliceStable(items[index].Values, func(left, right int) bool {
+			return strings.ToLower(items[index].Values[left].Val) < strings.ToLower(items[index].Values[right].Val)
+		})
 	}
 	sort.Slice(items, func(i, j int) bool {
 		if items[i].Imported != items[j].Imported {
@@ -82,6 +100,16 @@ func (c *Core) ListCollectionTagInfo(
 		return strings.ToLower(items[i].Name) < strings.ToLower(items[j].Name)
 	})
 	return items, nil
+}
+
+func persistedHintValues(tag collection.TagRecord) []string {
+	if tag.TextValue != nil {
+		return []string{*tag.TextValue}
+	}
+	if tag.IntegerValue != nil {
+		return []string{strconv.FormatInt(*tag.IntegerValue, 10)}
+	}
+	return append([]string(nil), tag.Values...)
 }
 
 // ListCollectionStorageInfo returns imported storage first, then other configured storage.

@@ -15,8 +15,8 @@ watch(() => route.fullPath, () => {
   headerQuery.value = route.path.endsWith('/files') ? String(route.query.q ?? '') : ''
 }, { immediate: true })
 
-function search() {
-  const q = headerQuery.value.trim()
+function search(query = headerQuery.value) {
+  const q = query.trim()
   void router.push({ path: `/collections/${encodeURIComponent(props.collection)}/files`, query: q ? { q } : {} })
 }
 </script>

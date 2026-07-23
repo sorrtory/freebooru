@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, shallowRef, useTemplateRef } from 'vue'
+import { computed, onBeforeUnmount, onMounted, shallowRef, useTemplateRef } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { useCollections } from '../useCollections'
@@ -11,6 +11,7 @@ const open = shallowRef(false)
 const query = shallowRef('')
 const activeIndex = shallowRef(0)
 const search = useTemplateRef<HTMLInputElement>('search')
+const root = useTemplateRef<HTMLElement>('root')
 const filtered = computed(() => {
   const normalized = query.value.trim().toLocaleLowerCase()
   return collections.value.filter((item) => item.name.toLocaleLowerCase().includes(normalized))
@@ -40,11 +41,13 @@ function commitActive() {
   else void router.push('/collections?create=1')
 }
 
-onMounted(() => void load())
+function outside(event: PointerEvent) { if (!root.value?.contains(event.target as Node)) open.value = false }
+onMounted(() => { document.addEventListener('pointerdown', outside); void load() })
+onBeforeUnmount(() => document.removeEventListener('pointerdown', outside))
 </script>
 
 <template>
-  <div class="switcher">
+  <div ref="root" class="switcher">
     <button class="switcher-button" type="button" :aria-expanded="open" aria-haspopup="listbox" @click="toggle">
       <strong>{{ collection }}</strong><span aria-hidden="true">⌄</span>
     </button>

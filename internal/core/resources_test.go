@@ -96,6 +96,34 @@ func TestCollectionResourcesListAndImportExplicitTag(t *testing.T) {
 	}
 }
 
+func TestCollectionTagInfoIncludesPersistedTextValueHints(t *testing.T) {
+	app := newRealImportTestCore(t)
+	source := filepath.Join(t.TempDir(), "hint.txt")
+	if err := os.WriteFile(source, []byte("hint"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := app.Import(t.Context(), ImportRequest{Collection: "main", SourcePath: source, Tags: map[string]any{"rating": "safe", "title": "Studio Trigger"}}); err != nil {
+		t.Fatal(err)
+	}
+	items, err := app.ListCollectionTagInfo(t.Context(), "main")
+	if err != nil {
+		t.Fatal(err)
+	}
+	title := findTagInfo(items, "title")
+	if title == nil || !hasPredefinedValue(title.Values, "Studio Trigger") {
+		t.Fatalf("title hints = %#v", title)
+	}
+}
+
+func hasPredefinedValue(values []config.PredefinedValue, want string) bool {
+	for _, value := range values {
+		if value.Val == want {
+			return true
+		}
+	}
+	return false
+}
+
 func findTagInfo(items []CollectionTagInfo, name string) *CollectionTagInfo {
 	for index := range items {
 		if items[index].Name == name {

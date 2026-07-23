@@ -456,7 +456,7 @@ function isCollectionTagsResponse(value: unknown): value is { tags: CollectionTa
 }
 
 function isCollectionTag(value: unknown): value is CollectionTag {
-  return isRecord(value) && typeof value.name === 'string' && isTagType(value.type) && typeof value.comment === 'string' && Array.isArray(value.values) && value.values.every((item) => isRecord(item) && typeof item.value === 'string' && typeof item.comment === 'string') && typeof value.required === 'boolean' && typeof value.imported === 'boolean' && typeof value.system === 'boolean' && typeof value.assignment_count === 'number'
+  return isRecord(value) && typeof value.name === 'string' && isTagType(value.type) && typeof value.comment === 'string' && Array.isArray(value.groups) && value.groups.every((item) => typeof item === 'string') && Array.isArray(value.values) && value.values.every((item) => isRecord(item) && typeof item.value === 'string' && typeof item.comment === 'string') && typeof value.required === 'boolean' && typeof value.imported === 'boolean' && typeof value.system === 'boolean' && typeof value.assignment_count === 'number'
 }
 
 function isCollectionStoragesResponse(value: unknown): value is { storages: CollectionStorage[] } {
