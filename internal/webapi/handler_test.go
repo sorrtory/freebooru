@@ -53,24 +53,30 @@ func (f *fakeApplication) GetFile(_ context.Context, collectionName, _ string) (
 func (f *fakeApplication) OpenFileContent(context.Context, string, string) (core.FileContent, error) {
 	return core.FileContent{}, f.collectionErr
 }
+
 func (f *fakeApplication) SetTag(context.Context, core.TagMutationRequest) (core.TagMutationResult, error) {
 	return core.TagMutationResult{}, f.collectionErr
 }
+
 func (f *fakeApplication) RemoveTag(context.Context, core.TagRemovalRequest) (core.TagMutationResult, error) {
 	return core.TagMutationResult{}, f.collectionErr
 }
+
 func (f *fakeApplication) ListCollectionTagInfo(_ context.Context, name string) ([]core.CollectionTagInfo, error) {
 	f.collection = name
 	return f.tags, f.collectionErr
 }
+
 func (f *fakeApplication) ListCollectionStorageInfo(_ context.Context, name string) ([]core.CollectionStorageInfo, error) {
 	f.collection = name
 	return f.storages, f.collectionErr
 }
+
 func (f *fakeApplication) ImportCollectionTag(_ context.Context, name, resource string) error {
 	f.collection, f.resource = name, resource
 	return f.collectionErr
 }
+
 func (f *fakeApplication) ImportCollectionStorage(_ context.Context, name, resource string) error {
 	f.collection, f.resource = name, resource
 	return f.collectionErr

@@ -26,6 +26,24 @@ status again, so correcting YAML on disk recovers the screen without restarting
 the server or desktop application. The GUI never creates or repairs
 configuration automatically; use `freebooru-cli init` for provisioning.
 
+## Collection workspace
+
+The selected collection is the route source of truth. Overview, Files, Search,
+Tags, Storage, Upload, and file-detail requests all send that collection name
+explicitly to Core. Overview counts link to their corresponding resource page.
+
+Tags and Storage present resources imported by the collection before other
+configured resources, which can be imported through atomic validated Core
+operations. Search uses a responsive booru-style sidebar with collection hot
+tags and keyboard tag/value completion. Upload keeps blocking demands beside
+the assignment that caused them and focuses the first actionable issue when an
+incomplete import is attempted.
+
+The settings gear opens application-scoped Settings. Appearance remains local
+browser state. The safe editable `freebooru.yaml` subset is revision-protected,
+atomically persisted, and fully revalidated; filesystem paths are preserved by
+Core but are not exposed to the remote frontend.
+
 ## Desktop
 
 We use Wails v2 to build the desktop application.

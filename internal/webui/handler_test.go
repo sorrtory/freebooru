@@ -53,24 +53,31 @@ func (staticApplication) DescribeCollection(context.Context, string) (core.Colle
 func (staticApplication) CreateCollection(context.Context, string) (core.CollectionInfo, error) {
 	return core.CollectionInfo{}, nil
 }
+
 func (staticApplication) Search(context.Context, core.FileSearchRequest) ([]collection.FileRecord, error) {
 	return nil, nil
 }
+
 func (staticApplication) GetFile(context.Context, string, string) (collection.FileRecord, error) {
 	return collection.FileRecord{}, nil
 }
+
 func (staticApplication) OpenFileContent(context.Context, string, string) (core.FileContent, error) {
 	return core.FileContent{}, nil
 }
+
 func (staticApplication) SetTag(context.Context, core.TagMutationRequest) (core.TagMutationResult, error) {
 	return core.TagMutationResult{}, nil
 }
+
 func (staticApplication) RemoveTag(context.Context, core.TagRemovalRequest) (core.TagMutationResult, error) {
 	return core.TagMutationResult{}, nil
 }
+
 func (staticApplication) ListCollectionTagInfo(context.Context, string) ([]core.CollectionTagInfo, error) {
 	return nil, nil
 }
+
 func (staticApplication) ListCollectionStorageInfo(context.Context, string) ([]core.CollectionStorageInfo, error) {
 	return nil, nil
 }

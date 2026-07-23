@@ -263,11 +263,11 @@ PUT /api/v1/settings
   recovery.
 - [ ] Verify mobile widths from `20rem`, touch targets, and reduced motion.
 - [ ] Verify useful screen-reader names.
-- [ ] Verify relative API URLs and absence of remote path/credential leaks.
-- [ ] Run frontend tests/build and focused Go tests after every phase.
-- [ ] Run `go tool task check` before completion.
-- [ ] Update GUI, HTTP, navigation, and machine-readable contracts.
-- [ ] Autoreview and commit final integration independently.
+- [x] Verify relative API URLs and absence of remote path/credential leaks.
+- [x] Run frontend tests/build and focused Go tests after every phase.
+- [x] Run `go tool task check` before completion.
+- [x] Update GUI, HTTP, navigation, and machine-readable contracts.
+- [x] Autoreview and commit final integration independently.
 
 ## Explicit non-goals
 

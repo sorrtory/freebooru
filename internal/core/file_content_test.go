@@ -21,7 +21,11 @@ func TestOpenFileContentReturnsSeekableStoredCopyWithoutPath(t *testing.T) {
 	if err != nil {
 		t.Fatalf("OpenFileContent() error = %v", err)
 	}
-	defer content.Reader.Close()
+	defer func() {
+		if err := content.Reader.Close(); err != nil {
+			t.Errorf("Close() error = %v", err)
+		}
+	}()
 	data, err := io.ReadAll(content.Reader)
 	if err != nil {
 		t.Fatal(err)

@@ -50,24 +50,31 @@ func (fakeApplication) DescribeCollection(context.Context, string) (core.Collect
 func (fakeApplication) CreateCollection(context.Context, string) (core.CollectionInfo, error) {
 	return core.CollectionInfo{}, nil
 }
+
 func (fakeApplication) Search(context.Context, core.FileSearchRequest) ([]collection.FileRecord, error) {
 	return nil, nil
 }
+
 func (fakeApplication) GetFile(context.Context, string, string) (collection.FileRecord, error) {
 	return collection.FileRecord{}, nil
 }
+
 func (fakeApplication) OpenFileContent(context.Context, string, string) (core.FileContent, error) {
 	return core.FileContent{}, nil
 }
+
 func (fakeApplication) SetTag(context.Context, core.TagMutationRequest) (core.TagMutationResult, error) {
 	return core.TagMutationResult{}, nil
 }
+
 func (fakeApplication) RemoveTag(context.Context, core.TagRemovalRequest) (core.TagMutationResult, error) {
 	return core.TagMutationResult{}, nil
 }
+
 func (fakeApplication) ListCollectionTagInfo(context.Context, string) ([]core.CollectionTagInfo, error) {
 	return nil, nil
 }
+
 func (fakeApplication) ListCollectionStorageInfo(context.Context, string) ([]core.CollectionStorageInfo, error) {
 	return nil, nil
 }

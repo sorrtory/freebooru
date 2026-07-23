@@ -16,8 +16,10 @@ import (
 	"github.com/sorrtory/freebooru/internal/core"
 )
 
-const defaultFilePageLimit int64 = 24
-const maxFilePageLimit int64 = 100
+const (
+	defaultFilePageLimit int64 = 24
+	maxFilePageLimit     int64 = 100
+)
 
 type fileAssignmentResponse struct {
 	Name  string `json:"name"`
