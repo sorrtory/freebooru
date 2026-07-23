@@ -25,16 +25,16 @@ competing with daily actions.
 
 ## Information architecture
 
-Collection navigation, in order: Overview, Files, Search, Tags, Storage,
-Upload. Application Settings is opened by a gear outside collection navigation.
+Collection navigation keeps Overview beside the collection selector and groups
+Storage, Tags, Files, and Upload on the right. Application Settings is opened by a gear outside collection navigation.
 Theme selection belongs inside Settings.
 
 | Route | Purpose |
 | --- | --- |
 | `/collections/:collection` | concise collection overview |
-| `/collections/:collection/files` | complete collection file browser |
-| `/collections/:collection/search?q=...` | assisted tag search |
-| `/collections/:collection/tags?required=true` | imported and available tags |
+| `/collections/:collection/files?q=...` | complete browser and assisted tag search |
+| `/collections/:collection/search?q=...` | compatibility redirect to Files |
+| `/collections/:collection/tags?kind=required` | imported and available tags |
 | `/collections/:collection/storage` | imported and available storage |
 | `/collections/:collection/import` | one-file upload workflow |
 | `/settings` | appearance and editable application configuration |

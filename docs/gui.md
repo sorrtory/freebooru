@@ -28,14 +28,15 @@ configuration automatically; use `freebooru-cli init` for provisioning.
 
 ## Collection workspace
 
-The selected collection is the route source of truth. Overview, Files, Search,
-Tags, Storage, Upload, and file-detail requests all send that collection name
+The selected collection is the route source of truth. Overview, Files, Tags,
+Storage, Upload, and file-detail requests all send that collection name
 explicitly to Core. Overview counts link to their corresponding resource page.
 
 Tags and Storage present resources imported by the collection before other
 configured resources, which can be imported through atomic validated Core
-operations. Search uses a responsive booru-style sidebar with collection hot
-tags and keyboard tag/value completion. Upload keeps blocking demands beside
+operations. Files combines browsing and search: a blank query shows everything,
+while its responsive booru-style sidebar searches as the user types and offers
+collection hot tags plus keyboard tag/value completion. Upload keeps blocking demands beside
 the assignment that caused them and focuses the first actionable issue when an
 incomplete import is attempted.
 
