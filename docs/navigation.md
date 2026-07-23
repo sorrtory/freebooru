@@ -41,6 +41,7 @@ freebooru/
 ├── .golangci.yml                     Linter and formatter configuration
 ├── .gitignore                        Ignored files
 ├── docs/todo-frontend-refinement.ai.md Phased frontend refinement contract
+├── docs/todo-frontend-unification.ai.md Files/search and assignment interaction contract
 ├── frontend/                         Shared Vue 3 and TypeScript application
 │   ├── package.json                  Frontend dependencies and commands
 │   ├── package-lock.json             Reproducible frontend dependency lock
@@ -57,9 +58,8 @@ freebooru/
 │       │   ├── StatusPage.vue        Runtime and configuration readiness screen
 │       │   ├── CollectionsPage.vue   Collection chooser and creation flow
 │       │   ├── CollectionOverviewPage.vue Collection landing actions and summary
-│       │   ├── FilesPage.vue         Collection-wide file browser
+│       │   ├── FilesPage.vue         Unified collection browser and live tag search
 │       │   ├── FileDetailPage.vue    Preview, metadata, and typed tag editing
-│       │   ├── SearchPage.vue        URL-backed tag search
 │       │   ├── TagsPage.vue          Imported-first collection tag catalog
 │       │   ├── StoragePage.vue       Imported-first collection storage catalog
 │       │   ├── SettingsPage.vue      Appearance and application settings
@@ -73,7 +73,7 @@ freebooru/
 │       │   ├── AppShell.test.ts      Exact collection navigation state test
 │       │   ├── FileCard.vue          Compact safe file thumbnail and summary
 │       │   ├── FileResults.vue       Shared browse/search grid and pagination
-│       │   ├── SearchSidebar.vue     Hot tags and keyboard tag/value completion
+│       │   ├── SearchSidebar.vue     Live booru query, hot tags, and tag/value completion
 │       │   ├── SearchSidebar.test.ts Search completion and hot-tag tests
 │       │   ├── ValueCombobox.vue     Searchable value and multivalue control
 │       │   ├── AssignedTags.vue      Required and canonical assigned tag cards

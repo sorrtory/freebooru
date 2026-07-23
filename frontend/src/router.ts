@@ -6,7 +6,6 @@ import CollectionsPage from './pages/CollectionsPage.vue'
 import FilesPage from './pages/FilesPage.vue'
 import FileDetailPage from './pages/FileDetailPage.vue'
 import ImportPage from './pages/ImportPage.vue'
-import SearchPage from './pages/SearchPage.vue'
 import SettingsPage from './pages/SettingsPage.vue'
 import StoragePage from './pages/StoragePage.vue'
 import TagsPage from './pages/TagsPage.vue'
@@ -22,7 +21,7 @@ export default createRouter({
       { path: '', component: CollectionOverviewPage, props: true },
       { path: 'files', component: FilesPage, props: true },
       { path: 'files/:sha256', component: FileDetailPage, props: true },
-      { path: 'search', component: SearchPage, props: true },
+      { path: 'search', redirect: (to) => ({ path: `/collections/${String(to.params.collection)}/files`, query: to.query }) },
       { path: 'tags', component: TagsPage, props: true },
       { path: 'storage', component: StoragePage, props: true },
       { path: 'import', component: ImportPage, props: true },

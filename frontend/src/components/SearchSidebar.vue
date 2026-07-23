@@ -5,14 +5,18 @@ import { getCollectionTags, type CollectionTag } from '../api'
 import { parseSearchQuery } from '../searchQuery'
 
 const props = defineProps<{ collection: string; modelValue: string; errorMessage: string }>()
-const emit = defineEmits<{ 'update:modelValue': [value: string]; search: [] }>()
+const emit = defineEmits<{ 'update:modelValue': [value: string]; search: []; change: [] }>()
 const input = shallowRef(props.modelValue)
 const tags = shallowRef<CollectionTag[]>([])
 const open = shallowRef(false)
 const active = shallowRef(0)
 
 watch(() => props.modelValue, (value) => { input.value = value })
-watch(input, (value) => emit('update:modelValue', value))
+watch(input, (value, _previous, onCleanup) => {
+  emit('update:modelValue', value)
+  const timer = window.setTimeout(() => emit('change'), 180)
+  onCleanup(() => window.clearTimeout(timer))
+})
 onMounted(async () => { try { tags.value = (await getCollectionTags(props.collection)).filter((tag) => tag.imported && !tag.system) } catch { tags.value = [] } })
 
 const hot = computed(() => [...tags.value].filter((tag) => tag.assignment_count > 0).sort((left, right) => right.assignment_count - left.assignment_count || left.name.localeCompare(right.name)).slice(0, 12))
@@ -31,7 +35,7 @@ const suggestions = computed(() => {
 })
 
 function quote(value: string) { return /\s/.test(value) ? `"${value}"` : value }
-function replaceToken(value: string) { const boundary = input.value.lastIndexOf(' '); input.value = `${boundary >= 0 ? input.value.slice(0, boundary + 1) : ''}${value}`; open.value = false }
+function replaceToken(value: string) { const boundary = input.value.lastIndexOf(' '); input.value = `${boundary >= 0 ? input.value.slice(0, boundary + 1) : ''}${value}`; active.value = 0; open.value = value.endsWith(':') }
 function complete(event: KeyboardEvent) { if (!suggestions.value.length) return; event.preventDefault(); replaceToken(suggestions.value[active.value] ?? suggestions.value[0]) }
 function move(step: number) { if (!suggestions.value.length) return; open.value = true; active.value = (active.value + step + suggestions.value.length) % suggestions.value.length }
 function addHot(tag: CollectionTag) { const next = [...terms.value, tag.name]; input.value = next.join(' '); emit('search') }

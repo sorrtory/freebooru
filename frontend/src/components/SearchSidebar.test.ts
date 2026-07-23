@@ -14,6 +14,11 @@ describe('SearchSidebar', () => {
     const wrapper = mount(SearchSidebar, { props: { collection: 'main', modelValue: '', errorMessage: '' } })
     await flushPromises()
     const input = wrapper.get('input')
+    await input.setValue('rat')
+    await input.trigger('keydown', { key: 'Tab' })
+    expect(wrapper.emitted('update:modelValue')?.at(-1)).toEqual(['rating:'])
+    expect(wrapper.text()).toContain('rating:safe')
+
     await input.setValue('rating:s')
     await input.trigger('keydown', { key: 'Tab' })
     expect(wrapper.emitted('update:modelValue')?.at(-1)).toEqual(['rating:safe'])
