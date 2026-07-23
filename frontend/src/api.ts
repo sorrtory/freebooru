@@ -100,6 +100,7 @@ export interface ApplicationSettings {
   language: 'en' | 'ru'
   default_collection: string
   default_storage_name: string
+  http_address: string
   http_port: number
   remove_on_upload: boolean
   restart_required: boolean
@@ -464,7 +465,7 @@ function isCollectionStoragesResponse(value: unknown): value is { storages: Coll
 }
 
 function isApplicationSettings(value: unknown): value is ApplicationSettings {
-  return isRecord(value) && typeof value.revision === 'string' && (value.language === 'en' || value.language === 'ru') && typeof value.default_collection === 'string' && typeof value.default_storage_name === 'string' && typeof value.http_port === 'number' && typeof value.remove_on_upload === 'boolean' && typeof value.restart_required === 'boolean' && Array.isArray(value.collections) && value.collections.every((item) => typeof item === 'string') && Array.isArray(value.storages) && value.storages.every((item) => typeof item === 'string')
+  return isRecord(value) && typeof value.revision === 'string' && (value.language === 'en' || value.language === 'ru') && typeof value.default_collection === 'string' && typeof value.default_storage_name === 'string' && typeof value.http_address === 'string' && typeof value.http_port === 'number' && typeof value.remove_on_upload === 'boolean' && typeof value.restart_required === 'boolean' && Array.isArray(value.collections) && value.collections.every((item) => typeof item === 'string') && Array.isArray(value.storages) && value.storages.every((item) => typeof item === 'string')
 }
 
 function isApplicationStatus(value: unknown): value is ApplicationStatus {

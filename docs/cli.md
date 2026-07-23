@@ -1,5 +1,22 @@
 # freebooru-cli
 
+Release packages install the command as `freebooru`. Its `server` command
+controls the packaged per-user systemd service:
+
+```console
+freebooru server start
+freebooru server stop
+freebooru server restart
+freebooru server status
+freebooru server logs
+```
+
+The controller delegates to `systemctl --user` and `journalctl --user`; it does
+not require root. The service runs as the current user, so it reads the same
+`$HOME/.config/freebooru` configuration and owns the same collection files as
+the CLI and desktop application. `start` enables and immediately starts the
+service; `stop` immediately stops and disables it.
+
 A tool to manage FreeBooru collections and tags from the command line.
 It calls the FreeBooru core.
 

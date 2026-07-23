@@ -195,11 +195,11 @@ describe('collection API', () => {
   })
 
   it('loads and saves revisioned safe settings', async () => {
-    const settings: ApplicationSettings = { revision: 'one', language: 'en', default_collection: 'main', default_storage_name: 'default', http_port: 52800, remove_on_upload: false, restart_required: false, collections: ['main'], storages: ['default'] }
+    const settings: ApplicationSettings = { revision: 'one', language: 'en', default_collection: 'main', default_storage_name: 'default', http_address: '0.0.0.0', http_port: 52800, remove_on_upload: false, restart_required: false, collections: ['main'], storages: ['default'] }
     const saved = { ...settings, revision: 'two', http_port: 52801, restart_required: true }
     const request = vi.fn<typeof fetch>().mockResolvedValueOnce(new Response(JSON.stringify(settings), { status: 200 })).mockResolvedValueOnce(new Response(JSON.stringify(saved), { status: 200 }))
     await expect(getSettings(request)).resolves.toEqual(settings)
     await expect(updateSettings({ ...settings, http_port: 52801 }, request)).resolves.toEqual(saved)
-    expect(request).toHaveBeenNthCalledWith(2, '/api/v1/settings', expect.objectContaining({ method: 'PUT', body: JSON.stringify({ revision: 'one', language: 'en', default_collection: 'main', default_storage_name: 'default', http_port: 52801, remove_on_upload: false }) }))
+    expect(request).toHaveBeenNthCalledWith(2, '/api/v1/settings', expect.objectContaining({ method: 'PUT', body: JSON.stringify({ revision: 'one', language: 'en', default_collection: 'main', default_storage_name: 'default', http_address: '0.0.0.0', http_port: 52801, remove_on_upload: false }) }))
   })
 })

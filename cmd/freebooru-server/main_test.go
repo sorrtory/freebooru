@@ -21,38 +21,38 @@ func (f fakeConfigLoader) AppConfig() config.AppConfig {
 	return f.appConfig
 }
 
-func TestHTTPPort(t *testing.T) {
+func TestHTTPAddress(t *testing.T) {
 	tests := []struct {
 		name    string
 		app     fakeConfigLoader
-		want    int
+		want    string
 		wantErr bool
 	}{
 		{
-			name: "configured port",
+			name: "configured address",
 			app: fakeConfigLoader{
-				appConfig: config.AppConfig{HTTPPort: 53123},
+				appConfig: config.AppConfig{HTTPAddress: "::1", HTTPPort: 53123},
 			},
-			want: 53123,
+			want: "[::1]:53123",
 		},
 		{
 			name: "default port after load failure",
 			app: fakeConfigLoader{
 				loadErr: errors.New("configuration is unavailable"),
 			},
-			want:    config.DefaultAppConfig().HTTPPort,
+			want:    "0.0.0.0:52800",
 			wantErr: true,
 		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			got, err := httpPort(context.Background(), test.app)
+			got, err := httpAddress(context.Background(), test.app)
 			if got != test.want {
-				t.Fatalf("httpPort() = %d, want %d", got, test.want)
+				t.Fatalf("httpAddress() = %q, want %q", got, test.want)
 			}
 			if (err != nil) != test.wantErr {
-				t.Fatalf("httpPort() error = %v, want error %t", err, test.wantErr)
+				t.Fatalf("httpAddress() error = %v, want error %t", err, test.wantErr)
 			}
 		})
 	}

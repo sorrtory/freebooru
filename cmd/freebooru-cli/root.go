@@ -1,25 +1,35 @@
 package main
 
 import (
+	"context"
+	"io"
 	"log/slog"
 	"os"
+	"os/exec"
 
 	"github.com/spf13/cobra"
 )
 
 type rootOptions struct {
-	verbose bool
-	newCore coreFactory
+	verbose    bool
+	newCore    coreFactory
+	runCommand commandRunner
 }
+
+type commandRunner func(context.Context, io.Reader, io.Writer, io.Writer, string, ...string) error
 
 func Execute() error {
 	return newRootCommand().Execute()
 }
 
 func newRootCommand() *cobra.Command {
-	options := &rootOptions{newCore: defaultCoreFactory}
+	options := &rootOptions{newCore: defaultCoreFactory, runCommand: runExternalCommand}
+	return newRootCommandWithOptions(options)
+}
+
+func newRootCommandWithOptions(options *rootOptions) *cobra.Command {
 	root := &cobra.Command{
-		Use:           "freebooru-cli",
+		Use:           "freebooru",
 		Short:         "Interact with FreeBooru",
 		Args:          cobra.NoArgs,
 		SilenceUsage:  true,
@@ -44,9 +54,25 @@ func newRootCommand() *cobra.Command {
 		newCollectionCommand(options),
 		newStorageCommand(options, "", true),
 		newFilesCommand(options, ""),
+		newServerCommand(options),
 	)
 
 	return root
+}
+
+func runExternalCommand(
+	ctx context.Context,
+	stdin io.Reader,
+	stdout io.Writer,
+	stderr io.Writer,
+	name string,
+	args ...string,
+) error {
+	command := exec.CommandContext(ctx, name, args...)
+	command.Stdin = stdin
+	command.Stdout = stdout
+	command.Stderr = stderr
+	return command.Run()
 }
 
 func newLogger(verbose bool) *slog.Logger {

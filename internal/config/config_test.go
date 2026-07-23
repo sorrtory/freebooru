@@ -42,6 +42,14 @@ remove_on_upload: false
 	}
 }
 
+func TestVerifyAppConfigRejectsInvalidHTTPAddress(t *testing.T) {
+	app := DefaultAppConfig()
+	app.HTTPAddress = "localhost"
+	if err := VerifyAppConfig(app); err == nil || !strings.Contains(err.Error(), "http_address") {
+		t.Fatalf("VerifyAppConfig() error = %v, want address validation error", err)
+	}
+}
+
 func TestLoadAppAppliesDefaults(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "freebooru.yaml")
 	if err := os.WriteFile(path, []byte("remove_on_upload: true\n"), 0o600); err != nil {

@@ -13,7 +13,8 @@ func TestUpdateSettingsPreservesSensitivePathAndRejectsStaleRevision(t *testing.
 	invalid := SettingsUpdate{
 		ExpectedRevision: current.Revision, Language: current.Language,
 		DefaultCollection: "missing", DefaultStorageName: current.DefaultStorageName,
-		HTTPPort: current.HTTPPort, RemoveOnUpload: current.RemoveOnUpload,
+		HTTPAddress: current.HTTPAddress, HTTPPort: current.HTTPPort,
+		RemoveOnUpload: current.RemoveOnUpload,
 	}
 	if _, err := app.UpdateSettings(t.Context(), invalid); err == nil {
 		t.Fatal("invalid UpdateSettings() error = nil")
@@ -26,12 +27,13 @@ func TestUpdateSettingsPreservesSensitivePathAndRejectsStaleRevision(t *testing.
 		ExpectedRevision: current.Revision, Language: "ru",
 		DefaultCollection:  current.DefaultCollection,
 		DefaultStorageName: current.DefaultStorageName,
+		HTTPAddress:        "127.0.0.1",
 		HTTPPort:           52801, RemoveOnUpload: true,
 	})
 	if err != nil {
 		t.Fatalf("UpdateSettings() error = %v", err)
 	}
-	if updated.Language != "ru" || updated.HTTPPort != 52801 || !updated.RemoveOnUpload {
+	if updated.Language != "ru" || updated.HTTPAddress != "127.0.0.1" || updated.HTTPPort != 52801 || !updated.RemoveOnUpload {
 		t.Fatalf("updated = %#v", updated)
 	}
 	stored, err := config.LoadApp(app.paths.App)

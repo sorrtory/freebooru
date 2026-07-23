@@ -1,0 +1,11 @@
+[Unit]
+Description=FreeBooru HTTP server
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/freebooru-server
+Restart=on-failure
+RestartSec=2s
+
+[Install]
+WantedBy=default.target

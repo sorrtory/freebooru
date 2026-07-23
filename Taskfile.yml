@@ -75,9 +75,17 @@ tasks:
 
   gui:build:
     desc: Build the Wails desktop application on Linux
+    deps: [frontend:build]
     dir: cmd/freebooru-gui
     cmds:
-      - go tool wails build -tags webkit2_41
+      - go tool wails build -s -tags webkit2_41
+
+  gui:package:
+    desc: Package the Linux amd64 Wails release artifact
+    deps: [gui:build]
+    cmds:
+      - mkdir -p release-assets
+      - tar -czf release-assets/freebooru-gui_Linux_x86_64.tar.gz -C cmd/freebooru-gui/build/bin freebooru-gui
 
   check:
     desc: Run code quality checks
@@ -95,6 +103,17 @@ tasks:
       - go test -race -tags webkit2_41 ./...
       - go test ./cmd/freebooru-cli -run '^TestMVPCleanHomeWorkflow$' -count=1
       - go mod verify
+
+  release:check:
+    desc: Validate the GoReleaser configuration
+    cmds:
+      - goreleaser check
+
+  release:snapshot:
+    desc: Build portable release artifacts locally without publishing
+    deps: [frontend:build]
+    cmds:
+      - goreleaser release --snapshot --clean --skip=nfpm
 
   cli:
     desc: Run the CLI application

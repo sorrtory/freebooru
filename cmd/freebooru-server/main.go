@@ -6,9 +6,11 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 	"time"
 
@@ -36,11 +38,11 @@ func run(logger *slog.Logger) error {
 	if err != nil {
 		return fmt.Errorf("construct application: %w", err)
 	}
-	port, loadErr := httpPort(context.Background(), app)
+	address, loadErr := httpAddress(context.Background(), app)
 	if loadErr != nil {
 		logger.Warn(
-			"application configuration unavailable; using default HTTP port",
-			"port", port,
+			"application configuration unavailable; using default HTTP address",
+			"address", address,
 			"error", loadErr,
 		)
 	}
@@ -55,7 +57,7 @@ func run(logger *slog.Logger) error {
 	}
 	handler := webui.NewHandler(api, assets)
 	server := &http.Server{
-		Addr:              fmt.Sprintf("127.0.0.1:%d", port),
+		Addr:              address,
 		Handler:           handler,
 		ReadHeaderTimeout: 5 * time.Second,
 		ReadTimeout:       30 * time.Second,
@@ -90,9 +92,11 @@ func run(logger *slog.Logger) error {
 	}
 }
 
-func httpPort(ctx context.Context, app configLoader) (int, error) {
+func httpAddress(ctx context.Context, app configLoader) (string, error) {
 	if err := app.LoadConfig(ctx); err != nil {
-		return config.DefaultAppConfig().HTTPPort, err
+		defaults := config.DefaultAppConfig()
+		return net.JoinHostPort(defaults.HTTPAddress, strconv.Itoa(defaults.HTTPPort)), err
 	}
-	return app.AppConfig().HTTPPort, nil
+	appConfig := app.AppConfig()
+	return net.JoinHostPort(appConfig.HTTPAddress, strconv.Itoa(appConfig.HTTPPort)), nil
 }

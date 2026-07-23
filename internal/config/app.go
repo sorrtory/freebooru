@@ -3,6 +3,7 @@ package config
 
 import (
 	"fmt"
+	"net"
 	"os"
 	"path/filepath"
 	"strings"
@@ -16,6 +17,7 @@ type AppConfig struct {
 	DefaultCollection  string `yaml:"default_collection"`
 	DefaultStorageName string `yaml:"default_storage_name"`
 	DefaultStoragePath string `yaml:"default_storage_path"`
+	HTTPAddress        string `yaml:"http_address"`
 	HTTPPort           int    `yaml:"http_port"`
 	RemoveOnUpload     bool   `yaml:"remove_on_upload"`
 }
@@ -27,6 +29,7 @@ func DefaultAppConfig() AppConfig {
 		DefaultCollection:  "main",
 		DefaultStorageName: "default",
 		DefaultStoragePath: "$HOME/.local/share/freebooru/storage/default",
+		HTTPAddress:        "0.0.0.0",
 		HTTPPort:           52800,
 		RemoveOnUpload:     false,
 	}
@@ -48,6 +51,9 @@ func VerifyAppConfig(cfg AppConfig) error {
 	}
 	if _, err := ExpandPath(cfg.DefaultStoragePath); err != nil {
 		return fmt.Errorf("default_storage_path: %w", err)
+	}
+	if net.ParseIP(cfg.HTTPAddress) == nil {
+		return fmt.Errorf("http_address must be an IPv4 or IPv6 address")
 	}
 	if cfg.HTTPPort < 1 || cfg.HTTPPort > 65535 {
 		return fmt.Errorf("http_port must be between 1 and 65535")

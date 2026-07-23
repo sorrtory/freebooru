@@ -36,6 +36,9 @@ freebooru/
 ├── AGENTS.md                         Repository rules for contributors and agents
 ├── README.md                         Project introduction
 ├── Taskfile.yml                      Format, lint, test, release, fix, and CLI tasks
+├── .goreleaser.yaml                  CLI and server release artifact configuration
+├── .github/workflows/release.yml     Tag-triggered GitHub Release workflow
+├── packaging/                        Debian desktop and user-service metadata
 ├── go.mod                            Go version and dependencies
 ├── go.sum                            Dependency checksums
 ├── .golangci.yml                     Linter and formatter configuration

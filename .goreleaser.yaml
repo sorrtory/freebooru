@@ -1,0 +1,92 @@
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
+
+version: 2
+
+builds:
+  - id: freebooru-cli
+    main: ./cmd/freebooru-cli
+    binary: freebooru
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+
+  - id: freebooru-server
+    main: ./cmd/freebooru-server
+    binary: freebooru-server
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+
+archives:
+  - formats: [tar.gz]
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else }}{{ .Arch }}{{ end }}
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+
+nfpms:
+  - id: freebooru
+    package_name: freebooru
+    ids:
+      - freebooru-cli
+      - freebooru-server
+    formats:
+      - deb
+    file_name_template: "{{ .ConventionalFileName }}"
+    bindir: /usr/bin
+    vendor: FreeBooru
+    homepage: https://github.com/sorrtory/freebooru
+    maintainer: sorrtory <62436169+sorrtory@users.noreply.github.com>
+    description: Booru-style file organization with CLI, server, and desktop clients
+    section: utils
+    priority: optional
+    dependencies:
+      - libgtk-3-0
+      - libwebkit2gtk-4.1-0
+    contents:
+      - src: ./release-assets/freebooru-gui_{{ .Arch }}
+        dst: /usr/bin/freebooru-gui
+        file_info:
+          mode: 0755
+      - src: ./packaging/freebooru-server.service
+        dst: /usr/lib/systemd/user/freebooru-server.service
+        file_info:
+          mode: 0644
+      - src: ./packaging/freebooru.desktop
+        dst: /usr/share/applications/freebooru.desktop
+        file_info:
+          mode: 0644
+
+checksum:
+  name_template: checksums.txt
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+
+release:
+  extra_files:
+    - glob: ./release-assets/freebooru-gui_Linux_*.tar.gz
+  footer: >-
+    ---
+
+    Released by [GoReleaser](https://github.com/goreleaser/goreleaser).

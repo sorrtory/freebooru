@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=FreeBooru
+Comment=Organize and tag files with FreeBooru
+Exec=freebooru-gui
+Icon=applications-graphics
+Terminal=false
+Categories=Graphics;Utility;

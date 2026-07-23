@@ -38,7 +38,7 @@ async function save() {
   try {
     const value = await updateSettings(settings.value)
     settings.value = { ...value }; saved.value = { ...value }
-    notice.value = value.restart_required ? 'Saved. Restart FreeBooru to use the new HTTP port.' : 'Settings saved.'
+    notice.value = value.restart_required ? 'Saved. Restart FreeBooru to use the new HTTP listener.' : 'Settings saved.'
   } catch (cause) { error.value = cause instanceof Error ? cause.message : 'Settings could not be saved.' }
   finally { saving.value = false }
 }
@@ -64,6 +64,7 @@ async function save() {
         <fieldset><legend>Language</legend><label class="inline-choice"><input v-model="settings.language" type="radio" value="en"> English</label><label class="inline-choice"><input v-model="settings.language" type="radio" value="ru"> Russian</label></fieldset>
         <label class="form-field"><span>Default collection</span><ValueCombobox v-model="settings.default_collection" :options="settings.collections" /></label>
         <label class="form-field"><span>Default storage</span><ValueCombobox v-model="settings.default_storage_name" :options="settings.storages" /></label>
+        <label class="form-field"><span>HTTP address <small>Requires restart</small></span><input v-model="settings.http_address" type="text" inputmode="text"></label>
         <label class="form-field"><span>HTTP port <small>Requires restart</small></span><input v-model.number="settings.http_port" type="number" min="1" max="65535" step="1"></label>
         <label class="check-field"><input v-model="settings.remove_on_upload" type="checkbox"><span><strong>Remove source after upload</strong><small>Only after stored content and database commit are verified</small></span></label>
         <div class="save-row"><button class="button button--primary" type="submit" :disabled="saving || !dirty">{{ saving ? 'Saving…' : 'Save' }}</button><span v-if="dirty">Unsaved changes</span></div>

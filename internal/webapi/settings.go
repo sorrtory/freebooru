@@ -14,6 +14,7 @@ type settingsResponse struct {
 	Language           string   `json:"language"`
 	DefaultCollection  string   `json:"default_collection"`
 	DefaultStorageName string   `json:"default_storage_name"`
+	HTTPAddress        string   `json:"http_address"`
 	HTTPPort           int      `json:"http_port"`
 	RemoveOnUpload     bool     `json:"remove_on_upload"`
 	RestartRequired    bool     `json:"restart_required"`
@@ -26,6 +27,7 @@ type settingsRequest struct {
 	Language           string `json:"language"`
 	DefaultCollection  string `json:"default_collection"`
 	DefaultStorageName string `json:"default_storage_name"`
+	HTTPAddress        string `json:"http_address"`
 	HTTPPort           int    `json:"http_port"`
 	RemoveOnUpload     bool   `json:"remove_on_upload"`
 }
@@ -47,14 +49,16 @@ func handleSettings(response http.ResponseWriter, request *http.Request, app App
 		updated, err := app.UpdateSettings(request.Context(), core.SettingsUpdate{
 			ExpectedRevision: body.Revision, Language: body.Language,
 			DefaultCollection:  body.DefaultCollection,
-			DefaultStorageName: body.DefaultStorageName, HTTPPort: body.HTTPPort,
+			DefaultStorageName: body.DefaultStorageName, HTTPAddress: body.HTTPAddress,
+			HTTPPort:       body.HTTPPort,
 			RemoveOnUpload: body.RemoveOnUpload,
 		})
 		if err != nil {
 			writeAPIError(response, http.StatusConflict, "settings.invalid", "Settings could not be saved; reload and try again")
 			return
 		}
-		writeJSON(response, http.StatusOK, settingsResponseFromCore(updated, before.HTTPPort != updated.HTTPPort))
+		restart := before.HTTPAddress != updated.HTTPAddress || before.HTTPPort != updated.HTTPPort
+		writeJSON(response, http.StatusOK, settingsResponseFromCore(updated, restart))
 	default:
 		response.Header().Set("Allow", http.MethodGet+", "+http.MethodPut)
 		writeAPIError(response, http.StatusMethodNotAllowed, "method.not_allowed", "Method not allowed")
@@ -65,7 +69,8 @@ func settingsResponseFromCore(settings core.Settings, restart bool) settingsResp
 	return settingsResponse{
 		Revision: settings.Revision, Language: settings.Language,
 		DefaultCollection:  settings.DefaultCollection,
-		DefaultStorageName: settings.DefaultStorageName, HTTPPort: settings.HTTPPort,
+		DefaultStorageName: settings.DefaultStorageName, HTTPAddress: settings.HTTPAddress,
+		HTTPPort:       settings.HTTPPort,
 		RemoveOnUpload: settings.RemoveOnUpload, RestartRequired: restart,
 		Collections: append([]string{}, settings.Collections...),
 		Storages:    append([]string{}, settings.Storages...),

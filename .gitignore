@@ -39,3 +39,9 @@ cmd/freebooru-gui/build/bin/
 # Editor/IDE
 # .idea/
 # .vscode/
+
+# Added by goreleaser init:
+/dist/
+/release-assets/
+
+# Generated files

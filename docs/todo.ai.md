@@ -61,7 +61,7 @@ Update Go structures only as far as needed to represent and round-trip the
 documented default application, storage, and collection files.
 
 - [x] Make `AppConfig` represent `lang`, `default_collection`,
-  `default_storage_name`, `default_storage_path`, `http_port`, and
+  `default_storage_name`, `default_storage_path`, `http_address`, `http_port`, and
   `remove_on_upload`.
 - [x] Make `DefaultAppConfig` exactly match `config.ai.md`.
 - [x] Keep storage as a list of providers with `name`, `type`, and local `path`.

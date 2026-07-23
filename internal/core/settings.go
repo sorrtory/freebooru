@@ -15,6 +15,7 @@ type Settings struct {
 	Language           string
 	DefaultCollection  string
 	DefaultStorageName string
+	HTTPAddress        string
 	HTTPPort           int
 	RemoveOnUpload     bool
 	Collections        []string
@@ -27,6 +28,7 @@ type SettingsUpdate struct {
 	Language           string
 	DefaultCollection  string
 	DefaultStorageName string
+	HTTPAddress        string
 	HTTPPort           int
 	RemoveOnUpload     bool
 }
@@ -56,6 +58,7 @@ func (c *Core) UpdateSettings(ctx context.Context, update SettingsUpdate) (Setti
 	next.Lang = update.Language
 	next.DefaultCollection = update.DefaultCollection
 	next.DefaultStorageName = update.DefaultStorageName
+	next.HTTPAddress = update.HTTPAddress
 	next.HTTPPort = update.HTTPPort
 	next.RemoveOnUpload = update.RemoveOnUpload
 	if err := config.ReplaceApp(c.paths.App, next); err != nil {
@@ -92,18 +95,20 @@ func settingsFromConfig(app config.AppConfig) Settings {
 	return Settings{
 		Revision: settingsRevision(app), Language: app.Lang,
 		DefaultCollection:  app.DefaultCollection,
-		DefaultStorageName: app.DefaultStorageName, HTTPPort: app.HTTPPort,
+		DefaultStorageName: app.DefaultStorageName, HTTPAddress: app.HTTPAddress,
+		HTTPPort:       app.HTTPPort,
 		RemoveOnUpload: app.RemoveOnUpload,
 	}
 }
 
 func settingsRevision(app config.AppConfig) string {
 	value := fmt.Sprintf(
-		"%s\x00%s\x00%s\x00%s\x00%d\x00%t",
+		"%s\x00%s\x00%s\x00%s\x00%s\x00%d\x00%t",
 		app.Lang,
 		app.DefaultCollection,
 		app.DefaultStorageName,
 		app.DefaultStoragePath,
+		app.HTTPAddress,
 		app.HTTPPort,
 		app.RemoveOnUpload,
 	)

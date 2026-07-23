@@ -14,11 +14,17 @@ missing or invalid.
 | `default_collection`   | string |       no | `main`                                         | Existing collection name                | Collection used when none is selected explicitly | Implemented     |
 | `default_storage_name` | string |       no | `default`                                      | Valid storage name                      | Storage used by default                          | Implemented     |
 | `default_storage_path` | path   |       no | `$HOME/.local/share/freebooru/storage/default` | Absolute after expanding `$HOME` or `~` | Path created for the default storage             | Implemented     |
+| `http_address`         | string |       no | `0.0.0.0`                                      | IPv4 or IPv6 address                    | HTTP server bind address                         | Implemented     |
 | `http_port`            | int    |       no | `52800`                                        | `1`–`65535`                             | HTTP server port                                 | Implemented     |
 | `remove_on_upload`     | bool   |       no | `false`                                        | —                                       | Remove the source after copies and SQL commit     | Implemented     |
 
 `default_collection` is a fallback, not global current state. An explicitly
 selected collection always wins.
+
+`http_address: 0.0.0.0` exposes the unauthenticated HTTP interface on every
+IPv4 network interface. Set it to `127.0.0.1` when FreeBooru must only be
+reachable from the local machine. TLS and authentication remain the
+responsibility of a trusted reverse proxy.
 
 When `remove_on_upload` is true, FreeBooru re-hashes the source after every
 copy and the database transaction succeed. It removes the source only when its

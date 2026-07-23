@@ -1,11 +1,14 @@
 # FreeBooru HTTP server
 
 `freebooru-server` serves the Vue production bundle and the versioned JSON API
-from the same address. The default address is `127.0.0.1:52800`, using
-`http_port` from `freebooru.yaml`.
+from the same address. The default address is `0.0.0.0:52800`, using
+`http_address` and `http_port` from `freebooru.yaml`.
 
-The first implementation binds to loopback only. Exposing FreeBooru to a
-remote network requires a separately specified authentication and TLS policy.
+The default listens on every IPv4 interface and therefore exposes the API and
+files to reachable networks without authentication or TLS. Use
+`http_address: 127.0.0.1` for local-only access. Remote deployments should put
+FreeBooru behind a trusted authenticating TLS reverse proxy and firewall the
+direct listener.
 
 ## Static application
 
@@ -86,9 +89,10 @@ contains an `application.config_load` error diagnostic. Warnings are returned
 but do not make the application unready. Other methods return JSON
 `405 Method Not Allowed` with `Allow: GET`.
 
-The standalone server attempts to load `http_port` before listening. If that
-load fails, it logs a warning and remains accessible on the default port
-`52800`, allowing the web interface to explain the configuration problem.
+The standalone server attempts to load `http_address` and `http_port` before
+listening. If that load fails, it logs a warning and remains accessible on the
+default address `0.0.0.0:52800`, allowing the web interface to explain the
+configuration problem.
 
 ## Import workspace
 
@@ -141,10 +145,10 @@ atomically and publishes the new catalog only after complete graph validation.
 
 Application settings use `GET /api/v1/settings` and `PUT /api/v1/settings`.
 The response intentionally omits filesystem paths and exposes only language,
-default collection/storage names, HTTP port, and remove-on-upload behavior.
+default collection/storage names, HTTP address and port, and remove-on-upload behavior.
 PUT requires the last opaque revision, preserves server-owned path values,
 writes atomically, validates the complete catalog/graph, and rolls back on
-failure. Changing the HTTP port is reported as restart-required.
+failure. Changing the HTTP address or port is reported as restart-required.
 
 All import calls name their collection explicitly and behave identically over
 the standalone server and the Wails asset server:

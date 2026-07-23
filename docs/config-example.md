@@ -11,6 +11,7 @@ lang: en
 default_collection: main
 default_storage_name: default
 default_storage_path: $HOME/.local/share/freebooru/storage/default
+http_address: 0.0.0.0
 http_port: 52800
 remove_on_upload: false
 ```

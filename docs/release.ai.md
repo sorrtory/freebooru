@@ -24,3 +24,36 @@ mutation, search, adding and removing storage copies, final-copy deletion, and
 reopening persisted state through later CLI invocations.
 
 Platform limitations and fail-safe behavior are recorded in `mvp.ai.md`.
+
+## Distribution releases
+
+Pushing a semantic-version tag matching `v*` runs the GitHub Actions release
+workflow. The workflow builds the embedded web application and runs GoReleaser
+to publish archives containing `freebooru` (the CLI) and `freebooru-server` for
+Linux, macOS, and Windows on amd64 and arm64. It also builds the Wails desktop
+application natively on Linux amd64 and arm64 with the WebKitGTK 4.1 ABI.
+GoReleaser publishes standalone GUI archives and Debian packages for both
+architectures. Each `.deb` contains the CLI, HTTP server, desktop application,
+desktop launcher, and per-user systemd service, and declares its GTK/WebKitGTK
+runtime dependencies.
+
+Use the locally installed GoReleaser binary to validate or preview packaging:
+
+```console
+go tool task release:check
+go tool task release:snapshot
+go tool task gui:package
+```
+
+Local snapshot releases write ignored artifacts to `dist/` and never publish a
+GitHub Release. The CI workflow uses `goreleaser/goreleaser-action@v7` to install
+a compatible GoReleaser v2 binary and run the same repository configuration.
+The GUI package task requires the Linux build dependencies documented in
+`gui.md`. Local snapshots skip Debian packaging because producing both packages
+requires native GUI artifacts from both CI architectures.
+
+Install a downloaded package together with its declared dependencies using:
+
+```console
+sudo apt install ./freebooru_<version>_amd64.deb
+```
