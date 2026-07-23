@@ -76,6 +76,8 @@ freebooru/
 │       │   ├── SearchSidebar.vue     Live booru query, hot tags, and tag/value completion
 │       │   ├── SearchSidebar.test.ts Search completion and hot-tag tests
 │       │   ├── ValueCombobox.vue     Searchable value and multivalue control
+│       │   ├── AssignmentCard.vue    Shared persistent-draft upload tag card
+│       │   ├── AssignmentCard.test.ts Assignment close, reset, and removal tests
 │       │   ├── AssignedTags.vue      Required and canonical assigned tag cards
 │       │   ├── ImportGuidance.vue    Demand and recommendation cards
 │       │   ├── TagCatalog.vue        Searchable unassigned-tag catalog

@@ -5,7 +5,7 @@ import type { ImportField, TagValue } from '../api'
 import ValueCombobox from './ValueCombobox.vue'
 
 const props = withDefaults(defineProps<{ field: ImportField; value?: TagValue; suggested?: TagValue; compact?: boolean }>(), { value: undefined, suggested: undefined })
-const emit = defineEmits<{ apply: [value: TagValue]; cancel: []; remove: [] }>()
+const emit = defineEmits<{ apply: [value: TagValue]; cancel: [] }>()
 const localValue = shallowRef<TagValue>(defaultValue())
 const validation = shallowRef('')
 const choiceValue = computed({
@@ -51,6 +51,7 @@ function submit() {
   }
   validation.value = ''
   emit('apply', localValue.value)
+  localValue.value = defaultValue()
 }
 
 function cancel() {
@@ -77,8 +78,7 @@ function cancel() {
     <p v-if="validation" class="field-error" role="alert">{{ validation }}</p>
     <div class="editor-actions">
       <button class="button button--primary" type="submit">Assign</button>
-      <button v-if="value !== undefined" class="trash-button" type="button" :aria-label="`Remove ${field.name}`" title="Remove tag" @click="emit('remove')"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3m3 0-1 13H7L6 7m4 4v5m4-5v5"/></svg></button>
-      <button v-if="compact" class="button" type="button" @click="cancel">Cancel</button>
+      <button class="button" type="button" @click="cancel">Cancel</button>
     </div>
   </form>
 </template>
@@ -93,6 +93,5 @@ input:not([type='checkbox']) { width: 100%; min-height: 2.75rem; padding: .65rem
 .boolean-control { display: flex; align-items: center; gap: .7rem; min-height: 2.75rem; }
 .boolean-control input { width: 1.25rem; height: 1.25rem; accent-color: var(--accent); }
 .editor-actions { display: flex; flex-wrap: wrap; gap: .5rem; }
-.trash-button { display: grid; width: 2.75rem; place-items: center; border: 1px solid color-mix(in srgb, var(--danger) 55%, var(--border)); border-radius: var(--radius); color: var(--danger); background: var(--surface); }.trash-button svg { width: 1.1rem; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
 .field-error { margin: 0; color: #ffc1b8; font-size: .86rem; }
 </style>

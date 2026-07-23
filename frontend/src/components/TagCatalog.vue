@@ -2,7 +2,7 @@
 import { computed, shallowRef, watch } from 'vue'
 
 import type { ImportField, TagValue } from '../api'
-import TagField from './TagField.vue'
+import AssignmentCard from './AssignmentCard.vue'
 
 const props = defineProps<{ fields: ImportField[]; assigned: Set<string>; selected?: string }>()
 const emit = defineEmits<{ apply: [name: string, value: TagValue] }>()
@@ -11,7 +11,6 @@ const selectedName = shallowRef(props.selected ?? '')
 
 watch(() => props.selected, (value) => { if (value) selectedName.value = value })
 const available = computed(() => props.fields.filter((field) => !props.assigned.has(field.name) && field.name.toLocaleLowerCase().includes(query.value.trim().toLocaleLowerCase())))
-const selectedField = computed(() => props.fields.find((field) => field.name === selectedName.value))
 </script>
 
 <template>
@@ -24,12 +23,8 @@ const selectedField = computed(() => props.fields.find((field) => field.name ===
       <label for="tag-search">Search imported tags</label>
       <input id="tag-search" v-model="query" type="search" placeholder="rating, artist, storage…">
     </div>
-    <TagField v-if="selectedField && !assigned.has(selectedField.name)" :field="selectedField" @apply="emit('apply', selectedField.name, $event); selectedName = ''" />
     <div class="catalog-list" aria-label="Available tags">
-      <button v-for="field in available" :key="field.name" type="button" :aria-pressed="selectedName === field.name" @click="selectedName = field.name">
-        <span><strong>{{ field.name }}</strong><small>{{ field.type }}</small><small v-if="field.comment">{{ field.comment }}</small></span>
-        <b>{{ field.required ? 'required' : 'optional' }}</b>
-      </button>
+      <AssignmentCard v-for="field in available" :key="field.name" :field="field" :open-request="selectedName === field.name" @open="selectedName = field.name" @apply="emit('apply', field.name, $event); selectedName = ''" />
       <p v-if="!available.length" class="empty-state">No matching unassigned tags.</p>
     </div>
   </section>
@@ -40,8 +35,4 @@ const selectedField = computed(() => props.fields.find((field) => field.name ===
 .catalog-search label { color: var(--muted); font: .68rem var(--mono); letter-spacing: .06em; text-transform: uppercase; }
 .catalog-search input { min-height: 2.75rem; padding: .65rem .75rem; border: 1px solid var(--line-strong); border-radius: .25rem; color: var(--text); background: var(--surface); }
 .catalog-list { display: grid; gap: .4rem; padding: 1rem; }
-.catalog-list button { display: flex; width: 100%; min-height: 3.25rem; align-items: center; justify-content: space-between; gap: .75rem; padding: .65rem .75rem; border: 1px solid var(--line); border-radius: .25rem; color: var(--text); text-align: left; background: transparent; cursor: pointer; }
-.catalog-list button:hover, .catalog-list button[aria-pressed='true'] { border-color: var(--accent); background: rgb(181 240 99 / 5%); }
-.catalog-list span { display: grid; gap: .2rem; }
-.catalog-list small, .catalog-list b { color: var(--muted); font: .65rem var(--mono); text-transform: uppercase; }
 </style>
