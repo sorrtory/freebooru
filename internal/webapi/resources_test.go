@@ -16,7 +16,7 @@ func TestCollectionResourcesUseExplicitScopeAndSafeDTOs(t *testing.T) {
 			Name: "rating", Type: config.TagTypeValue, Comment: "Safety",
 			Values: []config.PredefinedValue{{Val: "safe", Comment: "Safe content"}}, Groups: []string{"general"},
 			Imported: true, Required: true, AssignmentCount: 3,
-		}},
+		}, {Name: "sha256", Type: config.TagTypeText, Imported: true, System: true}},
 		storages: []core.CollectionStorageInfo{{
 			Name: "archive", Type: "local", Comment: "Archive",
 			Imported: true, FileCount: 2, TotalSizeBytes: 42,
@@ -42,5 +42,15 @@ func TestCollectionResourcesUseExplicitScopeAndSafeDTOs(t *testing.T) {
 	handler.ServeHTTP(response, httptest.NewRequest(http.MethodPost, "/api/v1/collections/main/tags/artist/import", nil))
 	if response.Code != http.StatusNoContent || app.collection != "main" || app.resource != "artist" {
 		t.Fatalf("import = %d, %q, %q", response.Code, app.collection, app.resource)
+	}
+}
+
+func TestCollectionTagsSerializeEmptyGroupsAsArray(t *testing.T) {
+	app := &fakeApplication{tags: []core.CollectionTagInfo{{Name: "sha256", Type: config.TagTypeText, Imported: true, System: true}}}
+	handler := mustNew(t, ModeServer, app)
+	response := httptest.NewRecorder()
+	handler.ServeHTTP(response, httptest.NewRequest(http.MethodGet, "/api/v1/collections/main/tags", nil))
+	if response.Code != http.StatusOK || !strings.Contains(response.Body.String(), `"groups":[]`) {
+		t.Fatalf("tags response = %d %s", response.Code, response.Body.String())
 	}
 }

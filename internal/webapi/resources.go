@@ -88,7 +88,7 @@ func handleCollectionTags(response http.ResponseWriter, request *http.Request, a
 		}
 		result = append(result, collectionTagResponse{
 			Name: item.Name, Type: string(item.Type), Comment: item.Comment,
-			Groups: append([]string(nil), item.Groups...),
+			Groups: append([]string{}, item.Groups...),
 			Values: values, Required: item.Required, Imported: item.Imported,
 			System: item.System, AssignmentCount: item.AssignmentCount,
 		})
