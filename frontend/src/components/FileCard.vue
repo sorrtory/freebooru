@@ -5,6 +5,8 @@ import type { FileRecord } from '../api'
 
 const props = defineProps<{ file: FileRecord; collection: string; returnTo?: string }>()
 const visual = computed(() => props.file.mime_type.startsWith('image/'))
+const visibleAssignments = computed(() => props.file.assignments.slice(0, 3))
+const hiddenAssignments = computed(() => Math.max(0, props.file.assignments.length - visibleAssignments.value.length))
 const route = computed(() => ({
   path: `/collections/${encodeURIComponent(props.collection)}/files/${props.file.sha256}`,
   query: props.returnTo ? { from: props.returnTo } : undefined,
@@ -14,6 +16,11 @@ function formatBytes(bytes: number) {
   if (bytes < 1024 ** 2) return `${Math.max(1, Math.round(bytes / 1024))} KB`
   return `${(bytes / 1024 ** 2).toFixed(1)} MB`
 }
+function formatAssignment(assignment: FileRecord['assignments'][number]) {
+  if (assignment.value === true) return assignment.name
+  const value = Array.isArray(assignment.value) ? assignment.value.join(', ') : String(assignment.value)
+  return `${assignment.name}:${value}`
+}
 </script>
 
 <template>
@@ -22,7 +29,7 @@ function formatBytes(bytes: number) {
       <img v-if="visual" :src="file.content_url" :alt="file.filename" loading="lazy">
       <span v-else aria-hidden="true">{{ file.mime_type.split('/')[1]?.slice(0, 5).toUpperCase() || 'FILE' }}</span>
     </div>
-    <div class="file-copy"><strong :title="file.filename">{{ file.filename }}</strong><small>{{ formatBytes(file.size_bytes) }}<template v-if="file.assignments.length"> · {{ file.assignments.length }} tags</template></small></div>
+    <div class="file-copy"><strong :title="file.filename">{{ file.filename }}</strong><small>{{ formatBytes(file.size_bytes) }}</small><div v-if="visibleAssignments.length" class="file-tags"><span v-for="assignment in visibleAssignments" :key="assignment.name" :title="formatAssignment(assignment)">{{ formatAssignment(assignment) }}</span><span v-if="hiddenAssignments" :title="`${file.assignments.length} tags total`">+{{ hiddenAssignments }}</span></div></div>
   </RouterLink>
 </template>
 
@@ -34,4 +41,5 @@ function formatBytes(bytes: number) {
 .file-copy { display: grid; min-width: 0; gap: .25rem; padding: .75rem; }
 .file-copy strong { overflow: hidden; font-size: .9rem; text-overflow: ellipsis; white-space: nowrap; }
 .file-copy small { color: var(--text-muted); font-size: .75rem; }
+.file-tags { display: flex; min-width: 0; flex-wrap: wrap; gap: .25rem; }.file-tags span { overflow: hidden; max-width: 100%; padding: .18rem .4rem; border-radius: 999px; color: var(--primary); background: var(--primary-soft); font-size: .68rem; font-weight: 750; text-overflow: ellipsis; white-space: nowrap; }
 </style>
