@@ -31,10 +31,14 @@ configuration automatically; use `freebooru-cli init` for provisioning.
 The selected collection is the route source of truth. Overview, Files, Tags,
 Storage, Upload, and file-detail requests all send that collection name
 explicitly to Core. Overview counts link to their corresponding resource page.
+The compact header keeps Overview and Tags beside collection selection, uses a
+fluid search field with tag/value completion and Popular tags, and leaves Files
+and Upload as the right-side daily actions. Storage is reached through Settings.
 
 Tags and Storage present resources imported by the collection before other
 configured resources, which can be imported through atomic validated Core
-operations. Files combines browsing and search: a blank query shows everything,
+operations. Tag rows expose their groups and link directly into Files search.
+Files combines browsing and search: a blank query shows everything,
 while its responsive booru-style sidebar searches as the user types and offers
 collection hot tags plus keyboard tag/value completion. Upload keeps blocking demands beside
 the assignment that caused them and focuses the first actionable issue when an

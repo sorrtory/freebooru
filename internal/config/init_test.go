@@ -142,6 +142,31 @@ func TestEnsureDefaultsIsIdempotent(t *testing.T) {
 	}
 }
 
+func TestStarterCharactersUseLuckyStarCast(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	paths, err := PathsFromDir(filepath.Join(home, "config"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := EnsureStarterDefaults(paths); err != nil {
+		t.Fatal(err)
+	}
+	data, err := os.ReadFile(filepath.Join(paths.Tags, "character.yaml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	content := string(data)
+	for _, name := range []string{"konata_izumi", "kagami_hiiragi", "tsukasa_hiiragi", "miyuki_takara"} {
+		if !strings.Contains(content, name) {
+			t.Errorf("starter characters missing %q", name)
+		}
+	}
+	if strings.Contains(content, "original_character") {
+		t.Error("starter characters contain original_character")
+	}
+}
+
 func TestEnsureDefaultsRejectsMissingDefaultStorage(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)

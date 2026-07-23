@@ -9,6 +9,7 @@ type collectionTagResponse struct {
 	Name            string            `json:"name"`
 	Type            string            `json:"type"`
 	Comment         string            `json:"comment"`
+	Groups          []string          `json:"groups"`
 	Values          []predefinedValue `json:"values"`
 	Required        bool              `json:"required"`
 	Imported        bool              `json:"imported"`
@@ -87,6 +88,7 @@ func handleCollectionTags(response http.ResponseWriter, request *http.Request, a
 		}
 		result = append(result, collectionTagResponse{
 			Name: item.Name, Type: string(item.Type), Comment: item.Comment,
+			Groups: append([]string(nil), item.Groups...),
 			Values: values, Required: item.Required, Imported: item.Imported,
 			System: item.System, AssignmentCount: item.AssignmentCount,
 		})

@@ -52,7 +52,7 @@ function removeTerm(index: number) { input.value = terms.value.filter((_, curren
     </form>
     <p v-if="errorMessage" class="query-error" role="alert">{{ errorMessage }}</p>
     <div v-if="terms.length" class="active-terms"><button v-for="(term, index) in terms" :key="`${term}-${index}`" type="button" :aria-label="`Remove ${term}`" @click="removeTerm(index)">{{ term }} ×</button></div>
-    <section v-if="hot.length" aria-labelledby="hot-tags"><h2 id="hot-tags">Hot tags</h2><button v-for="tag in hot" :key="tag.name" type="button" @click="addHot(tag)"><span>{{ tag.name }}</span><small>{{ tag.assignment_count }}</small></button></section>
+    <section v-if="hot.length" aria-labelledby="popular-tags"><h2 id="popular-tags">Popular tags</h2><button v-for="tag in hot" :key="tag.name" type="button" @click="addHot(tag)"><span>{{ tag.name }}</span><small>{{ tag.assignment_count }}</small></button></section>
     <details><summary>Search help</summary><p><code>tag</code> present</p><p><code>!tag</code> absent</p><p><code>rating:safe</code> equals</p><p><code>score&gt;=10</code> comparison</p><p>Use quotes around values with spaces. Conditions use AND.</p></details>
   </aside>
 </template>

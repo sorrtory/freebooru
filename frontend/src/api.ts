@@ -78,6 +78,7 @@ export interface CollectionTag {
   name: string
   type: TagType
   comment: string
+  groups: string[]
   values: { value: string; comment: string }[]
   required: boolean
   imported: boolean

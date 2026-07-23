@@ -28,6 +28,6 @@ const emit = defineEmits<{ page: [offset: number]; retry: [] }>()
 nav { display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin-top: 1.5rem; }
 nav span { color: var(--text-muted); font-size: .85rem; }
 @media (min-width: 40rem) { .file-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; } }
-@media (min-width: 64rem) { .file-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
-@media (min-width: 90rem) { .file-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
+@media (min-width: 64rem) { .file-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (min-width: 90rem) { .file-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
 </style>

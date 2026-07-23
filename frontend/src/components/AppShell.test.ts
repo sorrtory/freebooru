@@ -24,6 +24,7 @@ describe('AppShell', () => {
 
     expect(wrapper.get('.overview-link').classes()).not.toContain('router-link-exact-active')
     expect(wrapper.get('a[href="/collections/main/files"]').classes()).toContain('router-link-active')
+    expect(wrapper.find('a[href="/collections/main/storage"]').exists()).toBe(false)
     expect((wrapper.get('input[aria-label="Search files"]').element as HTMLInputElement).value).toBe('rating:safe')
 
     await wrapper.get('input[aria-label="Search files"]').setValue('artist:konata')

@@ -54,7 +54,7 @@ onMounted(() => void load())
 </template>
 
 <style scoped>
-.collections-page { min-height: 100vh; padding: 1rem; background: radial-gradient(circle at 15% 15%, var(--primary-soft), transparent 32rem); }
+.collections-page { min-height: 100vh; padding: 1rem; background: color-mix(in srgb, var(--canvas) 98%, var(--primary-soft)); }
 header { display: flex; max-width: 72rem; align-items: center; justify-content: space-between; margin: 0 auto; }
 .brand { color: var(--primary); font: 800 1.2rem var(--display); text-decoration: none; }
 .collections-content { width: min(100%, 52rem); margin: clamp(3rem, 10vh, 8rem) auto 0; }

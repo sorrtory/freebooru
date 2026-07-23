@@ -82,7 +82,6 @@ func ensureDefaultTags(root string) error {
 				Comment: "Characters depicted in or represented by the file",
 				Groups:  []string{"character"},
 				Values: []PredefinedValue{
-					{Val: "original_character"},
 					{
 						Val:     "konata_izumi",
 						Comment: "Konata Izumi from Lucky Star",
@@ -98,6 +97,21 @@ func ensureDefaultTags(root string) error {
 							Has:    []any{"lucky_star"},
 							Reason: "Konata Izumi is a character from Lucky Star",
 						}},
+					},
+					{
+						Val: "kagami_hiiragi", Comment: "Kagami Hiiragi from Lucky Star",
+						Aliases: []string{"kagami", "hiiragi_kagami"},
+						Demand:  []Relationship{{Tag: "universe", Has: []any{"lucky_star"}, Reason: "Kagami Hiiragi is a character from Lucky Star"}},
+					},
+					{
+						Val: "tsukasa_hiiragi", Comment: "Tsukasa Hiiragi from Lucky Star",
+						Aliases: []string{"tsukasa", "hiiragi_tsukasa"},
+						Demand:  []Relationship{{Tag: "universe", Has: []any{"lucky_star"}, Reason: "Tsukasa Hiiragi is a character from Lucky Star"}},
+					},
+					{
+						Val: "miyuki_takara", Comment: "Miyuki Takara from Lucky Star",
+						Aliases: []string{"miyuki", "takara_miyuki"},
+						Demand:  []Relationship{{Tag: "universe", Has: []any{"lucky_star"}, Reason: "Miyuki Takara is a character from Lucky Star"}},
 					},
 				},
 			},

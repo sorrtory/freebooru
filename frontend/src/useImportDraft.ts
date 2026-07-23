@@ -31,8 +31,13 @@ export function useImportDraft(collection: string) {
     evaluation = controller
     evaluating.value = true
     try {
-      const result = await evaluateImportDraft(collection, next, controller.signal)
+      let result = await evaluateImportDraft(collection, next, controller.signal)
       if (evaluation !== controller) return
+      const automatic = deterministicDemands(result)
+      if (Object.keys(automatic).length) {
+        result = await evaluateImportDraft(collection, { ...next, ...automatic }, controller.signal)
+        if (evaluation !== controller) return
+      }
       draft.value = result
       assignments.value = Object.fromEntries(result.assignments.map((item) => [item.name, item.value]))
       errorMessage.value = ''
@@ -42,6 +47,18 @@ export function useImportDraft(collection: string) {
     } finally {
       if (evaluation === controller) evaluating.value = false
     }
+  }
+
+  function deterministicDemands(result: ImportDraft): Record<string, TagValue> {
+    const assigned = new Set(result.assignments.map((item) => item.name))
+    const values: Record<string, TagValue> = {}
+    for (const edge of result.missing_demands) {
+      if (assigned.has(edge.target_tag) || values[edge.target_tag] !== undefined) continue
+      if (edge.target.is !== undefined) values[edge.target_tag] = edge.target.is
+      else if (edge.target.has.length) values[edge.target_tag] = edge.target.has
+      else if (edge.target.presence && schema.value?.fields.find((field) => field.name === edge.target_tag)?.type === 'bool') values[edge.target_tag] = true
+    }
+    return values
   }
 
   function apply(name: string, value: TagValue) {

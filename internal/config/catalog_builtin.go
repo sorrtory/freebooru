@@ -18,9 +18,9 @@ func (c *Catalog) addStorageTag(sourcePath string) {
 	}
 	c.tags[normalizeName("storage")] = catalogEntry[TagConfig]{
 		value: TagConfig{
-			Name:   "storage",
-			Type:   TagTypeMultivalue,
-			Values: values,
+			Name: "storage", Type: TagTypeMultivalue,
+			Comment: "Physical storage locations containing the file",
+			Groups:  []string{"storage"}, Values: values,
 		},
 		source: Source{File: sourcePath, Document: 1},
 	}

@@ -16,6 +16,10 @@ describe('AssignmentCard', () => {
 
     await wrapper.get('.assignment-summary').trigger('click')
     expect((wrapper.get('input[type="text"]').element as HTMLInputElement).value).toBe('Konata')
+    await wrapper.get('.tag-editor').trigger('click')
+    expect(wrapper.get('.assignment-editor').isVisible()).toBe(false)
+    await wrapper.get('.assignment-summary').trigger('click')
+    expect((wrapper.get('input[type="text"]').element as HTMLInputElement).value).toBe('Konata')
     await wrapper.findAll('button').find((button) => button.text() === 'Cancel')!.trigger('click')
     await wrapper.get('.assignment-summary').trigger('click')
     expect((wrapper.get('input[type="text"]').element as HTMLInputElement).value).toBe('')

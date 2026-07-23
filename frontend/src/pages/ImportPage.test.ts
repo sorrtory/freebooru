@@ -90,4 +90,22 @@ describe('ImportPage', () => {
     expect(wrapper.get('[data-problem]').element.contains(document.activeElement)).toBe(true)
     wrapper.unmount()
   })
+
+  it('automatically applies deterministic demanded values', async () => {
+    const demandedSchema = { collection: 'main', fields: [
+      { name: 'character', type: 'multivalue', comment: '', values: ['konata_izumi'], value_comments: {}, required: false },
+      { name: 'universe', type: 'multivalue', comment: '', values: ['lucky_star'], value_comments: {}, required: false },
+    ] }
+    const demand = { kind: 'demand', source_tag: 'character', source_value: 'konata_izumi', target_tag: 'universe', target: { presence: true, has: ['lucky_star'], not: [] }, reason: '' }
+    const first = { collection: 'main', assignments: [{ ...demandedSchema.fields[0], value: ['konata_izumi'] }], missing_required: [], missing_demands: [demand], active_conflicts: [], suggestions: [demand], complete: false }
+    const resolved = { ...first, assignments: [...first.assignments, { ...demandedSchema.fields[1], value: ['lucky_star'] }], missing_demands: [], suggestions: [], complete: true }
+    const request = vi.fn().mockResolvedValueOnce(json(demandedSchema)).mockResolvedValueOnce(json(first)).mockResolvedValueOnce(json(resolved))
+    vi.stubGlobal('fetch', request)
+    const wrapper = mount(ImportPage, { props: { collection: 'main' }, global: { stubs: { RouterLink: true } } })
+    await flushPromises()
+
+    expect(wrapper.get('section[aria-labelledby="guidance-title"] .count').text()).toBe('0')
+    expect(wrapper.text()).toContain('lucky_star')
+    expect(request).toHaveBeenNthCalledWith(3, '/api/v1/collections/main/imports/evaluate', expect.objectContaining({ body: JSON.stringify({ assignments: { universe: ['lucky_star'] } }) }))
+  })
 })

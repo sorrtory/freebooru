@@ -42,6 +42,7 @@ freebooru/
 ├── .gitignore                        Ignored files
 ├── docs/todo-frontend-refinement.ai.md Phased frontend refinement contract
 ├── docs/todo-frontend-unification.ai.md Files/search and assignment interaction contract
+├── docs/todo-frontend-header-polish.ai.md Header, catalog, and upload polish contract
 ├── frontend/                         Shared Vue 3 and TypeScript application
 │   ├── package.json                  Frontend dependencies and commands
 │   ├── package-lock.json             Reproducible frontend dependency lock
@@ -67,6 +68,8 @@ freebooru/
 │       │   └── ImportPage.test.ts    Canonical draft workspace interaction tests
 │       ├── components/
 │       │   ├── AppShell.vue          Responsive collection navigation shell
+│       │   ├── HeaderSearch.vue      Fluid collection search and completion popover
+│       │   ├── HeaderSearch.test.ts  Header completion and Popular-tag test
 │       │   ├── CollectionSwitcher.vue Searchable explicit collection switcher
 │       │   ├── ThemeMenu.vue         System/light/dark preference menu
 │       │   ├── ThemeMenu.test.ts     Theme application and persistence test

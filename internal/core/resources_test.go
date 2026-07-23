@@ -44,6 +44,10 @@ func TestCollectionResourcesListAndImportExplicitTag(t *testing.T) {
 	if artist == nil || artist.Imported || artist.Comment != "Creator" {
 		t.Fatalf("artist = %#v", artist)
 	}
+	storage := findTagInfo(items, "storage")
+	if storage == nil || !storage.Imported || !storage.Required || len(storage.Groups) != 1 || storage.Groups[0] != "storage" {
+		t.Fatalf("storage = %#v", storage)
+	}
 	if err := app.ImportCollectionTag(t.Context(), "main", "series"); err == nil {
 		t.Fatal("invalid relationship ImportCollectionTag() error = nil")
 	}

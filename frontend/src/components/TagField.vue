@@ -5,7 +5,7 @@ import type { ImportField, TagValue } from '../api'
 import ValueCombobox from './ValueCombobox.vue'
 
 const props = withDefaults(defineProps<{ field: ImportField; value?: TagValue; suggested?: TagValue; compact?: boolean }>(), { value: undefined, suggested: undefined })
-const emit = defineEmits<{ apply: [value: TagValue]; cancel: [] }>()
+const emit = defineEmits<{ apply: [value: TagValue]; cancel: []; dismiss: [] }>()
 const localValue = shallowRef<TagValue>(defaultValue())
 const validation = shallowRef('')
 const choiceValue = computed({
@@ -62,7 +62,7 @@ function cancel() {
 </script>
 
 <template>
-  <form class="tag-editor" :class="{ 'tag-editor--compact': compact }" @submit.prevent="submit">
+  <form class="tag-editor" :class="{ 'tag-editor--compact': compact }" @click.self="emit('dismiss')" @submit.prevent="submit">
     <div class="field-heading">
       <label :for="`tag-${field.name}`">{{ field.name }}</label>
       <span>{{ field.type }}{{ field.required ? ' / required' : '' }}</span>

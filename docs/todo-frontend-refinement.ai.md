@@ -25,8 +25,9 @@ competing with daily actions.
 
 ## Information architecture
 
-Collection navigation keeps Overview beside the collection selector and groups
-Storage, Tags, Files, and Upload on the right. Application Settings is opened by a gear outside collection navigation.
+Collection navigation keeps Overview and Tags beside the collection selector,
+then a fluid search field, then Files and Upload. Application Settings is opened
+by a gear outside collection navigation and contains the route to Storage.
 Theme selection belongs inside Settings.
 
 | Route | Purpose |

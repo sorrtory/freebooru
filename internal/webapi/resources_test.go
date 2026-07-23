@@ -14,7 +14,7 @@ func TestCollectionResourcesUseExplicitScopeAndSafeDTOs(t *testing.T) {
 	app := &fakeApplication{
 		tags: []core.CollectionTagInfo{{
 			Name: "rating", Type: config.TagTypeValue, Comment: "Safety",
-			Values:   []config.PredefinedValue{{Val: "safe", Comment: "Safe content"}},
+			Values: []config.PredefinedValue{{Val: "safe", Comment: "Safe content"}}, Groups: []string{"general"},
 			Imported: true, Required: true, AssignmentCount: 3,
 		}},
 		storages: []core.CollectionStorageInfo{{

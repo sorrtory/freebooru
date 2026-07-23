@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, shallowRef } from 'vue'
-import { onBeforeRouteLeave } from 'vue-router'
+import { onBeforeRouteLeave, useRoute } from 'vue-router'
 
 import { getSettings, updateSettings, type ApplicationSettings } from '../api'
 import ValueCombobox from '../components/ValueCombobox.vue'
 import { useTheme, type ThemePreference } from '../useTheme'
 
 const { preference, select } = useTheme()
+const route = useRoute()
 const choices: { value: ThemePreference; label: string; description: string }[] = [
   { value: 'system', label: 'System', description: 'Follow this device' },
   { value: 'light', label: 'Light', description: 'Bright archive surfaces' },
@@ -19,6 +20,7 @@ const saving = shallowRef(false)
 const error = shallowRef('')
 const notice = shallowRef('')
 const dirty = computed(() => Boolean(settings.value && saved.value && JSON.stringify(settings.value) !== JSON.stringify(saved.value)))
+const storageCollection = computed(() => typeof route.query.collection === 'string' ? route.query.collection : settings.value?.default_collection ?? '')
 
 onMounted(load)
 onBeforeRouteLeave(() => !dirty.value || window.confirm('Discard unsaved settings?'))
@@ -67,6 +69,10 @@ async function save() {
         <div class="save-row"><button class="button button--primary" type="submit" :disabled="saving || !dirty">{{ saving ? 'Saving…' : 'Save' }}</button><span v-if="dirty">Unsaved changes</span></div>
       </form>
     </section>
+    <section aria-labelledby="storage-heading">
+      <div><p>Collection</p><h2 id="storage-heading">Storage</h2></div>
+      <div class="settings-action"><p>Inspect locations available to {{ storageCollection || 'the selected collection' }}.</p><RouterLink v-if="storageCollection" class="button" :to="`/collections/${encodeURIComponent(storageCollection)}/storage`">Manage storage</RouterLink></div>
+    </section>
     <p v-if="error" class="settings-error" role="alert">{{ error }} <button class="button" type="button" @click="load">Reload</button></p><p v-if="notice" class="settings-notice" role="status">{{ notice }}</p>
   </main>
 </template>
@@ -85,5 +91,6 @@ label.selected { border-color: var(--primary); background: var(--primary-soft); 
 label span { display: grid; gap: .15rem; }
 label small { color: var(--text-muted); }
 input { accent-color: var(--primary); }form { display: grid; gap: 1rem; }form fieldset { display: flex; flex-wrap: wrap; gap: .5rem; }.inline-choice { min-height: 2.75rem; }.form-field { display: grid; gap: .4rem; padding: 0; border: 0; }.form-field > span { font-weight: 800; }.form-field small { color: var(--text-muted); font-weight: 400; }.form-field > input { width: 100%; padding: .65rem .75rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--canvas); }.check-field { align-items: flex-start; }.check-field span { display: grid; }.check-field small { color: var(--text-muted); }.save-row { display: flex; align-items: center; gap: .75rem; }.save-row span { color: var(--text-muted); }.settings-error { color: var(--danger); }.settings-notice { color: var(--success); font-weight: 800; }
+.settings-action { display: grid; justify-items: start; gap: .75rem; }.settings-action p { color: var(--text-muted); font-size: .9rem; font-weight: 400; letter-spacing: 0; text-transform: none; }
 @media (min-width: 48rem) { section { grid-template-columns: 12rem 1fr; } }
 </style>

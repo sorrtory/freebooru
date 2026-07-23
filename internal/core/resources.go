@@ -15,6 +15,7 @@ type CollectionTagInfo struct {
 	Name            string
 	Type            config.TagType
 	Comment         string
+	Groups          []string
 	Values          []config.PredefinedValue
 	Required        bool
 	Imported        bool
@@ -48,6 +49,7 @@ func (c *Core) ListCollectionTagInfo(
 		key := normalizeStateName(tag.Name)
 		items = append(items, CollectionTagInfo{
 			Name: tag.Name, Type: tag.Type, Comment: tag.Comment,
+			Groups:   append([]string(nil), tag.Groups...),
 			Values:   append([]config.PredefinedValue(nil), tag.Values...),
 			Imported: imported[key], Required: required[key],
 		})
@@ -197,11 +199,17 @@ func (c *Core) importCollectionReference(
 }
 
 func referenceSets(references config.ResolvedReferences) (map[string]bool, map[string]bool) {
-	importedTags, _ := resourceReferenceSets(references)
+	importedTags, importedStorages := resourceReferenceSets(references)
+	if len(importedStorages) > 0 {
+		importedTags["storage"] = true
+	}
 	required := make(map[string]bool)
 	for _, reference := range references.Required {
 		if reference.Tag != "" {
 			required[normalizeStateName(reference.Tag)] = true
+		}
+		if reference.Storage != "" {
+			required["storage"] = true
 		}
 	}
 	return importedTags, required

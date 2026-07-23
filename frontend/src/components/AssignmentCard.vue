@@ -29,7 +29,7 @@ onBeforeUnmount(() => document.removeEventListener('pointerdown', outside))
       <button v-if="removable" class="trash-button" type="button" :aria-label="`Remove ${field.name}`" title="Remove tag" @click.stop="emit('remove')"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3m3 0-1 13H7L6 7m4 4v5m4-5v5"/></svg></button>
     </div>
     <div v-if="openedOnce" v-show="open" class="assignment-editor" @click.stop>
-      <TagField compact :field="field" :value="value" :suggested="suggested" @apply="apply" @cancel="closeAndReset" />
+      <TagField compact :field="field" :value="value" :suggested="suggested" @apply="apply" @cancel="closeAndReset" @dismiss="open = false" />
     </div>
     <slot />
   </article>
