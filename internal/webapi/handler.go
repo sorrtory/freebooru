@@ -44,6 +44,8 @@ type Application interface {
 	ListCollectionStorageInfo(context.Context, string) ([]core.CollectionStorageInfo, error)
 	ImportCollectionTag(context.Context, string, string) error
 	ImportCollectionStorage(context.Context, string, string) error
+	Settings() core.Settings
+	UpdateSettings(context.Context, core.SettingsUpdate) (core.Settings, error)
 }
 
 // DiagnosticResponse is one configuration problem exposed to the frontend.
@@ -98,6 +100,9 @@ func New(mode Mode, app Application) (http.Handler, error) {
 		statusMu.Lock()
 		defer statusMu.Unlock()
 		writeJSON(response, http.StatusOK, applicationStatus(request.Context(), mode, app))
+	})
+	mux.HandleFunc("/api/v1/settings", func(response http.ResponseWriter, request *http.Request) {
+		handleSettings(response, request, app)
 	})
 	mux.HandleFunc("/api/v1/collections/", func(response http.ResponseWriter, request *http.Request) {
 		handleCollectionRequest(response, request, app)

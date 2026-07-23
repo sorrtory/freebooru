@@ -37,6 +37,7 @@ type fakeApplication struct {
 	tags             []core.CollectionTagInfo
 	storages         []core.CollectionStorageInfo
 	resource         string
+	settings         core.Settings
 }
 
 func (f *fakeApplication) Search(_ context.Context, request core.FileSearchRequest) ([]collection.FileRecord, error) {
@@ -73,6 +74,17 @@ func (f *fakeApplication) ImportCollectionTag(_ context.Context, name, resource 
 func (f *fakeApplication) ImportCollectionStorage(_ context.Context, name, resource string) error {
 	f.collection, f.resource = name, resource
 	return f.collectionErr
+}
+func (f *fakeApplication) Settings() core.Settings { return f.settings }
+func (f *fakeApplication) UpdateSettings(_ context.Context, update core.SettingsUpdate) (core.Settings, error) {
+	f.resource = update.ExpectedRevision
+	result := f.settings
+	result.Language = update.Language
+	result.DefaultCollection = update.DefaultCollection
+	result.DefaultStorageName = update.DefaultStorageName
+	result.HTTPPort = update.HTTPPort
+	result.RemoveOnUpload = update.RemoveOnUpload
+	return result, f.collectionErr
 }
 
 func (f *fakeApplication) ListCollections() ([]config.CollectionConfig, error) {

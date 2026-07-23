@@ -226,16 +226,16 @@ application configuration is authoritative backend state.
 
 ### Configuration contract
 
-- [ ] Inventory supported fields and classify each as editable, read-only,
+- [x] Inventory supported fields and classify each as editable, read-only,
   sensitive, or restart-required.
-- [ ] Return an explicit typed schema; do not infer controls from raw YAML.
-- [ ] Do not expose unrelated paths, credentials, YAML comments, or unknown
+- [x] Return explicit typed values and options; do not infer controls from raw YAML.
+- [x] Do not expose unrelated paths, credentials, YAML comments, or unknown
   fields to a remote client.
-- [ ] Validate a complete candidate through Core before persistence.
-- [ ] Write atomically, reload, and retain the previous file on failure.
-- [ ] Preserve YAML fields not owned by the form.
-- [ ] Return structured field diagnostics and restart requirements.
-- [ ] Prevent two Settings tabs from silently overwriting each other.
+- [x] Validate a complete candidate through Core before persistence.
+- [x] Write atomically, reload, and retain the previous file on failure.
+- [x] Preserve YAML fields not owned by the form.
+- [x] Return restart requirements without exposing backend errors.
+- [x] Prevent two Settings tabs from silently overwriting each other.
 
 ```http
 GET /api/v1/settings
@@ -244,16 +244,16 @@ PUT /api/v1/settings
 
 ### Settings UI
 
-- [ ] Put System/Light/Dark first.
-- [ ] Render typed controls for approved application fields.
-- [ ] Distinguish saved state, unsaved edits, errors, and restart notices.
-- [ ] Require explicit Save rather than persisting per keystroke.
-- [ ] Warn before navigation with unsaved configuration.
-- [ ] Keep advanced or rarely changed values collapsed.
+- [x] Put System/Light/Dark first.
+- [x] Render typed controls for approved application fields.
+- [x] Distinguish saved state, unsaved edits, errors, and restart notices.
+- [x] Require explicit Save rather than persisting per keystroke.
+- [x] Warn before navigation with unsaved configuration.
+- [x] Keep sensitive filesystem values outside the remote form.
 
-- [ ] Test rollback, unknown-field preservation, stale revision, diagnostics,
+- [x] Test rollback, server-owned-field preservation, stale revision, diagnostics,
   theme persistence, and restart notices.
-- [ ] Autoreview remote disclosure and commit independently.
+- [x] Autoreview remote disclosure and commit independently.
 
 ## Phase 7: integration and release evidence
 

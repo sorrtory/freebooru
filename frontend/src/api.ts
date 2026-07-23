@@ -94,6 +94,18 @@ export interface CollectionStorage {
   total_size_bytes: number
 }
 
+export interface ApplicationSettings {
+  revision: string
+  language: 'en' | 'ru'
+  default_collection: string
+  default_storage_name: string
+  http_port: number
+  remove_on_upload: boolean
+  restart_required: boolean
+  collections: string[]
+  storages: string[]
+}
+
 export type TagType = 'bool' | 'text' | 'int' | 'date' | 'datetime' | 'value' | 'multivalue'
 export type TagValue = boolean | number | string | string[]
 
@@ -273,6 +285,17 @@ async function requestEmpty(url: string, request: typeof fetch) {
   if (!response.ok) throw apiError(await errorBody(response), response.status)
 }
 
+export async function getSettings(request: typeof fetch = fetch): Promise<ApplicationSettings> {
+  return requestJSON('/api/v1/settings', {}, isApplicationSettings, 'settings', request)
+}
+
+export async function updateSettings(settings: ApplicationSettings, request: typeof fetch = fetch): Promise<ApplicationSettings> {
+  const { restart_required: _restart, collections: _collections, storages: _storages, ...body } = settings
+  return requestJSON('/api/v1/settings', {
+    method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+  }, isApplicationSettings, 'settings', request)
+}
+
 export async function setFileTag(collection: string, sha256: string, tag: string, value: TagValue, request: typeof fetch = fetch): Promise<FileRecord> {
   return requestJSON(fileTagURL(collection, sha256, tag), {
     method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ value }),
@@ -437,6 +460,10 @@ function isCollectionTag(value: unknown): value is CollectionTag {
 
 function isCollectionStoragesResponse(value: unknown): value is { storages: CollectionStorage[] } {
   return isRecord(value) && Array.isArray(value.storages) && value.storages.every((item) => isRecord(item) && typeof item.name === 'string' && typeof item.type === 'string' && typeof item.comment === 'string' && typeof item.imported === 'boolean' && typeof item.file_count === 'number' && typeof item.total_size_bytes === 'number')
+}
+
+function isApplicationSettings(value: unknown): value is ApplicationSettings {
+  return isRecord(value) && typeof value.revision === 'string' && (value.language === 'en' || value.language === 'ru') && typeof value.default_collection === 'string' && typeof value.default_storage_name === 'string' && typeof value.http_port === 'number' && typeof value.remove_on_upload === 'boolean' && typeof value.restart_required === 'boolean' && Array.isArray(value.collections) && value.collections.every((item) => typeof item === 'string') && Array.isArray(value.storages) && value.storages.every((item) => typeof item === 'string')
 }
 
 function isApplicationStatus(value: unknown): value is ApplicationStatus {

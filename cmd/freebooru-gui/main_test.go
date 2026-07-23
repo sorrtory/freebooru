@@ -73,6 +73,10 @@ func (fakeApplication) ListCollectionStorageInfo(context.Context, string) ([]cor
 }
 func (fakeApplication) ImportCollectionTag(context.Context, string, string) error     { return nil }
 func (fakeApplication) ImportCollectionStorage(context.Context, string, string) error { return nil }
+func (fakeApplication) Settings() core.Settings                                       { return core.Settings{} }
+func (fakeApplication) UpdateSettings(context.Context, core.SettingsUpdate) (core.Settings, error) {
+	return core.Settings{}, nil
+}
 
 func TestAPIMiddlewareRoutesOnlyAPIRequests(t *testing.T) {
 	api, err := webapi.New(webapi.ModeDesktop, fakeApplication{})

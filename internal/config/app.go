@@ -3,7 +3,11 @@ package config
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
+
+	"github.com/goccy/go-yaml"
 )
 
 // AppConfig contains process-wide application settings.
@@ -58,4 +62,40 @@ func LoadApp(path string) (AppConfig, error) {
 		Default:  DefaultAppConfig,
 		Validate: VerifyAppConfig,
 	}).Read()
+}
+
+// ReplaceApp atomically replaces a validated application configuration.
+func ReplaceApp(path string, app AppConfig) error {
+	if err := VerifyAppConfig(app); err != nil {
+		return err
+	}
+	data, err := yaml.Marshal(app)
+	if err != nil {
+		return fmt.Errorf("marshal application configuration: %w", err)
+	}
+	temporary, err := os.CreateTemp(filepath.Dir(path), ".freebooru-app-update-*")
+	if err != nil {
+		return fmt.Errorf("create temporary application configuration: %w", err)
+	}
+	temporaryName := temporary.Name()
+	defer func() { _ = os.Remove(temporaryName) }()
+	if err := temporary.Chmod(0o600); err != nil {
+		_ = temporary.Close()
+		return fmt.Errorf("protect temporary application configuration: %w", err)
+	}
+	if _, err := temporary.Write(data); err != nil {
+		_ = temporary.Close()
+		return fmt.Errorf("write temporary application configuration: %w", err)
+	}
+	if err := temporary.Sync(); err != nil {
+		_ = temporary.Close()
+		return fmt.Errorf("sync temporary application configuration: %w", err)
+	}
+	if err := temporary.Close(); err != nil {
+		return fmt.Errorf("close temporary application configuration: %w", err)
+	}
+	if err := os.Rename(temporaryName, path); err != nil {
+		return fmt.Errorf("replace application configuration: %w", err)
+	}
+	return nil
 }

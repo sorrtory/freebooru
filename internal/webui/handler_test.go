@@ -76,6 +76,10 @@ func (staticApplication) ListCollectionStorageInfo(context.Context, string) ([]c
 }
 func (staticApplication) ImportCollectionTag(context.Context, string, string) error     { return nil }
 func (staticApplication) ImportCollectionStorage(context.Context, string, string) error { return nil }
+func (staticApplication) Settings() core.Settings                                       { return core.Settings{} }
+func (staticApplication) UpdateSettings(context.Context, core.SettingsUpdate) (core.Settings, error) {
+	return core.Settings{}, nil
+}
 
 func TestHandlerServesAssetsAndSPAFallback(t *testing.T) {
 	assets := fstest.MapFS{

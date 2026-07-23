@@ -139,6 +139,13 @@ other globally configured resources. They expose comments, types, and aggregate
 usage but no storage paths or credentials. Import updates collection YAML
 atomically and publishes the new catalog only after complete graph validation.
 
+Application settings use `GET /api/v1/settings` and `PUT /api/v1/settings`.
+The response intentionally omits filesystem paths and exposes only language,
+default collection/storage names, HTTP port, and remove-on-upload behavior.
+PUT requires the last opaque revision, preserves server-owned path values,
+writes atomically, validates the complete catalog/graph, and rolls back on
+failure. Changing the HTTP port is reported as restart-required.
+
 All import calls name their collection explicitly and behave identically over
 the standalone server and the Wails asset server:
 

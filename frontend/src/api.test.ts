@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { createCollection, evaluateImportDraft, getCollection, getCollections, getCollectionStorages, getCollectionTags, getFiles, getHello, getImportSchema, getStatus, importCollectionTag, importFile } from './api'
+import { createCollection, evaluateImportDraft, getCollection, getCollections, getCollectionStorages, getCollectionTags, getFiles, getHello, getImportSchema, getSettings, getStatus, importCollectionTag, importFile, updateSettings } from './api'
+import type { ApplicationSettings } from './api'
 
 describe('getHello', () => {
   it('accepts the server hello response', async () => {
@@ -191,5 +192,14 @@ describe('collection API', () => {
     await expect(importCollectionTag('main', 'artist', request)).resolves.toBeUndefined()
     expect(request).toHaveBeenNthCalledWith(1, '/api/v1/collections/main/tags?q=rat&required=true', expect.anything())
     expect(request).toHaveBeenNthCalledWith(3, '/api/v1/collections/main/tags/artist/import', expect.objectContaining({ method: 'POST' }))
+  })
+
+  it('loads and saves revisioned safe settings', async () => {
+    const settings: ApplicationSettings = { revision: 'one', language: 'en', default_collection: 'main', default_storage_name: 'default', http_port: 52800, remove_on_upload: false, restart_required: false, collections: ['main'], storages: ['default'] }
+    const saved = { ...settings, revision: 'two', http_port: 52801, restart_required: true }
+    const request = vi.fn<typeof fetch>().mockResolvedValueOnce(new Response(JSON.stringify(settings), { status: 200 })).mockResolvedValueOnce(new Response(JSON.stringify(saved), { status: 200 }))
+    await expect(getSettings(request)).resolves.toEqual(settings)
+    await expect(updateSettings({ ...settings, http_port: 52801 }, request)).resolves.toEqual(saved)
+    expect(request).toHaveBeenNthCalledWith(2, '/api/v1/settings', expect.objectContaining({ method: 'PUT', body: JSON.stringify({ revision: 'one', language: 'en', default_collection: 'main', default_storage_name: 'default', http_port: 52801, remove_on_upload: false }) }))
   })
 })
