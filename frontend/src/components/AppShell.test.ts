@@ -13,6 +13,8 @@ describe('AppShell', () => {
         { path: '', component: { template: '<div />' } },
         { path: 'search', component: { template: '<div />' } },
         { path: 'files', component: { template: '<div />' } },
+        { path: 'tags', component: { template: '<div />' } },
+        { path: 'storage', component: { template: '<div />' } },
         { path: 'import', component: { template: '<div />' } },
       ] },
     ] })

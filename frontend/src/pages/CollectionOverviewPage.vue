@@ -40,12 +40,12 @@ onMounted(() => void load())
     <template v-else-if="info">
       <p v-if="info.comment" class="collection-comment">{{ info.comment }}</p>
       <dl class="collection-stats">
-        <div><dt>Files</dt><dd>{{ info.file_count }}</dd></div>
-        <div><dt>Indexed size</dt><dd>{{ formatBytes(info.total_size_bytes) }}</dd></div>
-        <div><dt>Tags</dt><dd>{{ info.tag_count }}</dd></div>
-        <div><dt>Required</dt><dd>{{ info.required_count }}</dd></div>
+        <div><RouterLink :to="`/collections/${encodeURIComponent(collection)}/files`"><dt>Files</dt><dd>{{ info.file_count }}</dd></RouterLink></div>
+        <div><RouterLink :to="`/collections/${encodeURIComponent(collection)}/files`"><dt>Indexed size</dt><dd>{{ formatBytes(info.total_size_bytes) }}</dd></RouterLink></div>
+        <div><RouterLink :to="`/collections/${encodeURIComponent(collection)}/tags`"><dt>Tags</dt><dd>{{ info.tag_count }}</dd></RouterLink></div>
+        <div><RouterLink :to="{ path: `/collections/${encodeURIComponent(collection)}/tags`, query: { required: 'true' } }"><dt>Required</dt><dd>{{ info.required_count }}</dd></RouterLink></div>
       </dl>
-      <section class="storage-section"><h2>Storage</h2><span v-for="storage in info.storages" :key="storage">{{ storage }}</span></section>
+      <RouterLink class="storage-section" :to="`/collections/${encodeURIComponent(collection)}/storage`"><h2>Storage</h2><span v-for="storage in info.storages" :key="storage">{{ storage }}</span></RouterLink>
     </template>
   </main>
 </template>
@@ -55,10 +55,10 @@ onMounted(() => void load())
 .page-heading span { display: inline-block; margin-top: .7rem; color: var(--primary); font-size: .82rem; font-weight: 800; }
 .collection-comment { max-width: 60ch; margin: 0; color: var(--text-muted); line-height: 1.6; }
 .collection-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: .65rem; margin: 0; }
-.collection-stats div { padding: 1rem; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); }
+.collection-stats div { overflow: hidden; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); }.collection-stats a { display: block; height: 100%; padding: 1rem; color: inherit; text-decoration: none; }.collection-stats a:hover { background: var(--primary-soft); }
 dt { color: var(--text-muted); font-size: .78rem; font-weight: 800; text-transform: uppercase; }
 dd { margin: .35rem 0 0; color: var(--primary); font: 1.8rem var(--display); }
-.storage-section { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem; }
+.storage-section { display: flex; min-height: 4rem; flex-wrap: wrap; align-items: center; gap: .6rem; padding: .75rem; border: 1px solid var(--border); border-radius: var(--radius-lg); color: inherit; text-decoration: none; background: var(--surface); }
 .storage-section h2 { width: 100%; margin: 0; font: 1.15rem var(--display); }
 .storage-section span { padding: .4rem .65rem; border-radius: 999px; color: var(--success); background: color-mix(in srgb, var(--success) 12%, transparent); font-weight: 800; }
 .error-state { color: var(--danger); }

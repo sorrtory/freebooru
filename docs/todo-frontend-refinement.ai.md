@@ -112,34 +112,34 @@ POST /api/v1/collections/{collection}/storages/{storage}/import
 
 ### Overview navigation
 
-- [ ] Make the file count open Files.
-- [ ] Make the tag count open Tags.
-- [ ] Make the required count open Tags with `required=true`.
-- [ ] Make the storage summary open Storage.
-- [ ] Make each useful row/card one accessible click target.
+- [x] Make the file count open Files.
+- [x] Make the tag count open Tags.
+- [x] Make the required count open Tags with `required=true`.
+- [x] Make the storage summary open Storage.
+- [x] Make each useful row/card one accessible click target.
 
 ### Tags page
 
-- [ ] Show imported collection tags first.
-- [ ] Support URL-backed name search and a Required-only filter.
-- [ ] Show type, comment, values, usage count, and required state without
+- [x] Show imported collection tags first.
+- [x] Support URL-backed name search and a Required-only filter.
+- [x] Show type, comment, values, usage count, and required state without
   duplicating labels.
-- [ ] Place `Other configured tags` after the imported section.
-- [ ] Initially collapse or bound the secondary section and reveal more on
+- [x] Place `Other configured tags` after the imported section.
+- [x] Initially collapse or bound the secondary section and reveal more on
   explicit interaction or scroll; never make it undiscoverable.
-- [ ] Add `Import into collection` with pending, success, and error states.
+- [x] Add `Import into collection` with pending, success, and error states.
 
 ### Storage page
 
-- [ ] Show collection storage first with file count, size, and safe status.
-- [ ] Open compact storage information when an imported row is selected.
-- [ ] Place `Other configured storage` after the collection section.
-- [ ] Add `Import into collection` where valid.
-- [ ] Keep destructive per-file storage operations out of this phase.
+- [x] Show collection storage first with file count, size, and safe status.
+- [x] Open compact storage information when an imported row is selected.
+- [x] Place `Other configured storage` after the collection section.
+- [x] Add `Import into collection` where valid.
+- [x] Keep destructive per-file storage operations out of this phase.
 
 - [ ] Test loading, empty, filtered, missing, successful import, and failed
   validation states.
-- [ ] Autoreview responsive hierarchy and commit independently.
+- [x] Autoreview responsive hierarchy and commit independently.
 
 ## Phase 4: assisted booru search
 

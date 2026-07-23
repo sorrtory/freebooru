@@ -74,6 +74,26 @@ export interface FilePage {
   next_offset: number | null
 }
 
+export interface CollectionTag {
+  name: string
+  type: TagType
+  comment: string
+  values: { value: string; comment: string }[]
+  required: boolean
+  imported: boolean
+  system: boolean
+  assignment_count: number
+}
+
+export interface CollectionStorage {
+  name: string
+  type: string
+  comment: string
+  imported: boolean
+  file_count: number
+  total_size_bytes: number
+}
+
 export type TagType = 'bool' | 'text' | 'int' | 'date' | 'datetime' | 'value' | 'multivalue'
 export type TagValue = boolean | number | string | string[]
 
@@ -224,6 +244,33 @@ export async function getFiles(
 
 export async function getFile(collection: string, sha256: string, signal?: AbortSignal, request: typeof fetch = fetch): Promise<FileRecord> {
   return requestJSON(`/api/v1/collections/${encodeURIComponent(collection)}/files/${encodeURIComponent(sha256)}`, { signal }, isFileRecord, 'file', request)
+}
+
+export async function getCollectionTags(collection: string, query = '', required = false, request: typeof fetch = fetch): Promise<CollectionTag[]> {
+  const search = new URLSearchParams()
+  if (query) search.set('q', query)
+  if (required) search.set('required', 'true')
+  const suffix = search.size ? `?${search}` : ''
+  const body = await requestJSON(`/api/v1/collections/${encodeURIComponent(collection)}/tags${suffix}`, {}, isCollectionTagsResponse, 'collection tags', request)
+  return body.tags
+}
+
+export async function importCollectionTag(collection: string, tag: string, request: typeof fetch = fetch): Promise<void> {
+  await requestEmpty(`/api/v1/collections/${encodeURIComponent(collection)}/tags/${encodeURIComponent(tag)}/import`, request)
+}
+
+export async function getCollectionStorages(collection: string, request: typeof fetch = fetch): Promise<CollectionStorage[]> {
+  const body = await requestJSON(`/api/v1/collections/${encodeURIComponent(collection)}/storages`, {}, isCollectionStoragesResponse, 'collection storage', request)
+  return body.storages
+}
+
+export async function importCollectionStorage(collection: string, storage: string, request: typeof fetch = fetch): Promise<void> {
+  await requestEmpty(`/api/v1/collections/${encodeURIComponent(collection)}/storages/${encodeURIComponent(storage)}/import`, request)
+}
+
+async function requestEmpty(url: string, request: typeof fetch) {
+  const response = await request(url, { method: 'POST', headers: { Accept: 'application/json' } })
+  if (!response.ok) throw apiError(await errorBody(response), response.status)
 }
 
 export async function setFileTag(collection: string, sha256: string, tag: string, value: TagValue, request: typeof fetch = fetch): Promise<FileRecord> {
@@ -378,6 +425,18 @@ function isFileAssignment(value: unknown): value is FileAssignment {
 
 function isFileSource(value: unknown): value is FileSource {
   return isRecord(value) && typeof value.filename === 'string' && typeof value.observed_at === 'string'
+}
+
+function isCollectionTagsResponse(value: unknown): value is { tags: CollectionTag[] } {
+  return isRecord(value) && Array.isArray(value.tags) && value.tags.every(isCollectionTag)
+}
+
+function isCollectionTag(value: unknown): value is CollectionTag {
+  return isRecord(value) && typeof value.name === 'string' && isTagType(value.type) && typeof value.comment === 'string' && Array.isArray(value.values) && value.values.every((item) => isRecord(item) && typeof item.value === 'string' && typeof item.comment === 'string') && typeof value.required === 'boolean' && typeof value.imported === 'boolean' && typeof value.system === 'boolean' && typeof value.assignment_count === 'number'
+}
+
+function isCollectionStoragesResponse(value: unknown): value is { storages: CollectionStorage[] } {
+  return isRecord(value) && Array.isArray(value.storages) && value.storages.every((item) => isRecord(item) && typeof item.name === 'string' && typeof item.type === 'string' && typeof item.comment === 'string' && typeof item.imported === 'boolean' && typeof item.file_count === 'number' && typeof item.total_size_bytes === 'number')
 }
 
 function isApplicationStatus(value: unknown): value is ApplicationStatus {

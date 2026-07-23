@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { createCollection, evaluateImportDraft, getCollection, getCollections, getFiles, getHello, getImportSchema, getStatus, importFile } from './api'
+import { createCollection, evaluateImportDraft, getCollection, getCollections, getCollectionStorages, getCollectionTags, getFiles, getHello, getImportSchema, getStatus, importCollectionTag, importFile } from './api'
 
 describe('getHello', () => {
   it('accepts the server hello response', async () => {
@@ -176,5 +176,20 @@ describe('collection API', () => {
 
     await expect(getFiles('main', ['rating:safe', 'title:hello world'], 24, undefined, request)).resolves.toEqual(page)
     expect(request.mock.calls[0][0]).toBe('/api/v1/collections/main/files?limit=24&offset=24&term=rating%3Asafe&term=title%3Ahello+world')
+  })
+
+  it('loads and imports explicit collection resources', async () => {
+    const tags = { tags: [{ name: 'rating', type: 'value', comment: '', values: [{ value: 'safe', comment: '' }], required: true, imported: true, system: false, assignment_count: 2 }] }
+    const storages = { storages: [{ name: 'default', type: 'local', comment: '', imported: true, file_count: 2, total_size_bytes: 42 }] }
+    const request = vi.fn<typeof fetch>()
+      .mockResolvedValueOnce(new Response(JSON.stringify(tags), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify(storages), { status: 200 }))
+      .mockResolvedValueOnce(new Response(null, { status: 204 }))
+
+    await expect(getCollectionTags('main', 'rat', true, request)).resolves.toEqual(tags.tags)
+    await expect(getCollectionStorages('main', request)).resolves.toEqual(storages.storages)
+    await expect(importCollectionTag('main', 'artist', request)).resolves.toBeUndefined()
+    expect(request).toHaveBeenNthCalledWith(1, '/api/v1/collections/main/tags?q=rat&required=true', expect.anything())
+    expect(request).toHaveBeenNthCalledWith(3, '/api/v1/collections/main/tags/artist/import', expect.objectContaining({ method: 'POST' }))
   })
 })

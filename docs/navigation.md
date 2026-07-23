@@ -60,6 +60,8 @@ freebooru/
 │       │   ├── FilesPage.vue         Collection-wide file browser
 │       │   ├── FileDetailPage.vue    Preview, metadata, and typed tag editing
 │       │   ├── SearchPage.vue        URL-backed tag search
+│       │   ├── TagsPage.vue          Imported-first collection tag catalog
+│       │   ├── StoragePage.vue       Imported-first collection storage catalog
 │       │   ├── SettingsPage.vue      Appearance and application settings
 │       │   ├── ImportPage.vue        Responsive three-area import workspace
 │       │   └── ImportPage.test.ts    Canonical draft workspace interaction tests

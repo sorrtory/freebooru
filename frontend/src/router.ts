@@ -8,6 +8,8 @@ import FileDetailPage from './pages/FileDetailPage.vue'
 import ImportPage from './pages/ImportPage.vue'
 import SearchPage from './pages/SearchPage.vue'
 import SettingsPage from './pages/SettingsPage.vue'
+import StoragePage from './pages/StoragePage.vue'
+import TagsPage from './pages/TagsPage.vue'
 import StatusPage from './pages/StatusPage.vue'
 
 export default createRouter({
@@ -21,6 +23,8 @@ export default createRouter({
       { path: 'files', component: FilesPage, props: true },
       { path: 'files/:sha256', component: FileDetailPage, props: true },
       { path: 'search', component: SearchPage, props: true },
+      { path: 'tags', component: TagsPage, props: true },
+      { path: 'storage', component: StoragePage, props: true },
       { path: 'import', component: ImportPage, props: true },
     ] },
   ],
