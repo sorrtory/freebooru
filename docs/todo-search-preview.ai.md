@@ -2,7 +2,7 @@
 
 - [x] Header and Files search share collection-aware tag and persisted-value hints.
 - [x] Tag matching is case-insensitive substring matching; value matching uses the active `tag:value` prefix.
-- [x] Enter in header search always opens Files with the entered query.
+- [x] Header search uses Up/Down completion navigation, Tab completion, Escape dismissal, and Enter submission to Files.
 - [x] Presence queries such as `artist` list files having that assignment.
 - [x] Collection and search popovers close on outside interaction.
 - [x] Popular tags toggle their exact query term instead of accumulating duplicates.
