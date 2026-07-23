@@ -69,7 +69,11 @@ function applyTag(name: string, value: TagValue) {
 }
 
 async function submit() {
-  if (!file.value || !draft.value?.complete || uploading.value) return
+  if (!file.value || uploading.value) return
+  if (!draft.value?.complete) {
+    focusProblem()
+    return
+  }
   uploading.value = true
   uploadError.value = ''
   try {
@@ -81,6 +85,19 @@ async function submit() {
   } finally {
     uploading.value = false
   }
+}
+
+function focusProblem() {
+  activePanel.value = 'assigned'
+  requestAnimationFrame(() => {
+    const problem = document.querySelector<HTMLElement>('[data-problem]')
+    if (!problem) return
+    if (problem instanceof HTMLDetailsElement) problem.open = true
+    problem.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    problem.classList.remove('problem-pulse')
+    requestAnimationFrame(() => problem.classList.add('problem-pulse'))
+    problem.querySelector<HTMLElement>('input, button, [tabindex]')?.focus()
+  })
 }
 
 onMounted(() => void load())
@@ -117,17 +134,17 @@ onBeforeUnmount(() => { if (previewURL.value) URL.revokeObjectURL(previewURL.val
       </nav>
       <div class="workspace-grid" :aria-busy="evaluating">
         <div :class="{ 'mobile-hidden': activePanel !== 'assigned' }">
-          <AssignedTags :missing="draft.missing_required" :assigned="draft.assignments" :fields="schema.fields" :conflicts="conflictNames" @apply="applyTag" @remove="remove" />
+          <AssignedTags :missing="draft.missing_required" :assigned="draft.assignments" :fields="schema.fields" :conflicts="conflictNames" :conflict-edges="draft.active_conflicts" :demands="draft.missing_demands" @apply="applyTag" @remove="remove" />
         </div>
         <div :class="{ 'mobile-hidden': activePanel !== 'suggested' }">
-          <ImportGuidance :demands="draft.missing_demands" :suggestions="draft.suggestions" @choose="chooseRelationship" />
+          <ImportGuidance :suggestions="draft.suggestions" @choose="chooseRelationship" />
         </div>
         <div :class="{ 'mobile-hidden': activePanel !== 'add' }">
           <TagCatalog :fields="schema.fields" :assigned="representedNames" :selected="selectedTag" @apply="applyTag" />
         </div>
       </div>
       <p v-if="errorMessage || uploadError" class="inline-error" role="alert">{{ errorMessage || uploadError }}</p>
-      <footer class="action-bar">
+      <footer class="action-bar" aria-live="polite">
         <div>
           <strong v-if="uploadResult">Imported {{ uploadResult.sha256.slice(0, 12) }}</strong>
           <strong v-else-if="issueCount">{{ issueCount }} blocking {{ issueCount === 1 ? 'issue' : 'issues' }}</strong>
@@ -137,7 +154,7 @@ onBeforeUnmount(() => { if (previewURL.value) URL.revokeObjectURL(previewURL.val
           <span v-else-if="evaluating">Checking relationships…</span>
           <span v-else>{{ file ? file.name : 'Choose a file to continue' }}</span>
         </div>
-        <button class="button button--primary" type="button" :disabled="!file || !draft.complete || evaluating || uploading || Boolean(uploadResult)" @click="submit">{{ uploading ? 'Importing…' : uploadResult ? 'Imported' : 'Import file' }}</button>
+        <button class="button button--primary" type="button" :disabled="!file || evaluating || uploading || Boolean(uploadResult)" :aria-disabled="!draft.complete" @click="submit">{{ uploading ? 'Importing…' : uploadResult ? 'Imported' : 'Import file' }}</button>
       </footer>
     </template>
   </main>
@@ -170,6 +187,8 @@ onBeforeUnmount(() => { if (previewURL.value) URL.revokeObjectURL(previewURL.val
 .action-bar strong { color: var(--primary); font-size: .82rem; }
 .action-bar span { color: var(--muted); font-size: .8rem; }
 .action-bar .button { min-width: 9rem; }
+@keyframes problem-pulse { 50% { box-shadow: 0 0 0 .35rem color-mix(in srgb, var(--warning) 28%, transparent); } }
+.problem-pulse { animation: problem-pulse .7s ease-out; }
 @media (min-width: 64rem) {
   .panel-tabs { display: none; }
   .workspace-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; padding: 1.25rem 2rem; }
@@ -182,4 +201,5 @@ onBeforeUnmount(() => { if (previewURL.value) URL.revokeObjectURL(previewURL.val
   .action-bar .button { width: 100%; }
   .import-shell { padding-bottom: 9rem; }
 }
+@media (prefers-reduced-motion: reduce) { .problem-pulse { animation: none; } }
 </style>

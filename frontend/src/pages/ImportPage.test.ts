@@ -72,4 +72,22 @@ describe('ImportPage', () => {
     expect(wrapper.text()).toContain('Imported abcdef123456')
     expect(request).toHaveBeenNthCalledWith(3, '/api/v1/collections/main/imports', expect.objectContaining({ method: 'POST' }))
   })
+
+  it('focuses the first blocking tag when Import is requested', async () => {
+    const request = vi.fn().mockResolvedValueOnce(json(schema)).mockResolvedValueOnce(json(emptyDraft))
+    vi.stubGlobal('fetch', request)
+    vi.stubGlobal('URL', { createObjectURL: vi.fn(() => 'blob:preview'), revokeObjectURL: vi.fn() })
+    vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => { callback(0); return 1 })
+    Element.prototype.scrollIntoView = vi.fn()
+    const wrapper = mount(ImportPage, { props: { collection: 'main' }, attachTo: document.body, global: { stubs: { RouterLink: true } } })
+    await flushPromises()
+    const input = wrapper.get<HTMLInputElement>('#import-file')
+    Object.defineProperty(input.element, 'files', { value: [new File(['data'], 'sample.txt')] })
+    await input.trigger('change')
+    await wrapper.get('.action-bar button').trigger('click')
+
+    expect(wrapper.get('[data-problem]').classes()).toContain('problem-pulse')
+    expect(wrapper.get('[data-problem]').element.contains(document.activeElement)).toBe(true)
+    wrapper.unmount()
+  })
 })

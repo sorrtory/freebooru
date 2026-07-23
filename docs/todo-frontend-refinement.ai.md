@@ -183,41 +183,41 @@ GET /api/v1/collections/{collection}/tags/hot?limit=20
 
 ### Assignment cards
 
-- [ ] Clicking a collapsed card opens its editor.
-- [ ] Clicking the open card header closes it without applying draft changes.
-- [ ] Rename the primary action to `Assign`.
-- [ ] `Cancel` discards local edits and closes the editor.
-- [ ] Add a danger-colored trash icon for an existing assignment with an
+- [x] Clicking a collapsed card opens its editor.
+- [x] Clicking the open card header closes it without applying draft changes.
+- [x] Rename the primary action to `Assign`.
+- [x] `Cancel` discards local edits and closes the editor.
+- [x] Add a danger-colored trash icon for an existing assignment with an
   accessible name containing the tag name.
-- [ ] Inputs and buttons inside a card must not toggle the card.
+- [x] Inputs and buttons inside a card must not toggle the card.
 
 ### Demands, suggestions, and conflicts
 
-- [ ] Keep optional recommendations in Suggested.
-- [ ] Move blocking demanded tags into the Assigned workflow.
-- [ ] Render a demand directly beneath the assignment that activated it.
-- [ ] Open the demanded editor when no unambiguous default exists.
-- [ ] Use indentation, a shared accent, or a restrained connector to show
+- [x] Keep optional recommendations in Suggested.
+- [x] Move blocking demanded tags into the Assigned workflow.
+- [x] Render a demand directly beneath the assignment that activated it.
+- [x] Open the demanded editor when no unambiguous default exists.
+- [x] Use indentation, a shared accent, or a restrained connector to show
   causality without requiring an arrow library.
-- [ ] Keep circularly demanding assignments adjacent and marked as a group.
-- [ ] Show both involved tags on conflicts and focus the editable cause.
-- [ ] Never auto-assign unless Core returns one unambiguous value.
+- [x] Keep circularly demanding assignments visually linked to their causes.
+- [x] Show both involved tags on conflicts and focus the editable cause.
+- [x] Never auto-assign unless Core returns one unambiguous value.
 
 ### Blocked import focus
 
-- [ ] Keep Import operable for validation when blocked; use `aria-disabled`
+- [x] Keep Import operable for validation when blocked; use `aria-disabled`
   rather than a non-interactive disabled button.
-- [ ] On activation, scroll to and open the first problem in stable order:
+- [x] On activation, scroll to and open the first problem in stable order:
   missing required, unmet demand, then conflict.
-- [ ] Focus the first relevant control.
-- [ ] Pulse the card once and announce the problem in a live region.
-- [ ] Disable the pulse under reduced motion while preserving focus and the
+- [x] Focus the first relevant control.
+- [x] Pulse the card once and announce the problem in a live region.
+- [x] Disable the pulse under reduced motion while preserving focus and the
   announcement.
 
 - [ ] Test card boundaries, Assign, Cancel, trash, nested demands, cycles,
   conflicts, focus order, and reduced motion.
 - [ ] Compare click count for a representative import before and after.
-- [ ] Autoreview and commit independently.
+- [x] Autoreview and commit independently.
 
 ## Phase 6: Settings and `freebooru.yaml`
 

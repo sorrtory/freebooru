@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Relationship } from '../api'
 
-defineProps<{ demands: Relationship[]; suggestions: Relationship[] }>()
+defineProps<{ suggestions: Relationship[] }>()
 const emit = defineEmits<{ choose: [relationship: Relationship] }>()
 
 function condition(edge: Relationship): string {
@@ -16,18 +16,8 @@ function condition(edge: Relationship): string {
   <section class="panel" aria-labelledby="guidance-title">
     <header class="panel-heading">
       <div><p>02 / Core guidance</p><h2 id="guidance-title">Suggested</h2></div>
-      <span class="count">{{ demands.length + suggestions.length }}</span>
+      <span class="count">{{ suggestions.length }}</span>
     </header>
-    <div class="panel-section">
-      <h3>Required next <span>{{ demands.length }}</span></h3>
-      <p v-if="!demands.length" class="empty-state">No relationship demands.</p>
-      <article v-for="edge in demands" :key="`${edge.source_tag}-${edge.target_tag}-${edge.reason}`" class="relation relation--demand">
-        <p><strong>{{ edge.target_tag }}</strong> {{ condition(edge) }}</p>
-        <small>{{ edge.source_tag }} activated this demand</small>
-        <blockquote>{{ edge.reason || 'Required by the active tag relationship.' }}</blockquote>
-        <button class="text-action" type="button" @click="emit('choose', edge)">Set value →</button>
-      </article>
-    </div>
     <div class="panel-section">
       <h3>Recommended <span>{{ suggestions.length }}</span></h3>
       <p v-if="!suggestions.length" class="empty-state">No recommendations for this draft.</p>
@@ -43,7 +33,6 @@ function condition(edge: Relationship): string {
 
 <style scoped>
 .relation { margin-bottom: .65rem; padding: .85rem; border: 1px dashed rgb(181 240 99 / 34%); border-radius: .3rem; background: rgb(181 240 99 / 3%); }
-.relation--demand { border-style: solid; border-color: rgb(243 199 109 / 48%); background: rgb(243 199 109 / 4%); }
 .relation p { margin: 0 0 .35rem; }
 .relation small { color: var(--muted); font: .68rem var(--mono); }
 .relation blockquote { margin: .75rem 0; padding-left: .7rem; border-left: 2px solid var(--line-strong); color: var(--muted-light); font-size: .87rem; line-height: 1.45; }
