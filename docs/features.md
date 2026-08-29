@@ -1,0 +1,9 @@
+- ls remotes
+- make file public + (share ecosystem: see public files, password for shared files etc)
+- native app+ web app
+- see photos or docs like in yandex disk but with sort (by metadata date and upload date) and tags selection
+- https://github.com/mickael-kerjean/filestash
+- spectogram analysis. check dublicates not only with hash but video and audio
+- `wget` to download websites
+- similar files detection (should compare metadata too and out a probability): phash for similar images: image_hasher or imgfprint. works at least with images (tlsh-rs is worse but not only for images) also simhash/minhash thousends of them
+- daemon for download monitoring. maybe indexing inbox, autotagging etc
